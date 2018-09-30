@@ -26,7 +26,7 @@ PersistentData settingsData = new PersistentData(directory:"settings");
 
 PersistentData userIdData = new PersistentData(directory:"userId");
 
-PersistentData createdPollsData = new PersistentData(directory:"created");
+PersistentData createdPollsData = new PersistentData(directory:"createdinfo");
 
 int numSettings = 1;
 
@@ -38,55 +38,55 @@ List<dynamic> createdPolls;
 
 Map<String,dynamic> data;
 
-void main()=>runApp(new App());
+ScrollController s = new ScrollController();
+
+bool hasLoaded = false;
+
+void main() async{
+  createdPolls = await createdPollsData.readData();
+  if(createdPolls==null){
+    createdPolls = new List<dynamic>();
+    createdPollsData.writeData(createdPolls);
+  }
+  settings = await settingsData.readData();
+  if(settings==null){
+    settings = new List<bool>();
+  }
+  if(settings.length>numSettings){
+    settings = settings.sublist(0,numSettings);
+    settingsData.writeData(settings);
+  }else if(settings.length<numSettings){
+    settings.addAll(new List<dynamic>(numSettings-settings.length).map((n)=>false));
+    settingsData.writeData(settings);
+  }
+  userId = await userIdData.readData();
+  if(userId==null){
+    Map<String,dynamic> usersMap = json.decode((await http.get(Uri.parse(database+"/users.json?auth="+secretKey))).body);
+    userId = "";
+    do{
+      userId = "";
+      Random r = new Random();
+      List<String> nums = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
+      for(int i = 0;i<16;i++){
+        userId+=(r.nextInt(2)==0?nums[r.nextInt(36)]:nums[r.nextInt(36)].toLowerCase());
+      }
+    }while(usersMap["userId"]!=null);
+    await http.put(Uri.parse(database+"/users/$userId.json?auth="+secretKey),body:"0");
+    userIdData.writeData(userId);
+  }
+  runApp(new App());
+}
 
 class App extends StatefulWidget{
   @override
   AppState createState() => new AppState();
 }
 
-bool firstLoad = true;
-
-ScrollController s = new ScrollController();
-
 class AppState extends State<App>{
-
-  bool hasLoaded = false;
 
   HttpClient client = new HttpClient();
 
   void setUp() async{
-    createdPolls = await createdPollsData.readData();
-    if(createdPolls==null){
-      createdPolls = new List<dynamic>();
-      createdPollsData.writeData(createdPolls);
-    }
-    settings = await settingsData.readData();
-    if(settings==null){
-      settings = new List<bool>();
-    }
-    if(settings.length>numSettings){
-      settings = settings.sublist(0,numSettings);
-      settingsData.writeData(settings);
-    }else if(settings.length<numSettings){
-      settings.addAll(new List<dynamic>(numSettings-settings.length).map((n)=>false));
-      settingsData.writeData(settings);
-    }
-    userId = await userIdData.readData();
-    if(userId==null){
-      Map<String,dynamic> usersMap = json.decode((await http.get(Uri.parse(database+"/users.json?auth="+secretKey))).body);
-      userId = "";
-      do{
-        userId = "";
-        Random r = new Random();
-        List<String> nums = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
-        for(int i = 0;i<16;i++){
-          userId+=(r.nextInt(2)==0?nums[r.nextInt(36)]:nums[r.nextInt(36)].toLowerCase());
-        }
-      }while(usersMap["userId"]!=null);
-      await http.put(Uri.parse(database+"/users/$userId.json?auth="+secretKey),body:"0");
-      userIdData.writeData(userId);
-    }
     Stopwatch watch = new Stopwatch();
     watch.start();
     data = json.decode(((await http.get(Uri.encodeFull(database+"/data.json?auth="+secretKey))).body));
@@ -98,7 +98,7 @@ class AppState extends State<App>{
           if(!hasLoaded){
             setState((){hasLoaded = true;});
           }
-          response.map((bytes) => new String.fromCharCodes(bytes)).listen((text){
+          response.map((bytes)=>new String.fromCharCodes(bytes)).listen((text){
             if(text.split(":").length>1&&text.split(":")[1].contains("keep-alive")){
               print("Keep-alive ${watch.elapsedMilliseconds}");
               watch.reset();
@@ -176,7 +176,7 @@ class AppState extends State<App>{
         return new MaterialApp(
             theme: theme,
             debugShowCheckedModeBanner: false,
-            home: hasLoaded?new Scaffold(
+            home: new Scaffold(
               bottomNavigationBar: new BottomNavigationBar(
                 currentIndex: index,
                 type: BottomNavigationBarType.fixed,
@@ -206,7 +206,7 @@ class AppState extends State<App>{
                 onTap: (i){
                   if(index!=i){
                     setState((){index = i;});
-                  }else if(index==0&&i==0){
+                  }else if(index==0&&i==0&&hasLoaded){
                     s.animateTo(0.0,curve: Curves.easeOut, duration: const Duration(milliseconds: 300));
                   }
                 }
@@ -217,7 +217,7 @@ class AppState extends State<App>{
                 )
               ):index==1?new Container(
                 child: new Center(
-                  child: new Text("Created")
+                  child: new View(true)
                 )
               ):index==2?new Container(
                 child: new Center(
@@ -236,10 +236,6 @@ class AppState extends State<App>{
                           })).toList()
                       )
                   )
-              )
-            ):new Scaffold(
-              body: new Center(
-                child: new CircularProgressIndicator()
               )
             )
         );
@@ -275,6 +271,38 @@ class ViewState extends State<View>{
 
   @override
   Widget build(BuildContext context){
+    if(!hasLoaded){
+      return new CustomScrollView(
+        slivers: [
+          new SliverAppBar(
+            pinned: false,
+            backgroundColor: settings[0]?Colors.blue:Colors.indigo[700],
+            floating: true,
+            centerTitle: false,
+            title: new Text(!widget.onlyCreated?"Browse":"Created"),
+            actions: [
+              new IconButton(
+                icon: new Icon(Icons.search),
+                onPressed: (){}
+              ),
+              new Padding(padding: EdgeInsets.only(right:3.0),child:new Container(
+                  width: 35.0,
+                  child: new PopupMenuButton<String>(
+                      itemBuilder: (BuildContext context)=>[
+                        new PopupMenuItem<String>(child: const Text("Top"), value: "top"),
+                        new PopupMenuItem<String>(child: const Text("Newest"), value: "newest"),
+                        new PopupMenuItem<String>(child: const Text("Oldest"), value: "oldest")
+                      ],
+                      child: new Icon(Icons.sort),
+                      onSelected: (str){}
+                  )
+              ))
+            ],
+            bottom: new PreferredSize(preferredSize: new Size(double.infinity,3.0),child: new Container(height:3.0,child:new LinearProgressIndicator()))
+          )
+        ]
+      );
+    }
     Map<String,dynamic> tempMap = new Map<String,dynamic>()..addAll(data)..removeWhere((key,value){
       return (widget.onlyCreated&&!createdPolls.contains(key))||(!(key.toUpperCase().contains(search.toUpperCase())||((value as Map<String,dynamic>)["q"] as String).toUpperCase().contains(search.toUpperCase()))||(!widget.onlyCreated&&((((value as Map<String,dynamic>)["b"])[2]==0)||((value as Map<String,dynamic>)["b"])[0]==1||((value as Map<String,dynamic>)["b"])[1]==1)));
     });
@@ -308,7 +336,7 @@ class ViewState extends State<View>{
               new SliverAppBar(
                   pinned: false,
                   floating: true,
-                  title: !inSearch?new Text("Browse"):new TextField(
+                  title: !inSearch?new Text(!widget.onlyCreated?"Browse":"Created"):new TextField(
                     style: new TextStyle(fontSize:20.0,color: Colors.white),
                     controller: c,
                     autofocus: true,
