@@ -50,7 +50,7 @@ void main() async{
   }
   settings = await settingsData.readData();
   if(settings==null){
-    settings = new List<bool>();
+    settings = new List<dynamic>();
   }
   if(settings.length>numSettings){
     settings = settings.sublist(0,numSettings);
