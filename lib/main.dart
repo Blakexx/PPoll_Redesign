@@ -445,9 +445,9 @@ class PollState extends State<Poll>{
   @override
   void initState(){
     super.initState();
-    hasVoted = data[widget.id]["i"]!=null&&data[widget.id]["i"].contains(userId);
+    hasVoted = data[widget.id]["i"]!=null&&data[widget.id]["i"][userId]!=null;
     if(hasVoted){
-      choice = data[widget.id]["i"]["userId"][0];
+      choice = data[widget.id]["c"][data[widget.id]["i"][userId]];
     }
     hasImage = data[widget.id]["b"].length==4&&data[widget.id]["b"][3]==1;
     if(hasImage){
@@ -465,14 +465,25 @@ class PollState extends State<Poll>{
 
   String choice;
 
-  void vote(String c){
+  void vote(String c) async{
     if(c!=choice){
-      lastChoice = choice;
-      choice = c;
-      if(lastChoice!=null){
-        data[widget.id]["c"][data[widget.id]["c"].indexOf(lastChoice)]--;
+      setState((){
+        lastChoice = choice;
+        choice = c;
+      });
+      if(data[widget.id]["i"]==null){
+        data[widget.id]["i"]={};
       }
-      data[widget.id]["c"][data[widget.id]["c"].indexOf(choice)]++;
+      data[widget.id]["i"][userId]=data[widget.id]["c"].indexOf(choice);
+      await http.put(Uri.encodeFull(database+"/data/${widget.id}/i/$userId.json?auth=$secretKey"),body: json.encode(data[widget.id]["i"][userId]));
+      if(lastChoice!=null){
+        data[widget.id]["a"][data[widget.id]["c"].indexOf(lastChoice)]--;
+      }
+      data[widget.id]["a"][data[widget.id]["c"].indexOf(choice)]++;
+      await http.put(Uri.encodeFull(database+"/data/${widget.id}/a.json?auth=$secretKey"),body: json.encode(data[widget.id]["a"]));
+      if(!hasVoted){
+        hasVoted = true;
+      }
     }
   }
 
@@ -484,7 +495,7 @@ class PollState extends State<Poll>{
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               new Padding(padding:EdgeInsets.only(top:10.0,left:11.0,right:11.0),child:new Text(data[widget.id]["q"],style: new TextStyle(fontSize: 15.0,fontWeight: FontWeight.w600),maxLines: 2,overflow: TextOverflow.ellipsis)),
-              new Padding(padding:EdgeInsets.only(top:5.0,left:11.0,bottom:5.0),child:new Text("${widget.id} • ${timeago.format(new DateTime.fromMillisecondsSinceEpoch(data[widget.id]["t"]*1000))} • ${data[widget.id]["a"].reduce((n1,n2)=>n1+n2)} vote"+((data[widget.id]["a"].reduce((n1,n2)=>n1+n2)==1)?"":"s"),style: new TextStyle(fontSize: 12.0,color:(settings[0]?Colors.white:Colors.black).withOpacity(.8)))),
+              new Padding(padding:EdgeInsets.only(top:5.0,left:11.0,bottom:5.0),child:new Text(widget.id+(data[widget.id]["t"]!=null?" • ${timeago.format(new DateTime.fromMillisecondsSinceEpoch(data[widget.id]["t"]*1000))}":"")+" • ${data[widget.id]["a"].reduce((n1,n2)=>n1+n2)} vote"+((data[widget.id]["a"].reduce((n1,n2)=>n1+n2)==1)?"":"s"),style: new TextStyle(fontSize: 12.0,color:(settings[0]?Colors.white:Colors.black).withOpacity(.8)))),
               image!=null?new Padding(padding:EdgeInsets.only(top:5.0,bottom:5.0),child:new FutureBuilder<ui.Image>(
                 future: completer.future,
                 builder: (BuildContext context, AsyncSnapshot<ui.Image> snapshot){
@@ -502,19 +513,22 @@ class PollState extends State<Poll>{
                 },
               )):new Container(),
               new Column(
-                  children: data[widget.id]["c"].map((c)=>new MaterialButton(onPressed: (){setState((){choice = c;});},padding:EdgeInsets.zero,child:new Row(
-                      children: [
-                        new Radio(
-                          value: c,
-                          groupValue: choice,
-                          onChanged: (s){
-                            setState((){choice = s;});
-                          },
-                        ),
-                        new Expanded(child:new Text(c,maxLines:2,overflow: TextOverflow.ellipsis)),
-                        new Container(width:5.0)
-                      ]
-                  ))).toList().cast<Widget>()
+                  children: data[widget.id]["c"].map((c)=>new MaterialButton(onPressed: (){vote(c);},padding:EdgeInsets.zero,child:new Column(children: [
+                    new Row(
+                        children: [
+                          new Radio(
+                            value: c,
+                            groupValue: choice,
+                            onChanged: (s){
+                              vote(s);
+                            },
+                          ),
+                          new Expanded(child:new Text(c,maxLines:2,overflow: TextOverflow.ellipsis)),
+                          new Container(width:5.0)
+                        ]
+                    ),
+                    hasVoted?new Padding(padding: EdgeInsets.only(left:50.0,right:20.0,bottom:5.0),child:new Container(height:3.0,child:new LinearProgressIndicator(value:data[widget.id]["a"][data[widget.id]["c"].indexOf(c)]/((data[widget.id]["a"].reduce((n1,n2)=>n1+n2))!=0?(data[widget.id]["a"].reduce((n1,n2)=>n1+n2)):1.0)))):new Container()
+                  ]))).toList().cast<Widget>()
               ),
               new Container(height:5.0)
             ]

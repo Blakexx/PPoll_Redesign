@@ -21,8 +21,8 @@
       <file leaf-file-name="main.dart" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/lib/main.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="239">
-              <caret line="301" column="210" lean-forward="true" selection-start-line="301" selection-start-column="210" selection-end-line="301" selection-end-column="210" />
+            <state relative-caret-position="250">
+              <caret line="529" column="323" lean-forward="false" selection-start-line="529" selection-start-column="323" selection-end-line="529" selection-end-column="323" />
               <folding>
                 <element signature="e#0#39#0" expanded="true" />
               </folding>
@@ -44,7 +44,7 @@
         <entry file="file://$PROJECT_DIR$/lib/key.dart">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="0">
-              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <caret line="0" column="60" lean-forward="false" selection-start-line="0" selection-start-column="60" selection-end-line="0" selection-end-column="60" />
               <folding />
             </state>
           </provider>
@@ -64,11 +64,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>Browse</find>
-      <find>http.</find>
-      <find>imageUrl</find>
-      <find>View</find>
-      <find>[</find>
       <find>data[</find>
       <find>bool hasLoaded</find>
       <find>[0]</find>
@@ -80,7 +75,6 @@
       <find>new Poll</find>
       <find>MediaQu</find>
       <find>/65-</find>
-      <find>print</find>
       <find>/3-</find>
       <find>/650</find>
       <find>/300</find>
@@ -89,11 +83,17 @@
       <find>/500</find>
       <find>/(3.0</find>
       <find>new Sliver</find>
-      <find>new Linear</find>
       <find>deeporan</find>
       <find>Colors.blue</find>
       <find>deepOrangeAcc</find>
       <find>alwaysS</find>
+      <find>timeago</find>
+      <find>createdPolls.add</find>
+      <find>vote(</find>
+      <find>http.get</find>
+      <find>http.put</find>
+      <find>print</find>
+      <find>new Linear</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -108,6 +108,7 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/pubspec.yaml" />
+        <option value="$PROJECT_DIR$/lib/key.dart" />
         <option value="$PROJECT_DIR$/lib/main.dart" />
       </list>
     </option>
@@ -395,14 +396,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/key.dart">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/pubspec.yaml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="243">
@@ -411,10 +404,18 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/lib/key.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="60" lean-forward="false" selection-start-line="0" selection-start-column="60" selection-end-line="0" selection-end-column="60" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/lib/main.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="239">
-          <caret line="301" column="210" lean-forward="true" selection-start-line="301" selection-start-column="210" selection-end-line="301" selection-end-column="210" />
+        <state relative-caret-position="250">
+          <caret line="529" column="323" lean-forward="false" selection-start-line="529" selection-start-column="323" selection-end-line="529" selection-end-column="323" />
           <folding>
             <element signature="e#0#39#0" expanded="true" />
           </folding>
