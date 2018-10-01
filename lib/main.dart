@@ -129,12 +129,18 @@ class AppState extends State<App>{
                     if(returned["data"]==null){
                       temp.remove(i);
                     }else{
+                      if(temp==null){
+                        temp = {};
+                      }
                       temp[i] = returned["data"];
                     }
                   }catch(e){
                     if(returned["data"]==null){
                       temp.remove(finalPath);
                     }else{
+                      if(temp==null){
+                        temp = {};
+                      }
                       temp[finalPath] = returned["data"];
                     }
                   }
@@ -145,12 +151,18 @@ class AppState extends State<App>{
                   if(returned["data"]==null){
                     temp.remove(i);
                   }else{
+                    if(temp==null){
+                      temp = {};
+                    }
                     temp[i] = returned["data"];
                   }
                 }catch(e){
                   if(returned["data"]==null){
                     temp.remove(finalPath);
                   }else{
+                    if(temp==null){
+                      temp = {};
+                    }
                     temp[finalPath] = returned["data"];
                   }
                 }
