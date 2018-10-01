@@ -117,6 +117,9 @@ class AppState extends State<App>{
               path.sublist(1,path.length-1).forEach((o){
                 try{
                   int i = int.parse(o);
+                  if(temp[i]==null){
+                    throw new Exception();
+                  }
                   temp = temp[i];
                 }catch(e){
                   temp = temp[o];
@@ -611,12 +614,12 @@ class ImageViewState extends State<ImageView>{
               new Positioned(
                   right:10.0,
                   top:MediaQuery.of(context).padding.top,
-                  child: new AnimatedOpacity(opacity:isAnimating?0.0:1.0,duration:new Duration(milliseconds:200),child:new IconButton(iconSize:30.0*MediaQuery.of(context).size.width/375.0,color:Colors.white,icon:new Icon(Icons.close),onPressed:(){hasLeft = true;Navigator.of(context).pop();}))
+                  child: new AnimatedOpacity(opacity:isAnimating?0.0:1.0,duration:new Duration(milliseconds:200),child:new IconButton(iconSize:30.0*min(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height)/375.0,color:Colors.white,icon:new Icon(Icons.close),onPressed:(){hasLeft = true;Navigator.of(context).pop();}))
               ),
               new Positioned(
                   left:15.0,
                   top:MediaQuery.of(context).padding.top+12,
-                  child: new IgnorePointer(child:new AnimatedOpacity(opacity:isAnimating?0.0:1.0,duration:new Duration(milliseconds:200),child:new Text(widget.name,style:new TextStyle(fontSize:(48.0/1.75)*MediaQuery.of(context).size.width/375.0,color:Colors.white))))
+                  child: new IgnorePointer(child:new AnimatedOpacity(opacity:isAnimating?0.0:1.0,duration:new Duration(milliseconds:200),child:new Text(widget.name,style:new TextStyle(fontSize:(48.0/1.75)*min(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height)/375.0,color:Colors.white))))
               )
               //new AnimatedOpacity(opacity:isAnimating?0.0:1.0,duration:new Duration(milliseconds:200),child:new Container(color:Colors.white70,height:MediaQuery.of(context).padding.top+kToolbarHeight,child:new AppBar(actions:[new IconButton(icon:new Icon(Icons.close),onPressed:(){hasLeft = true;Navigator.of(context).pop();})],automaticallyImplyLeading:false,centerTitle:false,title:new Text(widget.name,style:new TextStyle(color:Colors.white)),backgroundColor: Colors.transparent,elevation: 0.0)))
             ]:[
