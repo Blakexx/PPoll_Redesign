@@ -3,11 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="8a20a442-8abe-47f1-8bb0-a802a434ec9a" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/ios/Podfile.lock" afterPath="$PROJECT_DIR$/ios/Podfile.lock" />
-      <change beforePath="$PROJECT_DIR$/ios/Runner.xcodeproj/project.pbxproj" afterPath="$PROJECT_DIR$/ios/Runner.xcodeproj/project.pbxproj" />
       <change beforePath="$PROJECT_DIR$/lib/main.dart" afterPath="$PROJECT_DIR$/lib/main.dart" />
-      <change beforePath="$PROJECT_DIR$/pubspec.lock" afterPath="$PROJECT_DIR$/pubspec.lock" />
-      <change beforePath="$PROJECT_DIR$/pubspec.yaml" afterPath="$PROJECT_DIR$/pubspec.yaml" />
     </list>
     <ignored path="$PROJECT_DIR$/.dart_tool/" />
     <ignored path="$PROJECT_DIR$/.idea/" />
@@ -25,8 +21,8 @@
       <file leaf-file-name="main.dart" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/lib/main.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="199">
-              <caret line="496" column="75" lean-forward="false" selection-start-line="496" selection-start-column="75" selection-end-line="496" selection-end-column="75" />
+            <state relative-caret-position="239">
+              <caret line="301" column="210" lean-forward="true" selection-start-line="301" selection-start-column="210" selection-end-line="301" selection-end-column="210" />
               <folding>
                 <element signature="e#0#39#0" expanded="true" />
               </folding>
@@ -68,12 +64,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>new Stack</find>
-      <find>[700</find>
-      <find>appBar</find>
-      <find>sort</find>
-      <find>indigo</find>
-      <find>Colors.ind</find>
       <find>Browse</find>
       <find>http.</find>
       <find>imageUrl</find>
@@ -98,6 +88,12 @@
       <find>/7</find>
       <find>/500</find>
       <find>/(3.0</find>
+      <find>new Sliver</find>
+      <find>new Linear</find>
+      <find>deeporan</find>
+      <find>Colors.blue</find>
+      <find>deepOrangeAcc</find>
+      <find>alwaysS</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -417,8 +413,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/main.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="199">
-          <caret line="496" column="75" lean-forward="false" selection-start-line="496" selection-start-column="75" selection-end-line="496" selection-end-column="75" />
+        <state relative-caret-position="239">
+          <caret line="301" column="210" lean-forward="true" selection-start-line="301" selection-start-column="210" selection-end-line="301" selection-end-column="210" />
           <folding>
             <element signature="e#0#39#0" expanded="true" />
           </folding>

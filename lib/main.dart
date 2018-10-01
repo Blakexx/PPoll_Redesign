@@ -181,7 +181,7 @@ class AppState extends State<App>{
               bottomNavigationBar: new BottomNavigationBar(
                 currentIndex: index,
                 type: BottomNavigationBarType.fixed,
-                fixedColor: settings[0]?Colors.blueAccent:Colors.indigoAccent,
+                fixedColor: settings[0]?Colors.deepOrangeAccent:Colors.indigoAccent,
                 items: [
                   BottomNavigationBarItem(
                     icon: new Icon(Icons.language),
@@ -277,7 +277,7 @@ class ViewState extends State<View>{
         slivers: [
           new SliverAppBar(
             pinned: false,
-            backgroundColor: settings[0]?Colors.blue:Colors.indigo[700],
+            backgroundColor: settings[0]?Colors.deepOrange:Colors.indigo[700],
             floating: true,
             centerTitle: false,
             title: new Text(!widget.onlyCreated?"Browse":"Created"),
@@ -299,7 +299,7 @@ class ViewState extends State<View>{
                   )
               ))
             ],
-            bottom: new PreferredSize(preferredSize: new Size(double.infinity,3.0),child: new Container(height:3.0,child:new LinearProgressIndicator()))
+            bottom: new PreferredSize(preferredSize: new Size(double.infinity,3.0),child: new Container(height:3.0,child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation<Color>(Colors.lime))))
           )
         ]
       );
@@ -358,7 +358,7 @@ class ViewState extends State<View>{
                   ),
                   centerTitle: false,
                   expandedHeight: 30.0,
-                  backgroundColor: settings[0]?Colors.blue:Colors.indigo[700],
+                  backgroundColor: settings[0]?Colors.deepOrange[900]:Colors.indigo[700],
                   actions: [
                     inSearch?new IconButton(
                       icon: new Icon(Icons.close),
@@ -407,7 +407,7 @@ class ViewState extends State<View>{
                 mainAxisSpacing: 0.0,
                 crossAxisSpacing: 0.0,
                 itemCount: sortedMap.keys.length,
-                itemBuilder: (BuildContext context, int i) => new Poll(sortedMap.keys.toList()[i]),
+                itemBuilder: (BuildContext context, int i)=>new Padding(padding:EdgeInsets.only(top:(i<(MediaQuery.of(context).size.width/500.0).ceil())?5.0:0.0),child:new Poll(sortedMap.keys.toList()[i])),
                 staggeredTileBuilder: (i)=>new StaggeredTile.fit(1),
               ),
               //new SliverList(delegate: new SliverChildBuilderDelegate((context,i)=>new Padding(padding:EdgeInsets.only(top:i==0?5.0:0.0),child:new Poll(sortedMap.keys.toList()[i])), childCount: sortedMap.length))
@@ -416,7 +416,7 @@ class ViewState extends State<View>{
         ),
         new Positioned(
             left:0.0,right:0.0,
-            child:new Container(height:MediaQuery.of(context).padding.top,color:settings[0]?Colors.blue:Colors.indigo[700])
+            child:new Container(height:MediaQuery.of(context).padding.top,color:settings[0]?Colors.deepOrange[900]:Colors.indigo[700])
         )
       ]
     );
