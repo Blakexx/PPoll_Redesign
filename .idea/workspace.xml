@@ -21,21 +21,11 @@
       <file leaf-file-name="main.dart" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/lib/main.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="184">
-              <caret line="426" column="183" lean-forward="false" selection-start-line="426" selection-start-column="183" selection-end-line="426" selection-end-column="183" />
+            <state relative-caret-position="298">
+              <caret line="436" column="38" lean-forward="true" selection-start-line="436" selection-start-column="38" selection-end-line="436" selection-end-column="38" />
               <folding>
                 <element signature="e#0#39#0" expanded="true" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="index.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/functions/index.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="225">
-              <caret line="15" column="24" lean-forward="false" selection-start-line="15" selection-start-column="24" selection-end-line="15" selection-end-column="24" />
-              <folding />
             </state>
           </provider>
         </entry>
@@ -74,27 +64,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>createdPolls.add</find>
-      <find>http.get</find>
-      <find>print</find>
-      <find>new Linear</find>
-      <find>new Poll</find>
-      <find>ImageView</find>
-      <find>http.put</find>
-      <find>vote(</find>
-      <find>vote?</find>
-      <find>Colors.</find>
-      <find>.purple</find>
-      <find>timeago</find>
-      <find>sortedMap</find>
-      <find>sortedMap =</find>
-      <find>.keys</find>
-      <find>print(</find>
-      <find>==</find>
-      <find>voter</find>
-      <find>==-1</find>
-      <find>finish</find>
-      <find>new Dur</find>
       <find>finishedList.</find>
       <find>finishedList</find>
       <find>1</find>
@@ -104,6 +73,27 @@
       <find>black38</find>
       <find>150</find>
       <find>100.0</find>
+      <find>new Posit</find>
+      <find>sl</find>
+      <find>sliverAppBar</find>
+      <find>new Pos</find>
+      <find>sliverapp</find>
+      <find>bottom</find>
+      <find>.keys.lengt</find>
+      <find>.keys.toList</find>
+      <find>vote</find>
+      <find>const Co</find>
+      <find>Colors.indi</find>
+      <find>hexToInt</find>
+      <find>FFB7409</find>
+      <find>he</find>
+      <find>new Color</find>
+      <find>Colors.</find>
+      <find>new Card</find>
+      <find>const color</find>
+      <find>Colors.red</find>
+      <find>LinearProg</find>
+      <find>new Poll</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -310,6 +300,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1440" height="877" extended-state="0" />
+    <editor active="true" />
     <layout>
       <window_info id="Android Profiler" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -510,8 +501,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/main.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="184">
-          <caret line="426" column="183" lean-forward="false" selection-start-line="426" selection-start-column="183" selection-end-line="426" selection-end-column="183" />
+        <state relative-caret-position="298">
+          <caret line="436" column="38" lean-forward="true" selection-start-line="436" selection-start-column="38" selection-end-line="436" selection-end-column="38" />
           <folding>
             <element signature="e#0#39#0" expanded="true" />
           </folding>

@@ -43,6 +43,10 @@ ScrollController s = new ScrollController();
 
 bool hasLoaded = false;
 
+Color color = const Color.fromRGBO(52,52,52,1.0);
+
+Color textColor = const Color.fromRGBO(34, 34, 34,1.0);
+
 void main() async{
   createdPolls = await createdPollsData.readData();
   if(createdPolls==null){
@@ -228,10 +232,12 @@ class AppState extends State<App>{
                 }
               ),
               body: index==0?new Container(
+                color: const Color.fromRGBO(230, 230, 230, 1.0),
                 child: new Center(
                   child: new View(false)
                 )
               ):index==1?new Container(
+                color: const Color.fromRGBO(230, 230, 230, 1.0),
                 child: new Center(
                   child: new View(true)
                 )
@@ -296,9 +302,10 @@ class ViewState extends State<View>{
         slivers: [
           new SliverAppBar(
             pinned: false,
-            backgroundColor: settings[0]?Colors.deepOrange:Colors.indigo[700],
+            backgroundColor: settings[0]?Colors.deepOrange:color,
             floating: true,
             centerTitle: false,
+            expandedHeight: 30.0,
             title: new Text(!widget.onlyCreated?"Browse":"Created"),
             actions: [
               new IconButton(
@@ -318,7 +325,7 @@ class ViewState extends State<View>{
                   )
               ))
             ],
-            bottom: new PreferredSize(preferredSize: new Size(double.infinity,3.0),child: new Container(height:3.0,child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation<Color>(Colors.red))))
+            bottom: new PreferredSize(preferredSize: new Size(double.infinity,3.0),child: new Container(height:3.0,child:new LinearProgressIndicator()))
           )
         ]
       );
@@ -327,10 +334,8 @@ class ViewState extends State<View>{
       return (widget.onlyCreated&&!createdPolls.contains(key))||(!(key.toUpperCase().contains(search.toUpperCase())||((value as Map<String,dynamic>)["q"] as String).toUpperCase().contains(search.toUpperCase()))||(!widget.onlyCreated&&((((value as Map<String,dynamic>)["b"])[2]==0)||((value as Map<String,dynamic>)["b"])[0]==1||((value as Map<String,dynamic>)["b"])[1]==1)));
     });
     sortedMap = SplayTreeMap.from(tempMap,(o1,o2){
-      dynamic voters1 = tempMap[o1]["i"];
-      voters1 = voters1!=null?voters1.keys.toList().length:0;
-      dynamic voters2 = tempMap[o2]["i"];
-      voters2 = voters2!=null?voters2.keys.toList().length:0;
+      int voters1 = tempMap[o1]["a"].reduce((n1,n2)=>n1+n2);
+      int voters2 = tempMap[o2]["a"].reduce((n1,n2)=>n1+n2);
       if(!widget.onlyCreated){
         if((sorting=="newest"||sorting=="oldest")&&tempMap[o2]["t"]!=tempMap[o1]["t"]){
           return sorting=="newest"?tempMap[o2]["t"]-tempMap[o1]["t"]:tempMap[o1]["t"]-tempMap[o2]["t"];
@@ -381,7 +386,7 @@ class ViewState extends State<View>{
                   ),
                   centerTitle: false,
                   expandedHeight: 30.0,
-                  backgroundColor: settings[0]?Colors.deepOrange[900]:Colors.indigo[700],
+                  backgroundColor: settings[0]?Colors.deepOrange[900]:color,
                   actions: [
                     inSearch?new IconButton(
                       icon: new Icon(Icons.close),
@@ -424,23 +429,23 @@ class ViewState extends State<View>{
                         )
                     )),
                   ],
-                bottom: finishedList.length>0?new PreferredSize(preferredSize: new Size(double.infinity,2.0),child: new Container(height:2.0,child:new LinearProgressIndicator(value: 1.0,valueColor: new AlwaysStoppedAnimation<Color>(Colors.red)))):processingList.length>0?new PreferredSize(preferredSize: new Size(double.infinity,2.0),child: new Container(height:2.0,child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation<Color>(Colors.red)))):new PreferredSize(preferredSize: new Size(0.0,0.0),child: new Container())
+                bottom: finishedList.length>0?new PreferredSize(preferredSize: new Size(double.infinity,2.0),child: new Container(height:2.0,child:new LinearProgressIndicator(value: 1.0))):processingList.length>0?new PreferredSize(preferredSize: new Size(double.infinity,2.0),child: new Container(height:2.0,child:new LinearProgressIndicator())):new PreferredSize(preferredSize: new Size(0.0,0.0),child: new Container())
               ),
-              new SliverStaggeredGrid.countBuilder(
+              new SliverPadding(padding: new EdgeInsets.only(right:10.0,left:10.0,top:5.0),sliver:new SliverStaggeredGrid.countBuilder(
                 crossAxisCount: (MediaQuery.of(context).size.width/500.0).ceil(),
                 mainAxisSpacing: 0.0,
                 crossAxisSpacing: 0.0,
                 itemCount: sortedMap.keys.length,
-                itemBuilder: (BuildContext context, int i)=>new Padding(padding:EdgeInsets.only(top:(i<(MediaQuery.of(context).size.width/500.0).ceil())?5.0:0.0),child:new Poll(sortedMap.keys.toList()[i])),
+                itemBuilder: (BuildContext context, int i)=>new Poll(sortedMap.keys.toList()[i]),
                 staggeredTileBuilder: (i)=>new StaggeredTile.fit(1),
-              ),
+              )),
               //new SliverList(delegate: new SliverChildBuilderDelegate((context,i)=>new Padding(padding:EdgeInsets.only(top:i==0?5.0:0.0),child:new Poll(sortedMap.keys.toList()[i])), childCount: sortedMap.length))
             ],
           controller: s
         ),
         new Positioned(
             left:0.0,right:0.0,
-            child:new Container(height:MediaQuery.of(context).padding.top,color:settings[0]?Colors.deepOrange[900]:Colors.indigo[700])
+            child:new Container(height:MediaQuery.of(context).padding.top,color:settings[0]?Colors.deepOrange[900]:color)
         )
       ]
     );
@@ -494,13 +499,22 @@ class PollState extends State<Poll>{
 
   void vote(String c, BuildContext context) async{
     if(c!=choice){
-      context.ancestorStateOfType(new TypeMatcher<ViewState>()).setState((){
+      try{
+        context.ancestorStateOfType(new TypeMatcher<ViewState>()).setState((){
+          processingList.add(widget.id);
+        });
+      }catch(e){
         processingList.add(widget.id);
-      });
-      setState((){
+      }
+      try{
+        setState(() {
+          lastChoice = choice;
+          choice = c;
+        });
+      }catch(e){
         lastChoice = choice;
         choice = c;
-      });
+      }
       if(data[widget.id]["i"]==null){
         data[widget.id]["i"]={};
       }
@@ -512,27 +526,36 @@ class PollState extends State<Poll>{
           hasVoted = true;
         });
       }
-      context.ancestorStateOfType(new TypeMatcher<ViewState>()).setState((){
+      try{
+        context.ancestorStateOfType(new TypeMatcher<ViewState>()).setState((){
+          finishedList.add(widget.id);
+          processingList.remove(widget.id);
+        });
+      }catch(e){
         finishedList.add(widget.id);
         processingList.remove(widget.id);
-      });
+      }
       new Timer(new Duration(milliseconds:200),(){
-        context.ancestorStateOfType(new TypeMatcher<ViewState>()).setState((){
+        try{
+          context.ancestorStateOfType(new TypeMatcher<ViewState>()).setState((){
+            finishedList.remove(widget.id);
+          });
+        }catch(e){
           finishedList.remove(widget.id);
-        });
+        }
       });
     }
   }
 
   @override
   Widget build(BuildContext context){
-    return new Card(child: new Column(
+    return new Card(color: const Color.fromRGBO(250, 250, 250, 1.0),child: new Column(
         children:[
           new Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              new Padding(padding:EdgeInsets.only(top:10.0,left:11.0,right:11.0),child:new Text(data[widget.id]["q"],style: new TextStyle(fontSize: 15.0,fontWeight: FontWeight.w600),maxLines: 2,overflow: TextOverflow.ellipsis)),
-              new Padding(padding:EdgeInsets.only(top:5.0,left:11.0,bottom:5.0),child:new Text(widget.id+(data[widget.id]["t"]!=null?" • ${timeago.format(new DateTime.fromMillisecondsSinceEpoch(data[widget.id]["t"]*1000))}":"")+" • ${data[widget.id]["i"]!=null?data[widget.id]["i"].keys.toList().length:0} voter"+((data[widget.id]["i"]!=null&&data[widget.id]["i"].keys.toList().length==1)?"":"s"),style: new TextStyle(fontSize: 12.0,color:(settings[0]?Colors.white:Colors.black).withOpacity(.8)))),
+              new Padding(padding:EdgeInsets.only(top:10.0,left:11.0,right:11.0),child:new Text(data[widget.id]["q"],style: new TextStyle(color:textColor,fontSize: 15.0,fontWeight: FontWeight.w600),maxLines: 2,overflow: TextOverflow.ellipsis)),
+              new Padding(padding:EdgeInsets.only(top:5.0,left:11.0,bottom:5.0),child:new Text(widget.id+(data[widget.id]["t"]!=null?" • ${timeago.format(new DateTime.fromMillisecondsSinceEpoch(data[widget.id]["t"]*1000))}":"")+" • ${data[widget.id]["a"].reduce((n1,n2)=>n1+n2)} vote"+((data[widget.id]["a"].reduce((n1,n2)=>n1+n2)==1)?"":"s"),style: new TextStyle(fontSize: 12.0,color:(settings[0]?Colors.white:textColor).withOpacity(.8)))),
               image!=null?new Padding(padding:EdgeInsets.only(top:5.0,bottom:5.0),child:new FutureBuilder<ui.Image>(
                 future: completer.future,
                 builder: (BuildContext context, AsyncSnapshot<ui.Image> snapshot){
@@ -560,7 +583,7 @@ class PollState extends State<Poll>{
                               vote(s,context);
                             },
                           ),
-                          new Expanded(child:new Text(c,maxLines:2,overflow: TextOverflow.ellipsis)),
+                          new Expanded(child:new Text(c,maxLines:2,style: new TextStyle(color:textColor),overflow: TextOverflow.ellipsis)),
                           new Container(width:5.0)
                         ]
                     ),
