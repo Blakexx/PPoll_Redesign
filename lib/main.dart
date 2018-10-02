@@ -262,6 +262,8 @@ class AppState extends State<App>{
   }
 }
 
+List<String> processingList = [];
+
 class View extends StatefulWidget{
   final bool onlyCreated;
   View(this.onlyCreated);
@@ -314,7 +316,7 @@ class ViewState extends State<View>{
                   )
               ))
             ],
-            bottom: new PreferredSize(preferredSize: new Size(double.infinity,3.0),child: new Container(height:3.0,child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation<Color>(Colors.lime))))
+            bottom: new PreferredSize(preferredSize: new Size(double.infinity,3.0),child: new Container(height:3.0,child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation<Color>(Colors.black38))))
           )
         ]
       );
@@ -415,7 +417,8 @@ class ViewState extends State<View>{
                             }
                         )
                     )),
-                  ]
+                  ],
+                bottom: processingList.length>0?new PreferredSize(preferredSize: new Size(double.infinity,2.0),child: new Container(height:2.0,child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation<Color>(Colors.black38)))):new PreferredSize(preferredSize: new Size(0.0,0.0),child: new Container())
               ),
               new SliverStaggeredGrid.countBuilder(
                 crossAxisCount: (MediaQuery.of(context).size.width/500.0).ceil(),
@@ -483,8 +486,11 @@ class PollState extends State<Poll>{
 
   String choice;
 
-  void vote(String c) async{
+  void vote(String c, BuildContext context) async{
     if(c!=choice){
+      context.ancestorStateOfType(new TypeMatcher<ViewState>()).setState((){
+        processingList.add(widget.id);
+      });
       setState((){
         lastChoice = choice;
         choice = c;
@@ -496,8 +502,13 @@ class PollState extends State<Poll>{
       await http.put(Uri.encodeFull(database+"/data/${widget.id}/i/$userId.json?auth=$secretKey"),body: json.encode(data[widget.id]["i"][userId]));
       await http.get(Uri.encodeFull(functionsLink+"/vote?text={\"poll\":\"${widget.id}\",\"choice\":${data[widget.id]["c"].indexOf(choice)},\"changed\":${lastChoice!=null?data[widget.id]["c"].indexOf(lastChoice):null},\"multiSelect\":$multiSelect,\"key\":\"$secretKey\"}"));
       if(!hasVoted){
-        setState((){hasVoted = true;});
+        setState((){
+          hasVoted = true;
+        });
       }
+      context.ancestorStateOfType(new TypeMatcher<ViewState>()).setState((){
+        processingList.remove(widget.id);
+      });
     }
   }
 
@@ -527,14 +538,14 @@ class PollState extends State<Poll>{
                 },
               )):new Container(),
               new Column(
-                  children: data[widget.id]["c"].map((c)=>new MaterialButton(onPressed: (){vote(c);},padding:EdgeInsets.zero,child:new Column(children: [
+                  children: data[widget.id]["c"].map((c)=>new MaterialButton(onPressed: (){vote(c,context);},padding:EdgeInsets.zero,child:new Column(children: [
                     new Row(
                         children: [
                           new Radio(
                             value: c,
                             groupValue: choice,
                             onChanged: (s){
-                              vote(s);
+                              vote(s,context);
                             },
                           ),
                           new Expanded(child:new Text(c,maxLines:2,overflow: TextOverflow.ellipsis)),
