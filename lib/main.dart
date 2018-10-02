@@ -497,58 +497,59 @@ class PollState extends State<Poll>{
 
   String choice;
 
-  void vote(String c, BuildContext context) async{
-    if(c!=choice){
-      try{
-        context.ancestorStateOfType(new TypeMatcher<ViewState>()).setState((){
-          processingList.add(widget.id);
-        });
-      }catch(e){
+  List<String> pids = [];
+
+  void vote(String c, BuildContext context, String pid) async{
+    try{
+      context.ancestorStateOfType(new TypeMatcher<ViewState>()).setState((){
         processingList.add(widget.id);
-      }
-      try{
-        setState(() {
-          lastChoice = choice;
-          choice = c;
-        });
-      }catch(e){
+      });
+    }catch(e){
+      processingList.add(widget.id);
+    }
+    try{
+      setState(() {
         lastChoice = choice;
         choice = c;
-      }
-      if(data[widget.id]["i"]==null){
-        data[widget.id]["i"]={};
-      }
-      data[widget.id]["i"][userId]=data[widget.id]["c"].indexOf(choice);
-      await http.put(Uri.encodeFull(database+"/data/${widget.id}/i/$userId.json?auth=$secretKey"),body: json.encode(data[widget.id]["i"][userId]));
-      await http.get(Uri.encodeFull(functionsLink+"/vote?text={\"poll\":\"${widget.id}\",\"choice\":${data[widget.id]["c"].indexOf(choice)},\"changed\":${lastChoice!=null?data[widget.id]["c"].indexOf(lastChoice):null},\"multiSelect\":$multiSelect,\"key\":\"$secretKey\"}"));
-      if(!hasVoted){
-        try{
-          setState((){
-            hasVoted = true;
-          });
-        }catch(e){
-          hasVoted = true;
-        }
-      }
+      });
+    }catch(e){
+      lastChoice = choice;
+      choice = c;
+    }
+    if(data[widget.id]["i"]==null){
+      data[widget.id]["i"]={};
+    }
+    data[widget.id]["i"][userId]=data[widget.id]["c"].indexOf(choice);
+    await http.put(Uri.encodeFull(database+"/data/${widget.id}/i/$userId.json?auth=$secretKey"),body: json.encode(data[widget.id]["i"][userId]));
+    await http.get(Uri.encodeFull(functionsLink+"/vote?text={\"poll\":\"${widget.id}\",\"choice\":${data[widget.id]["c"].indexOf(choice)},\"changed\":${lastChoice!=null?data[widget.id]["c"].indexOf(lastChoice):null},\"multiSelect\":$multiSelect,\"key\":\"$secretKey\"}"));
+    if(!hasVoted){
       try{
-        context.ancestorStateOfType(new TypeMatcher<ViewState>()).setState((){
-          finishedList.add(widget.id);
-          processingList.remove(widget.id);
+        setState((){
+          hasVoted = true;
         });
       }catch(e){
+        hasVoted = true;
+      }
+    }
+    try{
+      context.ancestorStateOfType(new TypeMatcher<ViewState>()).setState((){
         finishedList.add(widget.id);
         processingList.remove(widget.id);
-      }
-      new Timer(new Duration(milliseconds:200),(){
-        try{
-          context.ancestorStateOfType(new TypeMatcher<ViewState>()).setState((){
-            finishedList.remove(widget.id);
-          });
-        }catch(e){
-          finishedList.remove(widget.id);
-        }
       });
+    }catch(e){
+      finishedList.add(widget.id);
+      processingList.remove(widget.id);
     }
+    pids.remove(pid);
+    new Timer(new Duration(milliseconds:200),(){
+      try{
+        context.ancestorStateOfType(new TypeMatcher<ViewState>()).setState((){
+          finishedList.remove(widget.id);
+        });
+      }catch(e){
+        finishedList.remove(widget.id);
+      }
+    });
   }
 
   @override
@@ -577,14 +578,58 @@ class PollState extends State<Poll>{
                 },
               )):new Container(),
               new Column(
-                  children: data[widget.id]["c"].map((c)=>new MaterialButton(onPressed: (){vote(c,context);},padding:EdgeInsets.zero,child:new Column(children: [
+                  children: data[widget.id]["c"].map((c)=>new MaterialButton(onPressed: (){
+                    if(c!=choice){
+                      String pid;
+                      do{
+                        pid = "";
+                        Random r = new Random();
+                        List<String> nums = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
+                        for(int i = 0;i<8;i++){
+                          pid+=(r.nextInt(2)==0?nums[r.nextInt(36)]:nums[r.nextInt(36)].toLowerCase());
+                        }
+                      }while(pids.contains(pid));
+                      pids.add(pid);
+                      waitForVote(){
+                        new Timer(Duration.zero,(){
+                          if(pids[0]==pid){
+                            vote(c,context,pid);
+                          }else{
+                            waitForVote();
+                          }
+                        });
+                      }
+                      waitForVote();
+                    }
+                    },padding:EdgeInsets.zero,child:new Column(children: [
                     new Row(
                         children: [
                           new Radio(
                             value: c,
                             groupValue: choice,
                             onChanged: (s){
-                              vote(s,context);
+                              if(s!=choice){
+                                String pid;
+                                do{
+                                  pid = "";
+                                  Random r = new Random();
+                                  List<String> nums = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
+                                  for(int i = 0;i<8;i++){
+                                    pid+=(r.nextInt(2)==0?nums[r.nextInt(36)]:nums[r.nextInt(36)].toLowerCase());
+                                  }
+                                }while(pids.contains(pid));
+                                pids.add(pid);
+                                waitForVote(){
+                                  new Timer(Duration.zero,(){
+                                    if(pids[0]==pid){
+                                      vote(s,context,pid);
+                                    }else{
+                                      waitForVote();
+                                    }
+                                  });
+                                }
+                                waitForVote();
+                              }
                             },
                           ),
                           new Expanded(child:new Text(c,maxLines:2,style: new TextStyle(color:textColor),overflow: TextOverflow.ellipsis)),
