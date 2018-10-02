@@ -457,9 +457,12 @@ class PollState extends State<Poll>{
 
   double height,width;
 
+  bool multiSelect;
+
   @override
   void initState(){
     super.initState();
+    multiSelect = data[widget.id]["b"][0]==1;
     hasVoted = data[widget.id]["i"]!=null&&data[widget.id]["i"][userId]!=null;
     if(hasVoted){
       choice = data[widget.id]["c"][data[widget.id]["i"][userId]];
@@ -491,13 +494,9 @@ class PollState extends State<Poll>{
       }
       data[widget.id]["i"][userId]=data[widget.id]["c"].indexOf(choice);
       await http.put(Uri.encodeFull(database+"/data/${widget.id}/i/$userId.json?auth=$secretKey"),body: json.encode(data[widget.id]["i"][userId]));
-      if(lastChoice!=null){
-        data[widget.id]["a"][data[widget.id]["c"].indexOf(lastChoice)]--;
-      }
-      data[widget.id]["a"][data[widget.id]["c"].indexOf(choice)]++;
-      await http.put(Uri.encodeFull(database+"/data/${widget.id}/a.json?auth=$secretKey"),body: json.encode(data[widget.id]["a"]));
+      await http.get(Uri.encodeFull(functionsLink+"/vote?text={\"poll\":\"${widget.id}\",\"choice\":${data[widget.id]["c"].indexOf(choice)},\"changed\":${lastChoice!=null?data[widget.id]["c"].indexOf(lastChoice):null},\"multiSelect\":$multiSelect,\"key\":\"$secretKey\"}"));
       if(!hasVoted){
-        hasVoted = true;
+        setState((){hasVoted = true;});
       }
     }
   }
