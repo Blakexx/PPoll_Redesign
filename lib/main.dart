@@ -325,11 +325,15 @@ class ViewState extends State<View>{
       return (widget.onlyCreated&&!createdPolls.contains(key))||(!(key.toUpperCase().contains(search.toUpperCase())||((value as Map<String,dynamic>)["q"] as String).toUpperCase().contains(search.toUpperCase()))||(!widget.onlyCreated&&((((value as Map<String,dynamic>)["b"])[2]==0)||((value as Map<String,dynamic>)["b"])[0]==1||((value as Map<String,dynamic>)["b"])[1]==1)));
     });
     sortedMap = SplayTreeMap.from(tempMap,(o1,o2){
+      dynamic voters1 = tempMap[o1]["i"];
+      voters1 = voters1!=null?voters1.keys.toList().length:0;
+      dynamic voters2 = tempMap[o2]["i"];
+      voters2 = voters2!=null?voters2.keys.toList().length:0;
       if(!widget.onlyCreated){
         if((sorting=="newest"||sorting=="oldest")&&tempMap[o2]["t"]!=tempMap[o1]["t"]){
           return sorting=="newest"?tempMap[o2]["t"]-tempMap[o1]["t"]:tempMap[o1]["t"]-tempMap[o2]["t"];
-        }else if(((tempMap[o2] as Map<String,dynamic>)["a"] as List).reduce((n1,n2)=>n1+n2)-((tempMap[o1] as Map<String,dynamic>)["a"] as List).reduce((n1,n2)=>n1+n2)!=0){
-          return ((tempMap[o2] as Map<String,dynamic>)["a"] as List).reduce((n1,n2)=>n1+n2)-((tempMap[o1] as Map<String,dynamic>)["a"] as List).reduce((n1,n2)=>n1+n2);
+        }else if(voters2!=voters1){
+          return voters2-voters1;
         }else if(tempMap[o1]["q"].compareTo(tempMap[o2]["q"])!=0){
           return tempMap[o1]["q"].compareTo(tempMap[o2]["q"]);
         }
@@ -338,8 +342,8 @@ class ViewState extends State<View>{
         if(sorting=="newest"||sorting=="oldest"){
           return sorting=="newest"?createdPolls.indexOf(o2)-createdPolls.indexOf(o1):createdPolls.indexOf(o1)-createdPolls.indexOf(o2);
         }else{
-          if(((tempMap[o2] as Map<String,dynamic>)["a"] as List).reduce((n1,n2)=>n1+n2)-((tempMap[o1] as Map<String,dynamic>)["a"] as List).reduce((n1,n2)=>n1+n2)!=0){
-            return ((tempMap[o2] as Map<String,dynamic>)["a"] as List).reduce((n1,n2)=>n1+n2)-((tempMap[o1] as Map<String,dynamic>)["a"] as List).reduce((n1,n2)=>n1+n2);
+          if(voters2!=voters1){
+            return voters2-voters1;
           }else if(tempMap[o1]["q"].compareTo(tempMap[o2]["q"])!=0){
             return tempMap[o1]["q"].compareTo(tempMap[o2]["q"]);
           }
@@ -462,13 +466,20 @@ class PollState extends State<Poll>{
 
   bool multiSelect;
 
+  bool pastVotes = false;
+
   @override
   void initState(){
     super.initState();
     multiSelect = data[widget.id]["b"][0]==1;
     hasVoted = data[widget.id]["i"]!=null&&data[widget.id]["i"][userId]!=null;
     if(hasVoted){
-      choice = data[widget.id]["c"][data[widget.id]["i"][userId]];
+      if(data[widget.id]["i"][userId]==-1){
+        pastVotes = true;
+        choice = null;
+      }else{
+        choice = data[widget.id]["c"][data[widget.id]["i"][userId]];
+      }
     }
     hasImage = data[widget.id]["b"].length==4&&data[widget.id]["b"][3]==1;
     if(hasImage){
@@ -500,7 +511,11 @@ class PollState extends State<Poll>{
       }
       data[widget.id]["i"][userId]=data[widget.id]["c"].indexOf(choice);
       await http.put(Uri.encodeFull(database+"/data/${widget.id}/i/$userId.json?auth=$secretKey"),body: json.encode(data[widget.id]["i"][userId]));
-      await http.get(Uri.encodeFull(functionsLink+"/vote?text={\"poll\":\"${widget.id}\",\"choice\":${data[widget.id]["c"].indexOf(choice)},\"changed\":${lastChoice!=null?data[widget.id]["c"].indexOf(lastChoice):null},\"multiSelect\":$multiSelect,\"key\":\"$secretKey\"}"));
+      if(!pastVotes){
+        await http.get(Uri.encodeFull(functionsLink+"/vote?text={\"poll\":\"${widget.id}\",\"choice\":${data[widget.id]["c"].indexOf(choice)},\"changed\":${lastChoice!=null?data[widget.id]["c"].indexOf(lastChoice):null},\"multiSelect\":$multiSelect,\"key\":\"$secretKey\"}"));
+      }else{
+        pastVotes = false;
+      }
       if(!hasVoted){
         setState((){
           hasVoted = true;
@@ -520,7 +535,7 @@ class PollState extends State<Poll>{
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               new Padding(padding:EdgeInsets.only(top:10.0,left:11.0,right:11.0),child:new Text(data[widget.id]["q"],style: new TextStyle(fontSize: 15.0,fontWeight: FontWeight.w600),maxLines: 2,overflow: TextOverflow.ellipsis)),
-              new Padding(padding:EdgeInsets.only(top:5.0,left:11.0,bottom:5.0),child:new Text(widget.id+(data[widget.id]["t"]!=null?" • ${timeago.format(new DateTime.fromMillisecondsSinceEpoch(data[widget.id]["t"]*1000))}":"")+" • ${data[widget.id]["a"].reduce((n1,n2)=>n1+n2)} vote"+((data[widget.id]["a"].reduce((n1,n2)=>n1+n2)==1)?"":"s"),style: new TextStyle(fontSize: 12.0,color:(settings[0]?Colors.white:Colors.black).withOpacity(.8)))),
+              new Padding(padding:EdgeInsets.only(top:5.0,left:11.0,bottom:5.0),child:new Text(widget.id+(data[widget.id]["t"]!=null?" • ${timeago.format(new DateTime.fromMillisecondsSinceEpoch(data[widget.id]["t"]*1000))}":"")+" • ${data[widget.id]["i"]!=null?data[widget.id]["i"].keys.toList().length:0} voter"+((data[widget.id]["i"]!=null&&data[widget.id]["i"].keys.toList().length==1)?"":"s"),style: new TextStyle(fontSize: 12.0,color:(settings[0]?Colors.white:Colors.black).withOpacity(.8)))),
               image!=null?new Padding(padding:EdgeInsets.only(top:5.0,bottom:5.0),child:new FutureBuilder<ui.Image>(
                 future: completer.future,
                 builder: (BuildContext context, AsyncSnapshot<ui.Image> snapshot){

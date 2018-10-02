@@ -21,8 +21,8 @@
       <file leaf-file-name="main.dart" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/lib/main.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="363">
-              <caret line="507" column="7" lean-forward="false" selection-start-line="507" selection-start-column="7" selection-end-line="507" selection-end-column="7" />
+            <state relative-caret-position="289">
+              <caret line="512" column="147" lean-forward="false" selection-start-line="512" selection-start-column="147" selection-end-line="512" selection-end-column="147" />
               <folding>
                 <element signature="e#0#39#0" expanded="true" />
               </folding>
@@ -74,12 +74,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>new Circu</find>
-      <find>&gt;</find>
-      <find>textf</find>
-      <find>new DateTime</find>
-      <find>MediaQu</find>
-      <find>/65-</find>
       <find>/3-</find>
       <find>/650</find>
       <find>/300</find>
@@ -92,7 +86,6 @@
       <find>Colors.blue</find>
       <find>deepOrangeAcc</find>
       <find>alwaysS</find>
-      <find>timeago</find>
       <find>createdPolls.add</find>
       <find>http.get</find>
       <find>print</find>
@@ -104,6 +97,13 @@
       <find>vote?</find>
       <find>Colors.</find>
       <find>.purple</find>
+      <find>timeago</find>
+      <find>sortedMap</find>
+      <find>sortedMap =</find>
+      <find>.keys</find>
+      <find>print(</find>
+      <find>==</find>
+      <find>voter</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -488,8 +488,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/main.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="363">
-          <caret line="507" column="7" lean-forward="false" selection-start-line="507" selection-start-column="7" selection-end-line="507" selection-end-column="7" />
+        <state relative-caret-position="289">
+          <caret line="512" column="147" lean-forward="false" selection-start-line="512" selection-start-column="147" selection-end-line="512" selection-end-column="147" />
           <folding>
             <element signature="e#0#39#0" expanded="true" />
           </folding>
