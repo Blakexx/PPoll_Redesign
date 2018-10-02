@@ -9,3 +9,5 @@ build/
 .flutter-plugins
 
 lib/key.dart
+
+functions/key.js
