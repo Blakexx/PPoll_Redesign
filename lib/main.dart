@@ -264,6 +264,8 @@ class AppState extends State<App>{
 
 List<String> processingList = [];
 
+List<String> finishedList = [];
+
 class View extends StatefulWidget{
   final bool onlyCreated;
   View(this.onlyCreated);
@@ -316,7 +318,7 @@ class ViewState extends State<View>{
                   )
               ))
             ],
-            bottom: new PreferredSize(preferredSize: new Size(double.infinity,3.0),child: new Container(height:3.0,child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation<Color>(Colors.black38))))
+            bottom: new PreferredSize(preferredSize: new Size(double.infinity,3.0),child: new Container(height:3.0,child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation<Color>(Colors.red))))
           )
         ]
       );
@@ -422,7 +424,7 @@ class ViewState extends State<View>{
                         )
                     )),
                   ],
-                bottom: processingList.length>0?new PreferredSize(preferredSize: new Size(double.infinity,2.0),child: new Container(height:2.0,child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation<Color>(Colors.black38)))):new PreferredSize(preferredSize: new Size(0.0,0.0),child: new Container())
+                bottom: finishedList.length>0?new PreferredSize(preferredSize: new Size(double.infinity,2.0),child: new Container(height:2.0,child:new LinearProgressIndicator(value: 1.0,valueColor: new AlwaysStoppedAnimation<Color>(Colors.red)))):processingList.length>0?new PreferredSize(preferredSize: new Size(double.infinity,2.0),child: new Container(height:2.0,child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation<Color>(Colors.red)))):new PreferredSize(preferredSize: new Size(0.0,0.0),child: new Container())
               ),
               new SliverStaggeredGrid.countBuilder(
                 crossAxisCount: (MediaQuery.of(context).size.width/500.0).ceil(),
@@ -466,20 +468,13 @@ class PollState extends State<Poll>{
 
   bool multiSelect;
 
-  bool pastVotes = false;
-
   @override
   void initState(){
     super.initState();
     multiSelect = data[widget.id]["b"][0]==1;
     hasVoted = data[widget.id]["i"]!=null&&data[widget.id]["i"][userId]!=null;
     if(hasVoted){
-      if(data[widget.id]["i"][userId]==-1){
-        pastVotes = true;
-        choice = null;
-      }else{
-        choice = data[widget.id]["c"][data[widget.id]["i"][userId]];
-      }
+      choice = data[widget.id]["c"][data[widget.id]["i"][userId]];
     }
     hasImage = data[widget.id]["b"].length==4&&data[widget.id]["b"][3]==1;
     if(hasImage){
@@ -511,18 +506,20 @@ class PollState extends State<Poll>{
       }
       data[widget.id]["i"][userId]=data[widget.id]["c"].indexOf(choice);
       await http.put(Uri.encodeFull(database+"/data/${widget.id}/i/$userId.json?auth=$secretKey"),body: json.encode(data[widget.id]["i"][userId]));
-      if(!pastVotes){
-        await http.get(Uri.encodeFull(functionsLink+"/vote?text={\"poll\":\"${widget.id}\",\"choice\":${data[widget.id]["c"].indexOf(choice)},\"changed\":${lastChoice!=null?data[widget.id]["c"].indexOf(lastChoice):null},\"multiSelect\":$multiSelect,\"key\":\"$secretKey\"}"));
-      }else{
-        pastVotes = false;
-      }
+      await http.get(Uri.encodeFull(functionsLink+"/vote?text={\"poll\":\"${widget.id}\",\"choice\":${data[widget.id]["c"].indexOf(choice)},\"changed\":${lastChoice!=null?data[widget.id]["c"].indexOf(lastChoice):null},\"multiSelect\":$multiSelect,\"key\":\"$secretKey\"}"));
       if(!hasVoted){
         setState((){
           hasVoted = true;
         });
       }
       context.ancestorStateOfType(new TypeMatcher<ViewState>()).setState((){
+        finishedList.add(widget.id);
         processingList.remove(widget.id);
+      });
+      new Timer(new Duration(milliseconds:200),(){
+        context.ancestorStateOfType(new TypeMatcher<ViewState>()).setState((){
+          finishedList.remove(widget.id);
+        });
       });
     }
   }
