@@ -625,8 +625,8 @@ class PollState extends State<Poll>{
                                 waitForVote(){
                                   new Timer(Duration.zero,(){
                                     if(pids[0]==pid){
-                                      vote(s,context,pid);
-                                    }else{
+                                      vote(c,context,pid);
+                                    }else if(pids.length>1){
                                       waitForVote();
                                     }
                                   });
