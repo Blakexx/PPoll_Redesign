@@ -570,10 +570,10 @@ class PollState extends State<Poll>{
                   if(snapshot.hasData){
                     height = snapshot.data.height*1.0;
                     width = snapshot.data.width*1.0;
-                    return GestureDetector(onTap:(){Navigator.push(context,new PageRouteBuilder(opaque:false,pageBuilder: (context,a1,a2)=>new ImageView(child:new Center(child:new PhotoView(imageProvider:image.image,minScale: min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height), maxScale:4.0*min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height))),name:widget.id)));},child:new SizedBox(
+                    return new InkWell(onTap:(){Navigator.push(context,new PageRouteBuilder(opaque:false,pageBuilder: (context,a1,a2)=>new ImageView(child:new Center(child:new PhotoView(imageProvider:image.image,minScale: min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height), maxScale:4.0*min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height))),name:widget.id)));},child:new SizedBox(
                         width: double.infinity,
-                        height:max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0*(MediaQuery.of(context).size.width/500.0).ceil()),
-                        child:new Image(image:image.image,fit:BoxFit.cover)
+                        height: max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0*((MediaQuery.of(context).size.width/500.0).ceil()==1?1:3*((MediaQuery.of(context).size.width/500.0).ceil())/4)),
+                        child: new Ink.image(image:image.image,fit:BoxFit.cover,child: new Container())
                     ));
                   }else{
                     return new Container(width:double.infinity,height:max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0*(MediaQuery.of(context).size.width/500.0).ceil()),color:Colors.black12,child: new Center(child: new Container(height:MediaQuery.of(context).size.height/20.0,width:MediaQuery.of(context).size.height/20.0,child:new CircularProgressIndicator())));
@@ -711,7 +711,7 @@ class ImageViewState extends State<ImageView>{
               new Positioned(
                   right:10.0,
                   top:MediaQuery.of(context).padding.top,
-                  child: new AnimatedOpacity(opacity:isAnimating?0.0:1.0,duration:new Duration(milliseconds:200),child:new InkWell(child:new IconButton(iconSize:30.0*min(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height)/375.0,color:Colors.white,icon:new Icon(Icons.close),onPressed:(){hasLeft = true;Navigator.of(context).pop();})))
+                  child: new AnimatedOpacity(opacity:isAnimating?0.0:1.0,duration:new Duration(milliseconds:200),child:new IconButton(iconSize:30.0*min(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height)/375.0,color:Colors.white,icon:new Icon(Icons.close),onPressed:(){hasLeft = true;Navigator.of(context).pop();}))
               ),
               new Positioned(
                   left:15.0,
