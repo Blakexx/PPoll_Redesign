@@ -429,7 +429,7 @@ class ViewState extends State<View>{
                         )
                     )),
                   ],
-                bottom: finishedList.length>0?new PreferredSize(preferredSize: new Size(double.infinity,2.5),child: new Container(height:2.5,child:new LinearProgressIndicator(value: 1.0))):processingList.length>0?new PreferredSize(preferredSize: new Size(double.infinity,2.5),child: new Container(height:2.5,child:new LinearProgressIndicator())):new PreferredSize(preferredSize: new Size(0.0,0.0),child: new Container())
+                bottom: finishedList.length>0?new PreferredSize(preferredSize: new Size(double.infinity,3.0),child: new Container(height:3.0,child:new LinearProgressIndicator(value: 1.0))):processingList.length>0?new PreferredSize(preferredSize: new Size(double.infinity,3.0),child: new Container(height:3.0,child:new LinearProgressIndicator())):new PreferredSize(preferredSize: new Size(0.0,3.0),child: new Container())
               ),
               new SliverPadding(padding: new EdgeInsets.only(right:5.0,left:5.0,top:5.0),sliver:new SliverStaggeredGrid.countBuilder(
                 crossAxisCount: (MediaQuery.of(context).size.width/500.0).ceil(),
@@ -639,7 +639,7 @@ class PollState extends State<Poll>{
                           new Container(width:5.0)
                         ]
                     ),
-                    hasVoted?new Padding(padding: EdgeInsets.only(left:50.0,right:20.0,bottom:5.0),child:new Container(height:3.0,child:new LinearProgressIndicator(value:data[widget.id]["a"][data[widget.id]["c"].indexOf(c)]/((data[widget.id]["a"].reduce((n1,n2)=>n1+n2))!=0?(data[widget.id]["a"].reduce((n1,n2)=>n1+n2)):1.0)))):new Container()
+                    hasVoted?new Padding(padding: EdgeInsets.only(left:50.0,right:20.0,bottom:5.0),child: new Container(height:3.0,child:new LinearProgressIndicator(value:data[widget.id]["a"][data[widget.id]["c"].indexOf(c)]/((data[widget.id]["a"].reduce((n1,n2)=>n1+n2))!=0?(data[widget.id]["a"].reduce((n1,n2)=>n1+n2)):1.0)))):new Container()
                   ]))).toList().cast<Widget>()
               ),
               new Container(height:5.0)
