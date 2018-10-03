@@ -207,16 +207,16 @@ class AppState extends State<App>{
                     title: new Text("Browse"),
                   ),
                   BottomNavigationBarItem(
-                    icon: new Icon(Icons.dehaze),
-                    title: new Text("Created"),
+                    icon: new Icon(Icons.add_circle_outline),
+                    title: new Text("New"),
                   ),
                   BottomNavigationBarItem(
                     icon: new Icon(Icons.check_circle),
                     title: new Text("Vote"),
                   ),
                   BottomNavigationBarItem(
-                    icon: new Icon(Icons.add_circle_outline),
-                    title: new Text("New"),
+                    icon: new Icon(Icons.dehaze),
+                    title: new Text("Created"),
                   ),
                   BottomNavigationBarItem(
                     icon: new Icon(Icons.settings),
@@ -239,7 +239,7 @@ class AppState extends State<App>{
               ):index==1?new Container(
                 color: const Color.fromRGBO(230, 230, 230, 1.0),
                 child: new Center(
-                  child: new View(true)
+                  child: new Text("New")
                 )
               ):index==2?new Container(
                 child: new Center(
@@ -247,7 +247,7 @@ class AppState extends State<App>{
                 )
               ):index==3?new Container(
                   child: new Center(
-                      child: new Text("New")
+                      child: new View(true)
                   )
               ):new Container(
                   child: new Center(
@@ -639,7 +639,7 @@ class PollState extends State<Poll>{
                           new Container(width:5.0)
                         ]
                     ),
-                    hasVoted?new Padding(padding: EdgeInsets.only(left:50.0,right:20.0,bottom:5.0),child: new Container(height:3.0,child:new LinearProgressIndicator(value:data[widget.id]["a"][data[widget.id]["c"].indexOf(c)]/((data[widget.id]["a"].reduce((n1,n2)=>n1+n2))!=0?(data[widget.id]["a"].reduce((n1,n2)=>n1+n2)):1.0)))):new Container()
+                    hasVoted?new Padding(padding: EdgeInsets.only(left:50.0,right:20.0,bottom:5.0),child: new Container(height:(MediaQuery.of(context).size.width/500.0).ceil()==1?5.0:5.0/(3*((MediaQuery.of(context).size.width/500.0).ceil())/4),child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation(choice==c?Colors.blueAccent:Colors.grey[600]),backgroundColor:Colors.black26,value:data[widget.id]["a"][data[widget.id]["c"].indexOf(c)]/((data[widget.id]["a"].reduce((n1,n2)=>n1+n2))!=0?(data[widget.id]["a"].reduce((n1,n2)=>n1+n2)):0.0)))):new Container()
                   ]))).toList().cast<Widget>()
               ),
               new Container(height:5.0)
@@ -711,7 +711,7 @@ class ImageViewState extends State<ImageView>{
               new Positioned(
                   right:10.0,
                   top:MediaQuery.of(context).padding.top,
-                  child: new AnimatedOpacity(opacity:isAnimating?0.0:1.0,duration:new Duration(milliseconds:200),child:new IconButton(iconSize:30.0*min(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height)/375.0,color:Colors.white,icon:new Icon(Icons.close),onPressed:(){hasLeft = true;Navigator.of(context).pop();}))
+                  child: new AnimatedOpacity(opacity:isAnimating?0.0:1.0,duration:new Duration(milliseconds:200),child:new InkWell(child:new IconButton(iconSize:30.0*min(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height)/375.0,color:Colors.white,icon:new Icon(Icons.close),onPressed:(){hasLeft = true;Navigator.of(context).pop();})))
               ),
               new Positioned(
                   left:15.0,
