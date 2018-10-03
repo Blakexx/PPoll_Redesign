@@ -505,6 +505,7 @@ class PollState extends State<Poll>{
         processingList.add(widget.id);
       });
     }catch(e){
+      print("Widget not in view");
       processingList.add(widget.id);
     }
     try{
@@ -537,6 +538,7 @@ class PollState extends State<Poll>{
         processingList.remove(widget.id);
       });
     }catch(e){
+      print("Widget not in view");
       finishedList.add(widget.id);
       processingList.remove(widget.id);
     }
@@ -547,6 +549,7 @@ class PollState extends State<Poll>{
           finishedList.remove(widget.id);
         });
       }catch(e){
+        print("Widget not in view");
         finishedList.remove(widget.id);
       }
     });
@@ -578,7 +581,7 @@ class PollState extends State<Poll>{
                 },
               )):new Container(),
               new Column(
-                  children: data[widget.id]["c"].map((c)=>new MaterialButton(onPressed: (){
+                  children: data[widget.id]["c"].map((c)=>new MaterialButton(onPressed: () async{
                     if(c!=choice){
                       String pid;
                       do{
@@ -594,7 +597,7 @@ class PollState extends State<Poll>{
                         new Timer(Duration.zero,(){
                           if(pids[0]==pid){
                             vote(c,context,pid);
-                          }else{
+                          }else if(pids.length>1){
                             waitForVote();
                           }
                         });
