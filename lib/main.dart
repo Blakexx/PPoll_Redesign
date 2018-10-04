@@ -20,8 +20,6 @@ import 'package:path/path.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:connectivity/connectivity.dart';
-import 'package:flutter_offline/flutter_offline.dart';
 
 bool light;
 

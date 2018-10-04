@@ -23,13 +23,11 @@ dependencies:
   charts_flutter:
   flutter_circular_chart:
   image_picker:
-  flutter_offline:
   mime:
   photo_view:
   timeago:
   flutter_launcher_icons:
   flutter_staggered_grid_view:
-  connectivity:
   dynamic_theme:
       git:
         url: git://github.com/Norbert515/dynamic_theme.git
