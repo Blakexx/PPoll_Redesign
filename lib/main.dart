@@ -659,12 +659,30 @@ class ImageView extends StatefulWidget{
   ImageViewState createState() => new ImageViewState();
 }
 
-class ImageViewState extends State<ImageView>{
+class ImageViewState extends State<ImageView> with SingleTickerProviderStateMixin{
   bool hasTapped = true;
   bool isAnimating = false;
   bool hasLeft = false;
   Timer t;
   Timer t2;
+
+  AnimationController controller;
+
+  Animation animation;
+
+  @override
+  void initState(){
+    super.initState();
+    controller = new AnimationController(
+    duration: new Duration(milliseconds: 200),
+    vsync: this
+    );
+    animation = new Tween(
+      begin: 0.0,
+      end:1.0
+    ).animate(controller);
+    controller.forward();
+  }
 
   @override
   Widget build(BuildContext context){
@@ -686,7 +704,7 @@ class ImageViewState extends State<ImageView>{
         }
       });
     }
-    return new GestureDetector(onTap:(){
+    return new FadeTransition(opacity: animation,child:new GestureDetector(onTap:(){
       if(!isAnimating){
         if(hasTapped){
           if(t2!=null&&t2.isActive){
@@ -711,7 +729,7 @@ class ImageViewState extends State<ImageView>{
               new Positioned(
                   right:10.0,
                   top:MediaQuery.of(context).padding.top,
-                  child: new AnimatedOpacity(opacity:isAnimating?0.0:1.0,duration:new Duration(milliseconds:200),child:new IconButton(iconSize:30.0*min(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height)/375.0,color:Colors.white,icon:new Icon(Icons.close),onPressed:(){hasLeft = true;Navigator.of(context).pop();}))
+                  child: new AnimatedOpacity(opacity:isAnimating?0.0:1.0,duration:new Duration(milliseconds:200),child:new IconButton(iconSize:30.0*min(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height)/375.0,color:Colors.white,icon:new Icon(Icons.close),onPressed:(){hasLeft = true;controller.animateTo(0.0).then((_){Navigator.of(context).pop();});}))
               ),
               new Positioned(
                   left:15.0,
@@ -723,7 +741,7 @@ class ImageViewState extends State<ImageView>{
               widget.child
             ]
         )
-    ));
+    )));
   }
 }
 
