@@ -20,6 +20,7 @@ import 'package:path/path.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:connectivity/connectivity.dart';
 
 bool light;
 
@@ -46,8 +47,6 @@ bool hasLoaded = false;
 Color color = const Color.fromRGBO(52,52,52,1.0);
 
 Color textColor = const Color.fromRGBO(34, 34, 34,1.0);
-
-bool isConnected = false;
 
 void main() async{
   createdPolls = await createdPollsData.readData();
@@ -113,7 +112,7 @@ class AppState extends State<App>{
             }else{
               dynamic returned;
               try{
-                returned = json.decode(text.substring(text.indexOf("{"),text.lastIndexOf("}")+1));
+                returned = json.decode(text.substring (text.indexOf("{"),text.lastIndexOf("}")+1));
               }catch(e){
                 return;
               }
@@ -185,26 +184,31 @@ class AppState extends State<App>{
 
   int index = 0;
 
+  ConnectivityResult current;
+
+  Connectivity connection = new Connectivity();
+
   @override
   void initState(){
     super.initState();
     ensureConnection(){
       new Timer(new Duration(seconds:1),() async{
-        try{
-          final result = await InternetAddress.lookup("google.com");
-          if(result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-            if(!isConnected){
-              isConnected = true;
-              setUp();
+        ConnectivityResult r = await connection.checkConnectivity();
+        if(r!=current){
+          current = r;
+          setState((){
+            client.close(force:true);
+            hasLoaded = false;
+          });
+          if(r!=ConnectivityResult.none){
+            try{
+              final result = await InternetAddress.lookup("google.com");
+              if(result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+                setUp();
+              }
+            }on SocketException catch(n){
+              current = ConnectivityResult.none;
             }
-          }
-        }on SocketException catch(n){
-          if(isConnected){
-            isConnected = false;
-            setState((){
-              client.close(force:true);
-              hasLoaded = false;
-            });
           }
         }
         ensureConnection();
@@ -600,10 +604,10 @@ class PollState extends State<Poll>{
                   if(snapshot.hasData){
                     height = snapshot.data.height*1.0;
                     width = snapshot.data.width*1.0;
-                    return new InkWell(onTap:(){Navigator.push(context,new PageRouteBuilder(opaque:false,pageBuilder: (context,a1,a2)=>new ImageView(child:new Center(child:new PhotoView(imageProvider:image.image,minScale: min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height), maxScale:4.0*min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height))),name:widget.id)));},child:new SizedBox(
+                    return new GestureDetector(onTap:(){Navigator.push(context,new PageRouteBuilder(opaque:false,pageBuilder: (context,a1,a2)=>new ImageView(child:new Center(child:new PhotoView(imageProvider:image.image,minScale: min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height), maxScale:4.0*min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height))),name:widget.id)));},child:new SizedBox(
                         width: double.infinity,
                         height: max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0*((MediaQuery.of(context).size.width/500.0).ceil()==1?1:3*((MediaQuery.of(context).size.width/500.0).ceil())/4)),
-                        child: new Ink.image(image:image.image,fit:BoxFit.cover,child: new Container())
+                        child: new Image(image:image.image,fit:BoxFit.cover)
                     ));
                   }else{
                     return new Container(width:double.infinity,height:max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0*(MediaQuery.of(context).size.width/500.0).ceil()),color:Colors.black12,child: new Center(child: new Container(height:MediaQuery.of(context).size.height/20.0,width:MediaQuery.of(context).size.height/20.0,child:new CircularProgressIndicator())));
@@ -704,7 +708,7 @@ class ImageViewState extends State<ImageView> with SingleTickerProviderStateMixi
   void initState(){
     super.initState();
     controller = new AnimationController(
-    duration: new Duration(milliseconds: 200),
+    duration: new Duration(milliseconds: 175),
     vsync: this
     );
     animation = new Tween(

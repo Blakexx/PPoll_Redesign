@@ -25,6 +25,7 @@ dependencies:
   image_picker:
   mime:
   photo_view:
+  connectivity:
   timeago:
   flutter_launcher_icons:
   flutter_staggered_grid_view:
