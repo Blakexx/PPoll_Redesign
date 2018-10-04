@@ -20,6 +20,8 @@ import 'package:path/path.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:connectivity/connectivity.dart';
+import 'package:flutter_offline/flutter_offline.dart';
 
 bool light;
 
@@ -46,6 +48,8 @@ bool hasLoaded = false;
 Color color = const Color.fromRGBO(52,52,52,1.0);
 
 Color textColor = const Color.fromRGBO(34, 34, 34,1.0);
+
+bool isConnected = false;
 
 void main() async{
   createdPolls = await createdPollsData.readData();
@@ -186,84 +190,112 @@ class AppState extends State<App>{
   @override
   void initState(){
     super.initState();
-    setUp();
+    ensureConnection(){
+      new Timer(new Duration(seconds:1),() async{
+        try{
+          final result = await InternetAddress.lookup("google.com");
+          if(result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+            if(!isConnected){
+              isConnected = true;
+              setUp();
+            }
+          }
+        }on SocketException catch(n){
+          if(isConnected){
+            isConnected = false;
+            setState((){
+              client.close(force:true);
+              hasLoaded = false;
+            });
+          }
+        }
+        ensureConnection();
+      });
+    }
+    ensureConnection();
+  }
+
+  @override
+  void dispose(){
+    super.dispose();
+    client.close(force:true);
   }
 
   @override
   Widget build(BuildContext context){
     return new DynamicTheme(
-      themedWidgetBuilder: (context, theme){
-        return new MaterialApp(
-            theme: theme,
-            debugShowCheckedModeBanner: false,
-            home: new Scaffold(
-              bottomNavigationBar: new BottomNavigationBar(
-                currentIndex: index,
-                type: BottomNavigationBarType.fixed,
-                fixedColor: settings[0]?Colors.deepOrangeAccent:Colors.indigoAccent,
-                items: [
-                  BottomNavigationBarItem(
-                    icon: new Icon(Icons.language),
-                    title: new Text("Browse"),
+        themedWidgetBuilder: (context, theme){
+          return new MaterialApp(
+              theme: theme,
+              debugShowCheckedModeBanner: false,
+              home: new Scaffold(
+                  bottomNavigationBar: new BottomNavigationBar(
+                      currentIndex: index,
+                      type: BottomNavigationBarType.fixed,
+                      fixedColor: settings[0]?Colors.deepOrangeAccent:Colors.indigoAccent,
+                      items: [
+                        BottomNavigationBarItem(
+                          icon: new Icon(Icons.language),
+                          title: new Text("Browse"),
+                        ),
+                        BottomNavigationBarItem(
+                          icon: new Icon(Icons.add_circle_outline),
+                          title: new Text("New"),
+                        ),
+                        BottomNavigationBarItem(
+                          icon: new Icon(Icons.check_circle),
+                          title: new Text("Vote"),
+                        ),
+                        BottomNavigationBarItem(
+                          icon: new Icon(Icons.dehaze),
+                          title: new Text("Created"),
+                        ),
+                        BottomNavigationBarItem(
+                          icon: new Icon(Icons.settings),
+                          title: new Text("Settings"),
+                        ),
+                      ],
+                      onTap: (i){
+                        if(index!=i){
+                          setState((){index = i;});
+                        }else if(index==0&&i==0&&hasLoaded){
+                          s.animateTo(0.0,curve: Curves.easeOut, duration: const Duration(milliseconds: 300));
+                        }
+                      }
                   ),
-                  BottomNavigationBarItem(
-                    icon: new Icon(Icons.add_circle_outline),
-                    title: new Text("New"),
-                  ),
-                  BottomNavigationBarItem(
-                    icon: new Icon(Icons.check_circle),
-                    title: new Text("Vote"),
-                  ),
-                  BottomNavigationBarItem(
-                    icon: new Icon(Icons.dehaze),
-                    title: new Text("Created"),
-                  ),
-                  BottomNavigationBarItem(
-                    icon: new Icon(Icons.settings),
-                    title: new Text("Settings"),
-                  ),
-                ],
-                onTap: (i){
-                  if(index!=i){
-                    setState((){index = i;});
-                  }else if(index==0&&i==0&&hasLoaded){
-                    s.animateTo(0.0,curve: Curves.easeOut, duration: const Duration(milliseconds: 300));
-                  }
-                }
-              ),
-              body: index==0?new Container(
-                color: const Color.fromRGBO(230, 230, 230, 1.0),
-                child: new Center(
-                  child: new View(false)
-                )
-              ):index==1?new Container(
-                color: const Color.fromRGBO(230, 230, 230, 1.0),
-                child: new Center(
-                  child: new Text("New")
-                )
-              ):index==2?new Container(
-                child: new Center(
-                  child: new Text("Vote")
-                )
-              ):index==3?new Container(
-                  child: new Center(
-                      child: new View(true)
-                  )
-              ):new Container(
-                  child: new Center(
-                      child: new Column(
-                          children: settings.asMap().keys.map((i)=>new Switch(value:settings[i],onChanged: (b){
-                            setState((){settings[i]=b;});
-                            settingsData.writeData(settings);
-                          })).toList()
+                  body: index==0?new Container(
+                      color: const Color.fromRGBO(230, 230, 230, 1.0),
+                      child: new Center(
+                          child: new View(false)
+                      )
+                  ):index==1?new Container(
+                      color: const Color.fromRGBO(230, 230, 230, 1.0),
+                      child: new Center(
+                          child: new Text("New")
+                      )
+                  ):index==2?new Container(
+                      child: new Center(
+                          child: new Text("Vote")
+                      )
+                  ):index==3?new Container(
+                      child: new Center(
+                          child: new View(true)
+                      )
+                  ):new Container(
+                      child: new Center(
+                          child: new Column(
+                              children: settings.asMap().keys.map((i)=>new Switch(value:settings[i],onChanged: (b){
+                                setState((){settings[i]=b;});
+                                settingsData.writeData(settings);
+                              })).toList()
+                          )
                       )
                   )
               )
-            )
-        );
-      },
-      data: (brightness) => new ThemeData(fontFamily: "Poppins",brightness: settings!=null&&settings[0]?Brightness.dark:Brightness.light),
-      defaultBrightness: settings!=null&&settings[0]?Brightness.dark:Brightness.light
+          );
+        },
+        data: (brightness) => new ThemeData(fontFamily: "Poppins",brightness: settings!=null&&settings[0]?Brightness.dark:Brightness.light),
+        defaultBrightness: settings!=null&&settings[0]?Brightness.dark:Brightness.light
     );
   }
 }
@@ -729,7 +761,7 @@ class ImageViewState extends State<ImageView> with SingleTickerProviderStateMixi
               new Positioned(
                   right:10.0,
                   top:MediaQuery.of(context).padding.top,
-                  child: new AnimatedOpacity(opacity:isAnimating?0.0:1.0,duration:new Duration(milliseconds:200),child:new IconButton(iconSize:30.0*min(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height)/375.0,color:Colors.white,icon:new Icon(Icons.close),onPressed:(){hasLeft = true;controller.animateTo(0.0).then((_){Navigator.of(context).pop();});}))
+                  child: new AnimatedOpacity(opacity:isAnimating?0.0:1.0,duration:new Duration(milliseconds:200),child:new IconButton(iconSize:30.0*min(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height)/375.0,color:Colors.white,icon:new Icon(Icons.close),onPressed:(){hasLeft = true;controller.animateTo(0.0).then((v){Navigator.of(context).pop();});}))
               ),
               new Positioned(
                   left:15.0,
