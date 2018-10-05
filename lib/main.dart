@@ -118,7 +118,7 @@ class AppState extends State<App>{
             }else{
               dynamic returned;
               try{
-                returned = json.decode(text.substring (text.indexOf("{"),text.lastIndexOf("}")+1));
+                returned = json.decode(text.substring(text.indexOf("{"),text.lastIndexOf("}")+1));
               }catch(e){
                 return;
               }
@@ -503,7 +503,7 @@ class ViewState extends State<View>{
           controller: s
         ),
         new Positioned(
-            left:0.0,right:0.0,
+            left:0.0,top:0.0,
             child:new Container(height:MediaQuery.of(context).padding.top,color:settings[0]?Colors.deepOrange[900]:color)
         )
       ]
