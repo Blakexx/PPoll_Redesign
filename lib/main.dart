@@ -48,7 +48,13 @@ Color color = const Color.fromRGBO(52,52,52,1.0);
 
 Color textColor = const Color.fromRGBO(34, 34, 34,1.0);
 
+ConnectivityResult current;
+
+Connectivity connection = new Connectivity();
+
+
 void main() async{
+  current = await connection.checkConnectivity();
   createdPolls = await createdPollsData.readData();
   if(createdPolls==null){
     createdPolls = new List<dynamic>();
@@ -184,14 +190,10 @@ class AppState extends State<App>{
 
   int index = 0;
 
-  ConnectivityResult current;
-
-  Connectivity connection = new Connectivity();
-
   @override
   void initState(){
     super.initState();
-    ensureConnection(){
+    /*ensureConnection(){
       new Timer(new Duration(seconds:1),() async{
         ConnectivityResult r = await connection.checkConnectivity();
         if(r!=current){
@@ -215,6 +217,29 @@ class AppState extends State<App>{
       });
     }
     ensureConnection();
+    */
+    connection.onConnectivityChanged.listen((r) async{
+      if(r!=current){
+        current = r;
+        setState((){
+          client.close(force:true);
+          hasLoaded = false;
+        });
+        if(r!=ConnectivityResult.none){
+          try{
+            final result = await InternetAddress.lookup("google.com");
+            if(result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+              setUp();
+            }
+          }on SocketException catch(n){
+            current = ConnectivityResult.none;
+          }
+        }
+      }
+    });
+    if(current!=ConnectivityResult.none){
+      setUp();
+    }
   }
 
   @override
