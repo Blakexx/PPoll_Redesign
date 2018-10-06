@@ -1,6 +1,6 @@
 # PPoll Redesign
 
-PPoll is an anonymous ad-free cross-platform solution for polling groups of any size. Our simple to use interface makes it easy for new users to answer and create polls instantly! Choose between 18 theme colors to customize the look and feel of PPoll. Discover publicly created polls with our browse feature. 
+PPoll is an anonymous ad-free cross-platform solution for polling groups of any size. Our simple to use interface makes it easy for new users to answer and create polls instantly! Choose between dark and light mode to customize the look and feel of PPoll. Discover publicly created polls with our browse feature. 
 
 ### Installing
 
