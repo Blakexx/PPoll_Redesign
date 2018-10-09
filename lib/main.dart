@@ -582,7 +582,11 @@ class PollState extends State<Poll>{
         hasVoted = true;
       }
     }
-    setState((){pids.remove(pid);});
+    try{
+      setState((){pids.remove(pid);});
+    }catch(e){
+      pids.remove(pid);
+    }
   }
 
   @override
