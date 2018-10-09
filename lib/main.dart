@@ -107,7 +107,7 @@ class AppState extends State<App>{
       }
       try{
         final result = await InternetAddress.lookup("google.com");
-        if(result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        if(result.isNotEmpty && result[0].rawAddress.isNotEmpty){
           data = json.decode(((await http.get(Uri.encodeFull(database+"/data.json?auth="+secretKey))).body));
           client.openUrl("GET", Uri.parse(database+"/data.json?auth="+secretKey)).then((req){
             req.headers.set("Accept", "text/event-stream");
@@ -331,10 +331,6 @@ class AppState extends State<App>{
   }
 }
 
-List<String> processingList = [];
-
-List<String> finishedList = [];
-
 class View extends StatefulWidget{
   final bool onlyCreated;
   View(this.onlyCreated);
@@ -492,7 +488,6 @@ class ViewState extends State<View>{
                         )
                     )),
                   ],
-                bottom: finishedList.length>0?new PreferredSize(preferredSize: new Size(double.infinity,3.0),child: new Container(height:3.0,child:new LinearProgressIndicator(value: 1.0))):processingList.length>0?new PreferredSize(preferredSize: new Size(double.infinity,3.0),child: new Container(height:3.0,child:new LinearProgressIndicator())):new PreferredSize(preferredSize: new Size(0.0,3.0),child: new Container())
               ),
               new SliverPadding(padding: new EdgeInsets.only(right:5.0,left:5.0,top:5.0),sliver:new SliverStaggeredGrid.countBuilder(
                 crossAxisCount: (MediaQuery.of(context).size.width/500.0).ceil(),
@@ -564,14 +559,6 @@ class PollState extends State<Poll>{
 
   void vote(String c, BuildContext context, String pid) async{
     try{
-      context.ancestorStateOfType(new TypeMatcher<ViewState>()).setState((){
-        processingList.add(widget.id);
-      });
-    }catch(e){
-      print("Widget not in view");
-      processingList.add(widget.id);
-    }
-    try{
       setState(() {
         lastChoice = choice;
         choice = c;
@@ -595,27 +582,7 @@ class PollState extends State<Poll>{
         hasVoted = true;
       }
     }
-    try{
-      context.ancestorStateOfType(new TypeMatcher<ViewState>()).setState((){
-        finishedList.add(widget.id);
-        processingList.remove(widget.id);
-      });
-    }catch(e){
-      print("Widget not in view");
-      finishedList.add(widget.id);
-      processingList.remove(widget.id);
-    }
     pids.remove(pid);
-    new Timer(new Duration(milliseconds:200),(){
-      try{
-        context.ancestorStateOfType(new TypeMatcher<ViewState>()).setState((){
-          finishedList.remove(widget.id);
-        });
-      }catch(e){
-        print("Widget not in view");
-        finishedList.remove(widget.id);
-      }
-    });
   }
 
   @override
