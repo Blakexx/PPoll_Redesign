@@ -98,94 +98,107 @@ class AppState extends State<App>{
 
   HttpClient client = new HttpClient();
 
-  void setUp() async{
+  void setUp(ConnectivityResult r) async{
     Stopwatch watch = new Stopwatch();
     watch.start();
-    data = json.decode(((await http.get(Uri.encodeFull(database+"/data.json?auth="+secretKey))).body));
-    client.openUrl("GET", Uri.parse(database+"/data.json?auth="+secretKey)).then((req){
-      req.headers.set("Accept", "text/event-stream");
-      req.followRedirects = true;
-      req.close().then((response) async{
-        if(response.statusCode == 200){
-          if(!hasLoaded){
-            setState((){hasLoaded = true;});
-          }
-          response.map((bytes)=>new String.fromCharCodes(bytes)).listen((text){
-            if(text.split(":").length>1&&text.split(":")[1].contains("keep-alive")){
-              print("Keep-alive ${watch.elapsedMilliseconds}");
-              watch.reset();
-              watch.start();
-            }else{
-              dynamic returned;
-              try{
-                returned = json.decode(text.substring(text.indexOf("{"),text.lastIndexOf("}")+1));
-              }catch(e){
-                return;
-              }
-              List<dynamic> path = returned["path"].split("/");
-              dynamic finalPath = path[path.length-1];
-              dynamic temp = data;
-              path.sublist(1,path.length-1).forEach((o){
-                try{
-                  int i = int.parse(o);
-                  if(temp[i]==null){
-                    throw new Exception();
-                  }
-                  temp = temp[i];
-                }catch(e){
-                  temp = temp[o];
+    waitForConnection() async{
+      if(r!=current){
+        return;
+      }
+      try{
+        final result = await InternetAddress.lookup("google.com");
+        if(result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+          data = json.decode(((await http.get(Uri.encodeFull(database+"/data.json?auth="+secretKey))).body));
+          client.openUrl("GET", Uri.parse(database+"/data.json?auth="+secretKey)).then((req){
+            req.headers.set("Accept", "text/event-stream");
+            req.followRedirects = true;
+            req.close().then((response) async{
+              if(response.statusCode == 200){
+                if(!hasLoaded){
+                  setState((){hasLoaded = true;});
                 }
-              });
-              if(index==0){
-                setState((){
-                  try{
-                    int i = int.parse(finalPath);
-                    if(returned["data"]==null){
-                      temp.remove(i);
-                    }else{
-                      if(temp==null){
-                        temp = {};
-                      }
-                      temp[i] = returned["data"];
+                response.map((bytes)=>new String.fromCharCodes(bytes)).listen((text){
+                  if(text.split(":").length>1&&text.split(":")[1].contains("keep-alive")){
+                    print("Keep-alive ${watch.elapsedMilliseconds}");
+                    watch.reset();
+                    watch.start();
+                  }else{
+                    dynamic returned;
+                    try{
+                      returned = json.decode(text.substring (text.indexOf("{"),text.lastIndexOf("}")+1));
+                    }catch(e){
+                      return;
                     }
-                  }catch(e){
-                    if(returned["data"]==null){
-                      temp.remove(finalPath);
-                    }else{
-                      if(temp==null){
-                        temp = {};
+                    List<dynamic> path = returned["path"].split("/");
+                    dynamic finalPath = path[path.length-1];
+                    dynamic temp = data;
+                    path.sublist(1,path.length-1).forEach((o){
+                      try{
+                        int i = int.parse(o);
+                        if(temp[i]==null){
+                          throw new Exception();
+                        }
+                        temp = temp[i];
+                      }catch(e){
+                        temp = temp[o];
                       }
-                      temp[finalPath] = returned["data"];
+                    });
+                    if(index==0){
+                      setState((){
+                        try{
+                          int i = int.parse(finalPath);
+                          if(returned["data"]==null){
+                            temp.remove(i);
+                          }else{
+                            if(temp==null){
+                              temp = {};
+                            }
+                            temp[i] = returned["data"];
+                          }
+                        }catch(e){
+                          if(returned["data"]==null){
+                            temp.remove(finalPath);
+                          }else{
+                            if(temp==null){
+                              temp = {};
+                            }
+                            temp[finalPath] = returned["data"];
+                          }
+                        }
+                      });
+                    }else{
+                      try{
+                        int i = int.parse(finalPath);
+                        if(returned["data"]==null){
+                          temp.remove(i);
+                        }else{
+                          if(temp==null){
+                            temp = {};
+                          }
+                          temp[i] = returned["data"];
+                        }
+                      }catch(e){
+                        if(returned["data"]==null){
+                          temp.remove(finalPath);
+                        }else{
+                          if(temp==null){
+                            temp = {};
+                          }
+                          temp[finalPath] = returned["data"];
+                        }
+                      }
                     }
                   }
                 });
-              }else{
-                try{
-                  int i = int.parse(finalPath);
-                  if(returned["data"]==null){
-                    temp.remove(i);
-                  }else{
-                    if(temp==null){
-                      temp = {};
-                    }
-                    temp[i] = returned["data"];
-                  }
-                }catch(e){
-                  if(returned["data"]==null){
-                    temp.remove(finalPath);
-                  }else{
-                    if(temp==null){
-                      temp = {};
-                    }
-                    temp[finalPath] = returned["data"];
-                  }
-                }
               }
-            }
+            });
           });
         }
-      });
-    });
+      }on SocketException catch(n){
+        new Timer(new Duration(seconds:1),waitForConnection);
+      }
+    };
+    waitForConnection();
   }
 
   int index = 0;
@@ -225,20 +238,11 @@ class AppState extends State<App>{
           client.close(force:true);
           hasLoaded = false;
         });
-        if(r!=ConnectivityResult.none){
-          try{
-            final result = await InternetAddress.lookup("google.com");
-            if(result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-              setUp();
-            }
-          }on SocketException catch(n){
-            current = ConnectivityResult.none;
-          }
-        }
+        setUp(current);
       }
     });
     if(current!=ConnectivityResult.none){
-      setUp();
+      setUp(current);
     }
   }
 
@@ -666,7 +670,7 @@ class PollState extends State<Poll>{
                     },padding:EdgeInsets.zero,child:new Column(children: [
                     new Row(
                         children: [
-                          new Radio(
+                          pids.length>0&&choice==c?new Container(width:2 * kRadialReactionRadius + 8.0,height:2 * kRadialReactionRadius + 8.0,child:new Center(child:new Container(height:16.0,width:16.0,child: new CircularProgressIndicator(strokeWidth: 2.2)))):new Radio(
                             value: c,
                             groupValue: choice,
                             onChanged: (s){
