@@ -582,7 +582,7 @@ class PollState extends State<Poll>{
         hasVoted = true;
       }
     }
-    pids.remove(pid);
+    setState((){pids.remove(pid);});
   }
 
   @override
@@ -637,7 +637,7 @@ class PollState extends State<Poll>{
                     },padding:EdgeInsets.zero,child:new Column(children: [
                     new Row(
                         children: [
-                          pids.length>0&&choice==c?new Container(width:2 * kRadialReactionRadius + 8.0,height:2 * kRadialReactionRadius + 8.0,child:new Center(child:new Container(height:16.0,width:16.0,child: new CircularProgressIndicator(strokeWidth: 2.2)))):new Radio(
+                          pids.length>0&&choice==c?new Container(width:2*kRadialReactionRadius+8.0,height:2*kRadialReactionRadius+8.0,child:new Center(child:new Container(height:16.0,width:16.0,child: new CircularProgressIndicator(strokeWidth: 2.2)))):new Radio(
                             value: c,
                             groupValue: choice,
                             onChanged: (s){
