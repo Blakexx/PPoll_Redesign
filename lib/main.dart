@@ -523,7 +523,7 @@ class ViewState extends State<View>{
         ),
         new Positioned(
             left:0.0,top:0.0,
-            child:new Container(height:MediaQuery.of(context).padding.top,color:settings[0]?Colors.deepOrange[900]:color)
+            child:new Container(height:MediaQuery.of(context).padding.top,width:MediaQuery.of(context).size.width,color:settings[0]?Colors.deepOrange[900]:color)
         )
       ]
     );
@@ -823,10 +823,10 @@ class PersistentData{
   }
 
   Future<dynamic> readData() async {
-    try {
+    try{
       final file = await _localFile;
       return json.decode(await file.readAsString());
-    } catch (e) {
+    }catch(e){
       return null;
     }
   }
