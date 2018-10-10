@@ -340,7 +340,7 @@ class View extends StatefulWidget{
 
 class ViewState extends State<View>{
 
-  String sorting = "newest";
+  String sorting = "trending";
 
   String search = "";
 
@@ -374,7 +374,12 @@ class ViewState extends State<View>{
               new Padding(padding: EdgeInsets.only(right:3.0),child:new Container(
                   width: 35.0,
                   child: new PopupMenuButton<String>(
-                      itemBuilder: (BuildContext context)=>[
+                      itemBuilder: (BuildContext context)=>widget.onlyCreated?[
+                        new PopupMenuItem<String>(child: const Text("Top"), value: "top"),
+                        new PopupMenuItem<String>(child: const Text("Newest"), value: "newest"),
+                        new PopupMenuItem<String>(child: const Text("Oldest"), value: "oldest")
+                      ]:[
+                        new PopupMenuItem<String>(child: const Text("Trending"), value: "trending"),
                         new PopupMenuItem<String>(child: const Text("Top"), value: "top"),
                         new PopupMenuItem<String>(child: const Text("Newest"), value: "newest"),
                         new PopupMenuItem<String>(child: const Text("Oldest"), value: "oldest")
@@ -396,6 +401,16 @@ class ViewState extends State<View>{
       int voters1 = tempMap[o1]["a"].reduce((n1,n2)=>n1+n2);
       int voters2 = tempMap[o2]["a"].reduce((n1,n2)=>n1+n2);
       if(!widget.onlyCreated){
+        if(sorting=="trending"){
+          double trendingIndex1 = (voters1+1)/((new DateTime.now().millisecondsSinceEpoch/1000-tempMap[o1]["t"]));
+          double trendingIndex2 = (voters2+1)/((new DateTime.now().millisecondsSinceEpoch/1000-tempMap[o2]["t"]));
+          if(trendingIndex1!=trendingIndex2){
+            return trendingIndex2>trendingIndex1?1:-1;
+          }else if(tempMap[o1]["q"].compareTo(tempMap[o2]["q"])!=0){
+            return tempMap[o1]["q"].compareTo(tempMap[o2]["q"]);
+          }
+          return o1.compareTo(o2);
+        }
         if((sorting=="newest"||sorting=="oldest")&&tempMap[o2]["t"]!=tempMap[o1]["t"]){
           return sorting=="newest"?tempMap[o2]["t"]-tempMap[o1]["t"]:tempMap[o1]["t"]-tempMap[o2]["t"];
         }else if(voters2!=voters1){
@@ -472,7 +487,12 @@ class ViewState extends State<View>{
                     new Padding(padding: EdgeInsets.only(right:3.0),child:new Container(
                         width: 35.0,
                         child: new PopupMenuButton<String>(
-                            itemBuilder: (BuildContext context)=>[
+                            itemBuilder: (BuildContext context)=>widget.onlyCreated?[
+                              new PopupMenuItem<String>(child: const Text("Top"), value: "top"),
+                              new PopupMenuItem<String>(child: const Text("Newest"), value: "newest"),
+                              new PopupMenuItem<String>(child: const Text("Oldest"), value: "oldest")
+                            ]:[
+                              new PopupMenuItem<String>(child: const Text("Trending"), value: "trending"),
                               new PopupMenuItem<String>(child: const Text("Top"), value: "top"),
                               new PopupMenuItem<String>(child: const Text("Newest"), value: "newest"),
                               new PopupMenuItem<String>(child: const Text("Oldest"), value: "oldest")
