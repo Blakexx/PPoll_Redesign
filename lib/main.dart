@@ -662,7 +662,7 @@ class PollState extends State<Poll>{
       choice = new Set.from([]);
     }
     hasImage = data[widget.id]["b"].length==4&&data[widget.id]["b"][3]==1;
-    if(hasImage){
+      if(hasImage){
       image = new Image.network(imageLink+widget.id);
       completer = new Completer<ui.Image>();
       image.image.resolve(new ImageConfiguration()).addListener((ImageInfo info, bool b){
