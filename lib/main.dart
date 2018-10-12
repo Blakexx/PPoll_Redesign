@@ -30,6 +30,10 @@ PersistentData userIdData = new PersistentData(directory:"userId");
 
 PersistentData createdPollsData = new PersistentData(directory:"createdinfo");
 
+PersistentData messages = new PersistentData(directory:"messages");
+
+String lastMessage;
+
 int numSettings = 1;
 
 String userId;
@@ -59,6 +63,8 @@ void main() async{
   if(createdPolls==null){
     createdPolls = new List<dynamic>();
     createdPollsData.writeData(createdPolls);
+  }else{
+    createdPolls = createdPolls.toSet().toList();
   }
   settings = await settingsData.readData();
   if(settings==null){
@@ -86,8 +92,11 @@ void main() async{
     await http.put(Uri.parse(database+"/users/$userId.json?auth="+secretKey),body:"0");
     userIdData.writeData(userId);
   }
+  lastMessage = (await messages.readData());
   runApp(new App());
 }
+
+bool start = true;
 
 class App extends StatefulWidget{
   @override
@@ -109,7 +118,7 @@ class AppState extends State<App>{
         final result = await InternetAddress.lookup("google.com");
         if(result.isNotEmpty && result[0].rawAddress.isNotEmpty){
           data = json.decode(((await http.get(Uri.encodeFull(database+"/data.json?auth="+secretKey))).body));
-          client.openUrl("GET", Uri.parse(database+"/data.json?auth="+secretKey)).then((req){
+          client.openUrl("GET", Uri.parse(database+"/data.json?auth="+secretKey)).then((req) async{
             req.headers.set("Accept", "text/event-stream");
             req.followRedirects = true;
             req.close().then((response) async{
@@ -143,7 +152,7 @@ class AppState extends State<App>{
                         temp = temp[o];
                       }
                     });
-                    if(index==0){
+                    if(index==0||index==3){
                       setState((){
                         try{
                           int i = int.parse(finalPath);
@@ -189,15 +198,18 @@ class AppState extends State<App>{
                       }
                     }
                   }
+                }).onDone((){
+                  print("Done");
                 });
               }
             });
           });
         }
-      }on SocketException catch(n){
+      }on SocketException catch(_){
+        print("Bad connection, retrying...");
         new Timer(new Duration(seconds:1),waitForConnection);
       }
-    };
+    }
     waitForConnection();
   }
 
@@ -238,7 +250,9 @@ class AppState extends State<App>{
           client.close(force:true);
           hasLoaded = false;
         });
-        setUp(current);
+        if(current!=ConnectivityResult.none){
+          setUp(current);
+        }
       }
     });
     if(current!=ConnectivityResult.none){
@@ -286,41 +300,72 @@ class AppState extends State<App>{
                           title: new Text("Settings"),
                         ),
                       ],
-                      onTap: (i){
+                      onTap:(i){
                         if(index!=i){
+                          if(i==0||i==3){
+                            ViewState.f.unfocus();
+                            ViewState.search = "";
+                            ViewState.sorting = i==0?"trending":"newest";
+                            ViewState.inSearch = false;
+                            ViewState.hasSearched = false;
+                            ViewState.c = new TextEditingController();
+                            if(s.hasClients){
+                              s.jumpTo(0.0);
+                            }
+                          }
                           setState((){index = i;});
-                        }else if(index==0&&i==0&&hasLoaded){
+                        }else if(((index==0&&i==0)||(index==3&&i==3))&&hasLoaded){
                           s.animateTo(0.0,curve: Curves.easeOut, duration: const Duration(milliseconds: 300));
                         }
                       }
                   ),
-                  body: index==0?new Container(
-                      color: const Color.fromRGBO(230, 230, 230, 1.0),
-                      child: new Center(
-                          child: new View(false)
-                      )
-                  ):index==1?new Container(
-                      color: const Color.fromRGBO(230, 230, 230, 1.0),
-                      child: new Center(
-                          child: new Text("New")
-                      )
-                  ):index==2?new Container(
-                      child: new Center(
-                          child: new Text("Vote")
-                      )
-                  ):index==3?new Container(
-                      child: new Center(
-                          child: new View(true)
-                      )
-                  ):new Container(
-                      child: new Center(
-                          child: new Column(
-                              children: settings.asMap().keys.map((i)=>new Switch(value:settings[i],onChanged: (b){
-                                setState((){settings[i]=b;});
-                                settingsData.writeData(settings);
-                              })).toList()
+                  body: new Builder(
+                    builder: (context){
+                      if(start&&hasLoaded){
+                        start = false;
+                        http.get(Uri.encodeFull("$database/message.json?auth=$secretKey")).then((r){
+                          String s = json.decode(r.body);
+                          if(s=="null"){
+                            s=null;
+                          }
+                          if(s!=lastMessage){
+                            lastMessage = s;
+                            messages.writeData(lastMessage);
+                            if(lastMessage!=null){
+                              showDialog(context:context,builder:(context)=>new AlertDialog(title:new Text("Alert"),content:new Text(lastMessage)));
+                            }
+                          }
+                        });
+                      }
+                      return index==0?new Container(
+                          color: const Color.fromRGBO(230, 230, 230, 1.0),
+                          child: new Center(
+                              child: new View(false)
                           )
-                      )
+                      ):index==1?new Container(
+                          child: new Center(
+                              child: new Text("New")
+                          )
+                      ):index==2?new Container(
+                          child: new Center(
+                              child: new Text("Vote")
+                          )
+                      ):index==3?new Container(
+                          color: const Color.fromRGBO(230, 230, 230, 1.0),
+                          child: new Center(
+                              child: new View(true)
+                          )
+                      ):new Container(
+                          child: new Center(
+                              child: new Column(
+                                  children: settings.asMap().keys.map((i)=>new Switch(value:settings[i],onChanged: (b){
+                                    setState((){settings[i]=b;});
+                                    settingsData.writeData(settings);
+                                  })).toList()
+                              )
+                          )
+                      );
+                    }
                   )
               )
           );
@@ -340,17 +385,26 @@ class View extends StatefulWidget{
 
 class ViewState extends State<View>{
 
-  String sorting = "trending";
+  static String sorting = "trending";
 
-  String search = "";
+  @override
+  void initState(){
+    super.initState();
+    if(createdPolls.length==0){
+      createdPolls.addAll(["TRHO","OS42","OV44"]);
+      print(createdPolls);
+    }
+  }
 
-  bool inSearch = false;
+  static String search = "";
 
-  bool hasSearched = false;
+  static bool inSearch = false;
 
-  FocusNode f = new FocusNode();
+  static bool hasSearched = false;
 
-  TextEditingController c = new TextEditingController();
+  static FocusNode f = new FocusNode();
+
+  static TextEditingController c = new TextEditingController();
 
   Map<String,dynamic> sortedMap;
 
@@ -402,8 +456,11 @@ class ViewState extends State<View>{
       int voters2 = tempMap[o2]["a"].reduce((n1,n2)=>n1+n2);
       if(!widget.onlyCreated){
         if(sorting=="trending"){
-          double trendingIndex1 = pow((voters1+1),1.5)/(pow((new DateTime.now().millisecondsSinceEpoch/1000-tempMap[o1]["t"]),2));
-          double trendingIndex2 = pow((voters2+1),1.5)/(pow((new DateTime.now().millisecondsSinceEpoch/1000-tempMap[o2]["t"]),2));
+          double currentTime = (new DateTime.now().millisecondsSinceEpoch/1000.0);
+          double timeChange1 = (currentTime-tempMap[o1]["t"]);
+          double timeChange2 = (currentTime-tempMap[o2]["t"]);
+          double trendingIndex1 = pow((voters1+1),1.5)/(pow(timeChange1!=0?timeChange1:.000000001,2));
+          double trendingIndex2 = pow((voters2+1),1.5)/(pow(timeChange2!=0?timeChange2:.000000001,2));
           if(trendingIndex1!=trendingIndex2){
             return trendingIndex2>trendingIndex1?1:-1;
           }else if(tempMap[o1]["q"].compareTo(tempMap[o2]["q"])!=0){
@@ -557,7 +614,13 @@ class PollState extends State<Poll>{
     multiSelect = data[widget.id]["b"][0]==1;
     hasVoted = data[widget.id]["i"]!=null&&data[widget.id]["i"][userId]!=null;
     if(hasVoted){
-      choice = data[widget.id]["c"][data[widget.id]["i"][userId]];
+      if(multiSelect&&data[widget.id]["i"]!=null&&data[widget.id]["i"][userId]!=null&&data[widget.id]["i"][userId].contains(-1)){
+        choice = new Set.from([]);
+      }else{
+        choice = !multiSelect?data[widget.id]["c"][data[widget.id]["i"][userId]]:new Set.from(data[widget.id]["i"][userId]);
+      }
+    }else if(multiSelect){
+      choice = new Set.from([]);
     }
     hasImage = data[widget.id]["b"].length==4&&data[widget.id]["b"][3]==1;
     if(hasImage){
@@ -573,26 +636,52 @@ class PollState extends State<Poll>{
 
   String lastChoice;
 
-  String choice;
+  var choice;
 
   List<String> pids = [];
 
-  void vote(String c, BuildContext context, String pid) async{
-    try{
-      setState(() {
+  void vote(String c, BuildContext context, String pid, [bool b]) async{
+    if(multiSelect&&((b&&choice.contains(data[widget.id]["c"].indexOf(c)))||(!b&&!choice.contains(data[widget.id]["c"].indexOf(c))))){
+      try{
+        setState((){pids.remove(pid);});
+      }catch(e){
+        pids.remove(pid);
+      }
+      return;
+    }
+    if(!multiSelect){
+      try{
+        setState((){
+          lastChoice = choice;
+          choice = c;
+        });
+      }catch(e){
         lastChoice = choice;
         choice = c;
-      });
-    }catch(e){
-      lastChoice = choice;
-      choice = c;
+      }
+    }else{
+      try{
+        setState((){
+          if(b){
+            choice.add(data[widget.id]["c"].indexOf(c));
+          }else{
+            choice.remove(data[widget.id]["c"].indexOf(c));
+          }
+        });
+      }catch(e){
+        if(b){
+          choice.add(data[widget.id]["c"].indexOf(c));
+        }else{
+          choice.remove(data[widget.id]["c"].indexOf(c));
+        }
+      }
     }
     if(data[widget.id]["i"]==null){
       data[widget.id]["i"]={};
     }
-    data[widget.id]["i"][userId]=data[widget.id]["c"].indexOf(choice);
-    await http.put(Uri.encodeFull(database+"/data/${widget.id}/i/$userId.json?auth=$secretKey"),body: json.encode(data[widget.id]["i"][userId]));
-    await http.get(Uri.encodeFull(functionsLink+"/vote?text={\"poll\":\"${widget.id}\",\"choice\":${data[widget.id]["c"].indexOf(choice)},\"changed\":${lastChoice!=null?data[widget.id]["c"].indexOf(lastChoice):null},\"multiSelect\":$multiSelect,\"key\":\"$secretKey\"}"));
+    data[widget.id]["i"][userId]=!multiSelect?data[widget.id]["c"].indexOf(choice):choice.toList();
+    await http.put(Uri.encodeFull(database+"/data/${widget.id}/i/$userId.json?auth=$secretKey"),body: json.encode(!multiSelect?data[widget.id]["c"].indexOf(choice):(data[widget.id]["i"][userId].length>0?data[widget.id]["i"][userId]:[-1])));
+    await http.get(Uri.encodeFull(functionsLink+"/vote?text={\"poll\":\"${widget.id}\",\"choice\":${data[widget.id]["c"].indexOf(c)},\"changed\":${!multiSelect?lastChoice!=null?data[widget.id]["c"].indexOf(lastChoice):null:!b},\"multiSelect\":$multiSelect,\"key\":\"$secretKey\"}"));
     if(!hasVoted){
       try{
         setState((){
@@ -636,7 +725,7 @@ class PollState extends State<Poll>{
               )):new Container(),
               new Column(
                   children: data[widget.id]["c"].map((c)=>new MaterialButton(onPressed: () async{
-                    if(c!=choice){
+                    if(multiSelect||c!=choice){
                       String pid;
                       do{
                         pid = "";
@@ -650,8 +739,8 @@ class PollState extends State<Poll>{
                       waitForVote(){
                         new Timer(Duration.zero,(){
                           if(pids[0]==pid){
-                            vote(c,context,pid);
-                          }else if(pids.length>1){
+                            vote(c,context,pid,multiSelect?!choice.contains(data[widget.id]["c"].indexOf(c)):null);
+                          }else if(pids.length>0){
                             waitForVote();
                           }
                         });
@@ -661,7 +750,7 @@ class PollState extends State<Poll>{
                     },padding:EdgeInsets.zero,child:new Column(children: [
                     new Row(
                         children: [
-                          pids.length>0&&choice==c?new Container(width:2*kRadialReactionRadius+8.0,height:2*kRadialReactionRadius+8.0,child:new Center(child:new Container(height:16.0,width:16.0,child: new CircularProgressIndicator(strokeWidth: 2.2)))):new Radio(
+                          !multiSelect?pids.length>0&&choice==c?new Container(width:2*kRadialReactionRadius+8.0,height:2*kRadialReactionRadius+8.0,child:new Center(child:new Container(height:16.0,width:16.0,child: new CircularProgressIndicator(strokeWidth: 2.2)))):new Radio(
                             value: c,
                             groupValue: choice,
                             onChanged: (s){
@@ -680,7 +769,7 @@ class PollState extends State<Poll>{
                                   new Timer(Duration.zero,(){
                                     if(pids[0]==pid){
                                       vote(c,context,pid);
-                                    }else if(pids.length>1){
+                                    }else if(pids.length>0){
                                       waitForVote();
                                     }
                                   });
@@ -688,12 +777,36 @@ class PollState extends State<Poll>{
                                 waitForVote();
                               }
                             },
+                          ):new Checkbox(
+                            value: choice.contains(data[widget.id]["c"].indexOf(c)),
+                            onChanged:(b){
+                              String pid;
+                              do{
+                                pid = "";
+                                Random r = new Random();
+                                List<String> nums = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
+                                for(int i = 0;i<8;i++){
+                                  pid+=(r.nextInt(2)==0?nums[r.nextInt(36)]:nums[r.nextInt(36)].toLowerCase());
+                                }
+                              }while(pids.contains(pid));
+                              pids.add(pid);
+                              waitForVote(){
+                                new Timer(Duration.zero,(){
+                                  if(pids[0]==pid){
+                                    vote(c,context,pid,b);
+                                  }else if(pids.length>0){
+                                    waitForVote();
+                                  }
+                                });
+                              }
+                              waitForVote();
+                            }
                           ),
                           new Expanded(child:new Text(c,maxLines:2,style: new TextStyle(color:textColor),overflow: TextOverflow.ellipsis)),
                           new Container(width:5.0)
                         ]
                     ),
-                    hasVoted?new Padding(padding: EdgeInsets.only(left:50.0,right:20.0,bottom:5.0),child: new Container(height:(MediaQuery.of(context).size.width/500.0).ceil()==1?5.0:5.0/(3*((MediaQuery.of(context).size.width/500.0).ceil())/4),child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation(choice==c?Colors.blueAccent:Colors.grey[600]),backgroundColor:Colors.black26,value:data[widget.id]["a"][data[widget.id]["c"].indexOf(c)]/((data[widget.id]["a"].reduce((n1,n2)=>n1+n2))!=0?(data[widget.id]["a"].reduce((n1,n2)=>n1+n2)):0.0)))):new Container()
+                    hasVoted?new Padding(padding: EdgeInsets.only(left:50.0,right:20.0,bottom:5.0),child: new Container(height:(MediaQuery.of(context).size.width/500.0).ceil()==1?5.0:5.0/(3*((MediaQuery.of(context).size.width/500.0).ceil())/4),child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation((!multiSelect?choice==c:choice.contains(data[widget.id]["c"].indexOf(c)))?Colors.blueAccent:Colors.grey[600]),backgroundColor:Colors.black26,value:(data[widget.id]["a"].reduce((n1,n2)=>n1+n2))!=0?data[widget.id]["a"][data[widget.id]["c"].indexOf(c)]/(data[widget.id]["a"].reduce((n1,n2)=>n1+n2)):0.0))):new Container()
                   ]))).toList().cast<Widget>()
               ),
               new Container(height:!hasVoted?7.0:13.0)
@@ -732,7 +845,7 @@ class ImageViewState extends State<ImageView> with SingleTickerProviderStateMixi
     vsync: this
     );
     animation = new Tween(
-      begin: 0.0,
+      begin:0.0,
       end:1.0
     ).animate(controller);
     controller.forward();
@@ -813,16 +926,16 @@ class PersistentData{
 
   String directory;
 
-  Future<String> get _localPath async {
+  Future<String> get _localPath async{
     return (await getApplicationDocumentsDirectory()).path;
   }
 
-  Future<File> get _localFile async {
+  Future<File> get _localFile async{
     final path = await _localPath;
     return new File('$path/$directory.txt');
   }
 
-  Future<dynamic> readData() async {
+  Future<dynamic> readData() async{
     try{
       final file = await _localFile;
       return json.decode(await file.readAsString());
@@ -831,7 +944,7 @@ class PersistentData{
     }
   }
 
-  Future<File> writeData(dynamic data) async {
+  Future<File> writeData(dynamic data) async{
     final file = await _localFile;
     return file.writeAsString(json.encode(data));
   }
