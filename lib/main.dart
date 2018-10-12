@@ -34,6 +34,10 @@ PersistentData messages = new PersistentData(directory:"messages");
 
 String lastMessage;
 
+int actualUserLevel;
+
+int currentUserLevel;
+
 int numSettings = 1;
 
 String userId;
@@ -97,6 +101,8 @@ void main() async{
 }
 
 bool start = true;
+
+bool hasGotLevel = false;
 
 class App extends StatefulWidget{
   @override
@@ -321,6 +327,29 @@ class AppState extends State<App>{
                   ),
                   body: new Builder(
                     builder: (context){
+                      if(actualUserLevel==null&&!hasGotLevel){
+                        hasGotLevel = true;
+                        tryToGetId() async{
+                          try{
+                            final result = await InternetAddress.lookup("google.com");
+                            if(result.isNotEmpty && result[0].rawAddress.isNotEmpty){
+                              http.get(Uri.encodeFull("$database/users/$userId.json?auth=$secretKey")).then((r){
+                                setState((){
+                                  actualUserLevel = json.decode(r.body);
+                                  currentUserLevel = actualUserLevel;
+                                });
+                                if(actualUserLevel==2){
+                                  showDialog(context:context,barrierDismissible: false,builder:(context)=>new AlertDialog(title:new Text("Alert"),content:new Text("You have been banned from PPoll")));
+                                }
+                              });
+                            }
+                          }on SocketException catch(_){
+                            print("Bad connection, retrying...");
+                            new Timer(new Duration(seconds:1),tryToGetId);
+                          }
+                        }
+                        tryToGetId();
+                      }
                       if(start&&hasLoaded){
                         start = false;
                         http.get(Uri.encodeFull("$database/message.json?auth=$secretKey")).then((r){
@@ -358,10 +387,17 @@ class AppState extends State<App>{
                       ):new Container(
                           child: new Center(
                               child: new Column(
-                                  children: settings.asMap().keys.map((i)=>new Switch(value:settings[i],onChanged: (b){
-                                    setState((){settings[i]=b;});
-                                    settingsData.writeData(settings);
-                                  })).toList()
+                                children: [
+                                  new Column(
+                                      children: settings.asMap().keys.map((i)=>new Switch(value:settings[i],onChanged:(b){
+                                        setState((){settings[i]=b;});
+                                        settingsData.writeData(settings);
+                                      })).toList()
+                                  ),
+                                  actualUserLevel==1?new Switch(value: currentUserLevel==1, onChanged: (b){
+                                    setState((){currentUserLevel = b?1:0;});
+                                  }):new Container()
+                                ]
                               )
                           )
                       );
@@ -449,7 +485,7 @@ class ViewState extends State<View>{
       );
     }
     Map<String,dynamic> tempMap = new Map<String,dynamic>()..addAll(data)..removeWhere((key,value){
-      return (widget.onlyCreated&&!createdPolls.contains(key))||(!(key.toUpperCase().contains(search.toUpperCase())||((value as Map<String,dynamic>)["q"] as String).toUpperCase().contains(search.toUpperCase()))||(!widget.onlyCreated&&((((value as Map<String,dynamic>)["b"])[2]==0)||((value as Map<String,dynamic>)["b"])[0]==1||((value as Map<String,dynamic>)["b"])[1]==1)));
+      return (widget.onlyCreated&&!createdPolls.contains(key))||(!(key.toUpperCase().contains(search.toUpperCase())||((value as Map<String,dynamic>)["q"] as String).toUpperCase().contains(search.toUpperCase()))||((!widget.onlyCreated&&currentUserLevel!=1)&&((((value as Map<String,dynamic>)["b"])[2]==0)||((value as Map<String,dynamic>)["b"])[0]==1||((value as Map<String,dynamic>)["b"])[1]==1)));
     });
     sortedMap = SplayTreeMap.from(tempMap,(o1,o2){
       int voters1 = tempMap[o1]["a"].reduce((n1,n2)=>n1+n2);
@@ -457,10 +493,10 @@ class ViewState extends State<View>{
       if(!widget.onlyCreated){
         if(sorting=="trending"){
           double currentTime = (new DateTime.now().millisecondsSinceEpoch/1000.0);
-          double timeChange1 = (currentTime-tempMap[o1]["t"]);
-          double timeChange2 = (currentTime-tempMap[o2]["t"]);
-          double trendingIndex1 = pow((voters1+1),1.5)/(pow(timeChange1!=0?timeChange1:.000000001,2));
-          double trendingIndex2 = pow((voters2+1),1.5)/(pow(timeChange2!=0?timeChange2:.000000001,2));
+          double timeChange1 = (currentTime-(tempMap[o1]["t"]!=null?tempMap[o1]["t"]:currentTime/2.0));
+          double timeChange2 = (currentTime-(tempMap[o2]["t"]!=null?tempMap[o2]["t"]:currentTime/2.0));
+          double trendingIndex1 = pow((voters1+1),1.5)/(pow(timeChange1!=0?timeChange1:.0001,2));
+          double trendingIndex2 = pow((voters2+1),1.5)/(pow(timeChange2!=0?timeChange2:.0001,2));
           if(trendingIndex1!=trendingIndex2){
             return trendingIndex2>trendingIndex1?1:-1;
           }else if(tempMap[o1]["q"].compareTo(tempMap[o2]["q"])!=0){
@@ -469,7 +505,10 @@ class ViewState extends State<View>{
           return o1.compareTo(o2);
         }
         if((sorting=="newest"||sorting=="oldest")&&tempMap[o2]["t"]!=tempMap[o1]["t"]){
-          return sorting=="newest"?tempMap[o2]["t"]-tempMap[o1]["t"]:tempMap[o1]["t"]-tempMap[o2]["t"];
+          double currentTime = (new DateTime.now().millisecondsSinceEpoch/1000.0);
+          double time1 = tempMap[o1]["t"]!=null?tempMap[o1]["t"].toDouble():(currentTime/2.0).roundToDouble();
+          double time2 = tempMap[o2]["t"]!=null?tempMap[o2]["t"].toDouble():(currentTime/2.0).roundToDouble();
+          return sorting=="newest"?time1>time2?-1:1:time1>time2?1:-1;
         }else if(voters2!=voters1){
           return voters2-voters1;
         }else if(tempMap[o1]["q"].compareTo(tempMap[o2]["q"])!=0){

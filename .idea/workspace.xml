@@ -21,8 +21,8 @@
       <file leaf-file-name="main.dart" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/lib/main.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="262">
-              <caret line="334" column="200" lean-forward="false" selection-start-line="334" selection-start-column="200" selection-end-line="334" selection-end-column="200" />
+            <state relative-caret-position="229">
+              <caret line="395" column="36" lean-forward="true" selection-start-line="395" selection-start-column="36" selection-end-line="395" selection-end-column="36" />
               <folding>
                 <element signature="e#0#39#0" expanded="true" />
               </folding>
@@ -73,7 +73,7 @@
       <file leaf-file-name="pubspec.yaml" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/pubspec.yaml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="338">
+            <state relative-caret-position="420">
               <caret line="28" column="10" lean-forward="false" selection-start-line="28" selection-start-column="10" selection-end-line="28" selection-end-column="10" />
               <folding />
             </state>
@@ -84,16 +84,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>new Poll</find>
-      <find>= &quot;tr</find>
-      <find>&gt;1</find>
-      <find>pids.length</find>
-      <find>index==0</find>
-      <find>s.anim</find>
-      <find>orange</find>
-      <find>TRHO</find>
-      <find>newest</find>
-      <find>search</find>
       <find>TextEditi</find>
       <find>index = i</find>
       <find>ViewState.</find>
@@ -114,6 +104,16 @@
       <find>auth=</find>
       <find>database+</find>
       <find>database</find>
+      <find>tryTo</find>
+      <find>actualUs</find>
+      <find>isGetting</find>
+      <find>ViewSta</find>
+      <find>.removeWhe</find>
+      <find>Settings</find>
+      <find>index =</find>
+      <find>.removeWhere</find>
+      <find>currentUserLevel!=</find>
+      <find>new Switch(</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -159,6 +159,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -197,10 +198,9 @@
         </subPane>
         <option name="show-excluded-files" value="false" />
       </pane>
+      <pane id="AndroidView" />
       <pane id="Scratches" />
       <pane id="PackagesPane" />
-      <pane id="AndroidView" />
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -805,7 +805,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/pubspec.yaml">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="338">
+        <state relative-caret-position="420">
           <caret line="28" column="10" lean-forward="false" selection-start-line="28" selection-start-column="10" selection-end-line="28" selection-end-column="10" />
           <folding />
         </state>
@@ -813,8 +813,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/main.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="262">
-          <caret line="334" column="200" lean-forward="false" selection-start-line="334" selection-start-column="200" selection-end-line="334" selection-end-column="200" />
+        <state relative-caret-position="229">
+          <caret line="395" column="36" lean-forward="true" selection-start-line="395" selection-start-column="36" selection-end-line="395" selection-end-column="36" />
           <folding>
             <element signature="e#0#39#0" expanded="true" />
           </folding>
