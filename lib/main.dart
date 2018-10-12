@@ -332,7 +332,7 @@ class AppState extends State<App>{
                             lastMessage = s;
                             messages.writeData(lastMessage);
                             if(lastMessage!=null){
-                              showDialog(context:context,builder:(context)=>new AlertDialog(title:new Text("Alert"),content:new Text(lastMessage)));
+                              showDialog(context:context,builder:(context)=>new AlertDialog(actions: [new RaisedButton(color:Colors.grey,child: new Text("Okay",style:new TextStyle(color:Colors.black87)),onPressed:(){Navigator.of(context).pop();})],title:new Text("Alert"),content:new Text(lastMessage)));
                             }
                           }
                         });
