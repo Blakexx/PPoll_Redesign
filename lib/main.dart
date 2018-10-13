@@ -21,12 +21,15 @@ import 'package:photo_view/photo_view.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:connectivity/connectivity.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 bool light;
 
 PersistentData settingsData = new PersistentData(directory:"settings");
 
 PersistentData userIdData = new PersistentData(directory:"userId");
+
+final realUserId = new FlutterSecureStorage();
 
 PersistentData createdPollsData = new PersistentData(directory:"createdinfo");
 
@@ -60,7 +63,6 @@ ConnectivityResult current;
 
 Connectivity connection = new Connectivity();
 
-
 void main() async{
   current = await connection.checkConnectivity();
   createdPolls = await createdPollsData.readData();
@@ -81,7 +83,13 @@ void main() async{
     settings.addAll(new List<dynamic>(numSettings-settings.length).map((n)=>false));
     settingsData.writeData(settings);
   }
-  userId = await userIdData.readData();
+  userId = await realUserId.read(key: "ID");
+  if(userId==null){
+    userId = await userIdData.readData();
+    if(userId!=null){
+      realUserId.write(key: "ID", value: userId);
+    }
+  }
   if(userId==null){
     Map<String,dynamic> usersMap = json.decode((await http.get(Uri.parse(database+"/users.json?auth="+secretKey))).body);
     userId = "";
@@ -94,7 +102,7 @@ void main() async{
       }
     }while(usersMap["userId"]!=null);
     await http.put(Uri.parse(database+"/users/$userId.json?auth="+secretKey),body:"0");
-    userIdData.writeData(userId);
+    realUserId.write(key: "ID", value: userId);
   }
   lastMessage = (await messages.readData());
   runApp(new App());

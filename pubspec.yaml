@@ -27,6 +27,7 @@ dependencies:
   photo_view:
   connectivity:
   timeago:
+  flutter_secure_storage:
   flutter_launcher_icons:
   flutter_staggered_grid_view:
   dynamic_theme:
