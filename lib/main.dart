@@ -87,7 +87,7 @@ void main() async{
   if(userId==null){
     userId = await userIdData.readData();
     if(userId!=null){
-      realUserId.write(key: "ID", value: userId);
+      await realUserId.write(key: "ID", value: userId);
     }
   }
   if(userId==null){
@@ -102,7 +102,7 @@ void main() async{
       }
     }while(usersMap["userId"]!=null);
     await http.put(Uri.parse(database+"/users/$userId.json?auth="+secretKey),body:"0");
-    realUserId.write(key: "ID", value: userId);
+    await realUserId.write(key: "ID", value: userId);
   }
   lastMessage = (await messages.readData());
   runApp(new App());
