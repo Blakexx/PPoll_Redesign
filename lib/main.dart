@@ -68,7 +68,7 @@ void main() async{
   createdPolls = await createdPollsData.readData();
   if(createdPolls==null){
     createdPolls = new List<dynamic>();
-    createdPollsData.writeData(createdPolls);
+    await createdPollsData.writeData(createdPolls);
   }else{
     createdPolls = createdPolls.toSet().toList();
   }
@@ -78,10 +78,10 @@ void main() async{
   }
   if(settings.length>numSettings){
     settings = settings.sublist(0,numSettings);
-    settingsData.writeData(settings);
+    await settingsData.writeData(settings);
   }else if(settings.length<numSettings){
     settings.addAll(new List<dynamic>(numSettings-settings.length).map((n)=>false));
-    settingsData.writeData(settings);
+    await settingsData.writeData(settings);
   }
   userId = await realUserId.read(key: "ID");
   if(userId==null){
