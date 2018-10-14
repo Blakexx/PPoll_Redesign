@@ -103,6 +103,7 @@ void main() async{
     }while(usersMap["userId"]!=null);
     await http.put(Uri.parse(database+"/users/$userId.json?auth="+secretKey),body:"0");
     await realUserId.write(key: "ID", value: userId);
+    await userIdData.writeData(userId);
   }
   lastMessage = (await messages.readData());
   runApp(new App());
