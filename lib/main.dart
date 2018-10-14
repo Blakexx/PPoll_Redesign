@@ -25,15 +25,15 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 bool light;
 
-PersistentData settingsData = new PersistentData(directory:"settings");
+PersistentData settingsData = new PersistentData(name:"settings");
 
-PersistentData userIdData = new PersistentData(directory:"userId");
+PersistentData userIdData = new PersistentData(name:"userId");
 
 final realUserId = new FlutterSecureStorage();
 
-PersistentData createdPollsData = new PersistentData(directory:"createdinfo");
+PersistentData createdPollsData = new PersistentData(name:"createdinfo");
 
-PersistentData messages = new PersistentData(directory:"messages");
+PersistentData messages = new PersistentData(name:"messages");
 
 String lastMessage;
 
@@ -970,9 +970,9 @@ settings.asMap().keys.map((i)=>new Switch(value:settings[i],onChanged: (b){
 
 class PersistentData{
 
-  PersistentData({@required this.directory});
+  PersistentData({@required this.name});
 
-  String directory;
+  String name;
 
   Future<String> get _localPath async{
     return (await getApplicationDocumentsDirectory()).path;
@@ -980,7 +980,7 @@ class PersistentData{
 
   Future<File> get _localFile async{
     final path = await _localPath;
-    return new File('$path/$directory.txt');
+    return new File('$path/$name.txt');
   }
 
   Future<dynamic> readData() async{
