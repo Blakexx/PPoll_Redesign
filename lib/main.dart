@@ -83,11 +83,11 @@ void main() async{
     settings.addAll(new List<dynamic>(numSettings-settings.length).map((n)=>false));
     await settingsData.writeData(settings);
   }
-  userId = await realUserId.read(key: "ID");
+  userId = await realUserId.read(key: "PPollUserID");
   if(userId==null){
     userId = await userIdData.readData();
     if(userId!=null){
-      await realUserId.write(key: "ID", value: userId);
+      await realUserId.write(key: "PPollUserID", value: userId);
     }
   }
   if(userId==null){
@@ -102,7 +102,7 @@ void main() async{
       }
     }while(usersMap["userId"]!=null);
     await http.put(Uri.parse(database+"/users/$userId.json?auth="+secretKey),body:"0");
-    await realUserId.write(key: "ID", value: userId);
+    await realUserId.write(key: "PPollUserID", value: userId);
     await userIdData.writeData(userId);
   }
   lastMessage = (await messages.readData());
