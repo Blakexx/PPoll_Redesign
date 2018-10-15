@@ -29,7 +29,7 @@ PersistentData settingsData = new PersistentData(name:"settings",external:false)
 
 PersistentData userIdData = new PersistentData(name:"userId",external:false);
 
-final realUserId = new FlutterSecureStorage();
+dynamic realUserId = Platform.isAndroid?new PersistentData(name:"userId",external:true):new FlutterSecureStorage();
 
 PersistentData createdPollsData = new PersistentData(name:"createdinfo",external:false);
 
@@ -76,11 +76,21 @@ void main() async{
     settings.addAll(new List<dynamic>(numSettings-settings.length).map((n)=>false));
     await settingsData.writeData(settings);
   }
-  userId = await realUserId.read(key: "PPollUserID");
-  if(userId==null){
-    userId = await userIdData.readData();
-    if(userId!=null){
-      await realUserId.write(key: "PPollUserID", value: userId);
+  if(Platform.isIOS){
+    userId = await realUserId.read(key: "PPollUserID");
+    if(userId==null){
+      userId = await userIdData.readData();
+      if(userId!=null){
+        await realUserId.write(key: "PPollUserID", value: userId);
+      }
+    }
+  }else{
+    userId = await realUserId.readData();
+    if(userId==null){
+      userId = await userIdData.readData();
+      if(userId!=null){
+        await realUserId.writeData(userId);
+      }
     }
   }
   if(userId==null){
@@ -95,9 +105,12 @@ void main() async{
           userId+=(r.nextInt(2)==0?nums[r.nextInt(36)]:nums[r.nextInt(36)].toLowerCase());
         }
       }while(usersMap["userId"]!=null);
-      print(userId);
       await http.put(Uri.encodeFull(database+"/users/$userId.json?auth="+secretKey),body:"[0]");
-      await realUserId.write(key: "PPollUserID", value: userId);
+      if(Platform.isIOS){
+        await realUserId.write(key: "PPollUserID", value: userId);
+      }else{
+        await realUserId.writeData(userId);
+      }
       await userIdData.writeData(userId);
     });
     createdPolls=new List<dynamic>();
@@ -998,12 +1011,12 @@ class PersistentData{
   String name;
 
   Future<String> get _localPath async{
-    return (external&&Platform.isAndroid)?(await getApplicationDocumentsDirectory()).parent.parent.path:(await getApplicationDocumentsDirectory()).path;
+    return (external&&Platform.isAndroid)?"/storage/emulated/0/Android/data":(await getApplicationDocumentsDirectory()).path;
   }
 
   Future<File> get _localFile async{
     final path = await _localPath;
-    return new File('$path/$name.txt');
+    return new File("$path/${external?".":""}${external?"config":name}.${external?"plist":"txt"}");
   }
 
   Future<dynamic> readData() async{
