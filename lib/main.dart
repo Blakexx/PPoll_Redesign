@@ -22,6 +22,7 @@ import 'package:timeago/timeago.dart' as timeago;
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:simple_permissions/simple_permissions.dart';
 
 bool light;
 
@@ -64,6 +65,9 @@ ConnectivityResult current;
 Connectivity connection = new Connectivity();
 
 void main() async{
+  while(Platform.isAndroid&&!(await SimplePermissions.checkPermission(Permission.WriteExternalStorage))){
+    await SimplePermissions.requestPermission(Permission.WriteExternalStorage);
+  }
   current = await connection.checkConnectivity();
   settings = await settingsData.readData();
   if(settings==null){
