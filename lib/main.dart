@@ -25,21 +25,21 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 bool light;
 
-PersistentData settingsData = new PersistentData(name:"settings");
+PersistentData settingsData = new PersistentData(name:"settings",external:false);
 
-PersistentData userIdData = new PersistentData(name:"userId");
+PersistentData userIdData = new PersistentData(name:"userId",external:false);
 
 final realUserId = new FlutterSecureStorage();
 
-PersistentData createdPollsData = new PersistentData(name:"createdinfo");
+PersistentData createdPollsData = new PersistentData(name:"createdinfo",external:false);
 
-PersistentData messages = new PersistentData(name:"messages");
+PersistentData messages = new PersistentData(name:"messages",external:false);
 
 String lastMessage;
 
-int actualUserLevel;
+dynamic actualUserLevel;
 
-int currentUserLevel;
+dynamic currentUserLevel;
 
 int numSettings = 1;
 
@@ -65,13 +65,6 @@ Connectivity connection = new Connectivity();
 
 void main() async{
   current = await connection.checkConnectivity();
-  createdPolls = await createdPollsData.readData();
-  if(createdPolls==null){
-    createdPolls = new List<dynamic>();
-    await createdPollsData.writeData(createdPolls);
-  }else{
-    createdPolls = createdPolls.toSet().toList();
-  }
   settings = await settingsData.readData();
   if(settings==null){
     settings = new List<dynamic>();
@@ -91,22 +84,50 @@ void main() async{
     }
   }
   if(userId==null){
-    Map<String,dynamic> usersMap = json.decode((await http.get(Uri.parse(database+"/users.json?auth="+secretKey))).body);
-    userId = "";
-    do{
+    doWhenHasConnection(() async{
+      Map<String,dynamic> usersMap = json.decode((await http.get(Uri.parse(database+"/users.json?auth="+secretKey))).body);
       userId = "";
-      Random r = new Random();
-      List<String> nums = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
-      for(int i = 0;i<16;i++){
-        userId+=(r.nextInt(2)==0?nums[r.nextInt(36)]:nums[r.nextInt(36)].toLowerCase());
+      do{
+        userId = "";
+        Random r = new Random();
+        List<String> nums = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
+        for(int i = 0;i<16;i++){
+          userId+=(r.nextInt(2)==0?nums[r.nextInt(36)]:nums[r.nextInt(36)].toLowerCase());
+        }
+      }while(usersMap["userId"]!=null);
+      print(userId);
+      await http.put(Uri.encodeFull(database+"/users/$userId.json?auth="+secretKey),body:"[0]");
+      await realUserId.write(key: "PPollUserID", value: userId);
+      await userIdData.writeData(userId);
+    });
+    createdPolls=new List<dynamic>();
+  }else{
+    doWhenHasConnection(() async{
+      createdPolls = json.decode((await http.get(Uri.encodeFull(database+"/users/$userId/1.json?auth="+secretKey))).body);
+      if(createdPolls==null){
+        createdPolls = await createdPollsData.readData();
+        if(createdPolls!=null){
+          await http.put(Uri.encodeFull(database+"/users/$userId/1.json?auth="+secretKey),body:json.encode(createdPolls));
+        }else{
+          createdPolls = new List<dynamic>();
+        }
       }
-    }while(usersMap["userId"]!=null);
-    await http.put(Uri.parse(database+"/users/$userId.json?auth="+secretKey),body:"0");
-    await realUserId.write(key: "PPollUserID", value: userId);
-    await userIdData.writeData(userId);
+    });
   }
   lastMessage = (await messages.readData());
   runApp(new App());
+}
+
+doWhenHasConnection(Function function) async{
+  try{
+    final result = await InternetAddress.lookup("google.com");
+    if(result.isNotEmpty && result[0].rawAddress.isNotEmpty){
+      function();
+    }
+  }on SocketException catch(_){
+    print("Bad connection, retrying...");
+    new Timer(new Duration(seconds:1),await doWhenHasConnection(function));
+  }
 }
 
 bool start = true;
@@ -127,6 +148,10 @@ class AppState extends State<App>{
     watch.start();
     waitForConnection() async{
       if(r!=current){
+        return;
+      }
+      if(userId==null||createdPolls==null){
+        new Timer(new Duration(seconds:1),waitForConnection);
         return;
       }
       try{
@@ -342,13 +367,13 @@ class AppState extends State<App>{
                           try{
                             final result = await InternetAddress.lookup("google.com");
                             if(result.isNotEmpty && result[0].rawAddress.isNotEmpty){
-                              http.get(Uri.encodeFull("$database/users/$userId.json?auth=$secretKey")).then((r){
+                              http.get(Uri.encodeFull("$database/users/$userId/0.json?auth=$secretKey")).then((r){
                                 setState((){
                                   actualUserLevel = json.decode(r.body);
-                                  currentUserLevel = actualUserLevel;
+                                  currentUserLevel = 0;
                                 });
-                                if(actualUserLevel==2){
-                                  showDialog(context:context,barrierDismissible: false,builder:(context)=>new AlertDialog(title:new Text("Alert"),content:new Text("You have been banned from PPoll")));
+                                if(actualUserLevel is String){
+                                  showDialog(context:context,barrierDismissible: false,builder:(context)=>new AlertDialog(title:new Text("You have been banned from PPoll",textAlign:TextAlign.center),content:new Text("Reason: $actualUserLevel",textAlign: TextAlign.start)));
                                 }
                               });
                             }
@@ -370,7 +395,7 @@ class AppState extends State<App>{
                             lastMessage = s;
                             messages.writeData(lastMessage);
                             if(lastMessage!=null){
-                              showDialog(context:context,builder:(context)=>new AlertDialog(actions: [new RaisedButton(color:Colors.grey,child: new Text("Okay",style:new TextStyle(color:Colors.black87)),onPressed:(){Navigator.of(context).pop();})],title:new Text("Alert"),content:new Text(lastMessage)));
+                              showDialog(context:context,builder:(context)=>new AlertDialog(actions: [new RaisedButton(color:Colors.grey,child: new Text("OK",style:new TextStyle(color:Colors.black87)),onPressed:(){Navigator.of(context).pop();})],title:new Text("Alert",textAlign: TextAlign.center),content:new Text(lastMessage)));
                             }
                           }
                         });
@@ -397,12 +422,12 @@ class AppState extends State<App>{
                           child: new Center(
                               child: new Column(
                                 children: [
-                                  new Column(
+                                  new Padding(padding: EdgeInsets.only(top:MediaQuery.of(context).padding.top),child: new Column(
                                       children: settings.asMap().keys.map((i)=>new Switch(value:settings[i],onChanged:(b){
                                         setState((){settings[i]=b;});
                                         settingsData.writeData(settings);
                                       })).toList()
-                                  ),
+                                  )),
                                   actualUserLevel==1?new Switch(value: currentUserLevel==1, onChanged: (b){
                                     setState((){currentUserLevel = b?1:0;});
                                   }):new Container()
@@ -435,10 +460,6 @@ class ViewState extends State<View>{
   @override
   void initState(){
     super.initState();
-    if(createdPolls.length==0){
-      createdPolls.addAll(["TRHO","OS42","OV44"]);
-      print(createdPolls);
-    }
   }
 
   static String search = "";
@@ -970,12 +991,14 @@ settings.asMap().keys.map((i)=>new Switch(value:settings[i],onChanged: (b){
 
 class PersistentData{
 
-  PersistentData({@required this.name});
+  PersistentData({@required this.name, @required this.external});
+
+  bool external;
 
   String name;
 
   Future<String> get _localPath async{
-    return (await getApplicationDocumentsDirectory()).path;
+    return (external&&Platform.isAndroid)?(await getApplicationDocumentsDirectory()).parent.parent.path:(await getApplicationDocumentsDirectory()).path;
   }
 
   Future<File> get _localFile async{

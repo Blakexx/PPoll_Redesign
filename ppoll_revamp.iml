@@ -15,6 +15,12 @@
       <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/connectivity/example/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/connectivity/example/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/connectivity/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/flutter_secure_storage/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/flutter_secure_storage/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/flutter_secure_storage/build" />
+      <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/flutter_secure_storage/example/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/flutter_secure_storage/example/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/flutter_secure_storage/example/build" />
       <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/image_picker/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/image_picker/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/ios/.symlinks/plugins/image_picker/build" />
