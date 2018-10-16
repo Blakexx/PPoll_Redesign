@@ -30,7 +30,7 @@ dependencies:
   flutter_secure_storage:
   flutter_launcher_icons:
   flutter_staggered_grid_view:
-  simple_permissions:
+  permission:
   dynamic_theme:
       git:
         url: git://github.com/Norbert515/dynamic_theme.git

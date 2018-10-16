@@ -22,7 +22,7 @@ import 'package:timeago/timeago.dart' as timeago;
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:simple_permissions/simple_permissions.dart';
+import 'package:permission/permission.dart';
 
 bool light;
 
@@ -30,7 +30,7 @@ PersistentData settingsData = new PersistentData(name:"settings",external:false)
 
 PersistentData userIdData = new PersistentData(name:"userId",external:false);
 
-dynamic realUserId = Platform.isAndroid?new PersistentData(name:"userId",external:true):new FlutterSecureStorage();
+dynamic realUserId = Platform.isIOS?new FlutterSecureStorage():new PersistentData(name:"userId",external:true);
 
 PersistentData createdPollsData = new PersistentData(name:"createdinfo",external:false);
 
@@ -66,11 +66,11 @@ Connectivity connection = new Connectivity();
 
 void main() async{
   if(Platform.isAndroid){
-    bool hasPerms = (await SimplePermissions.checkPermission(Permission.WriteExternalStorage));
+    bool hasPerms = (await Permission.getPermissionStatus([PermissionName.Storage]))[0].permissionStatus==PermissionStatus.allow;
     while(!hasPerms){
-      PermissionStatus status = (await SimplePermissions.requestPermission(Permission.WriteExternalStorage));
-      hasPerms = status==PermissionStatus.authorized;
-      if(status==PermissionStatus.deniedNeverAsk){
+      PermissionStatus status = (await Permission.requestPermissions([PermissionName.Storage]))[0].permissionStatus;
+      hasPerms = status==PermissionStatus.allow;
+      if(status==PermissionStatus.noAgain){
         runApp(new MaterialApp(home:new Scaffold(body:new Builder(builder: (context)=>new Container(child:new Center(child:new Padding(padding: EdgeInsets.only(left:MediaQuery.of(context).size.width*.05,right:MediaQuery.of(context).size.width*.05),child:new FittedBox(fit: BoxFit.scaleDown,child:new Text("In order to use PPoll you must enable storage permissions.",style:new TextStyle(fontSize:10000.0))))))))));
         return;
       }
@@ -125,7 +125,7 @@ void main() async{
       }
       await userIdData.writeData(userId);
     });
-    createdPolls=new List<dynamic>();
+    createdPolls = new List<dynamic>();
   }else{
     doWhenHasConnection(() async{
       createdPolls = json.decode((await http.get(Uri.encodeFull(database+"/users/$userId/1.json?auth="+secretKey))).body);
