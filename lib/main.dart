@@ -65,12 +65,15 @@ ConnectivityResult current;
 Connectivity connection = new Connectivity();
 
 void main() async{
-  int count = 0;
-  while(Platform.isAndroid&&!(await SimplePermissions.checkPermission(Permission.WriteExternalStorage))){
-    await SimplePermissions.requestPermission(Permission.WriteExternalStorage);
-    if(count++>=10){
-      runApp(new MaterialApp(home:new Scaffold(body:new Builder(builder: (context)=>new Container(child:new Center(child:new Padding(padding: EdgeInsets.only(left:MediaQuery.of(context).size.width*.05,right:MediaQuery.of(context).size.width*.05),child:new FittedBox(fit: BoxFit.scaleDown,child:new Text("In order to use PPoll you must enable storage permissions.",style:new TextStyle(fontSize:10000.0))))))))));
-      return;
+  if(Platform.isAndroid){
+    bool hasPerms = (await SimplePermissions.checkPermission(Permission.WriteExternalStorage));
+    while(!hasPerms){
+      PermissionStatus status = (await SimplePermissions.requestPermission(Permission.WriteExternalStorage));
+      hasPerms = status==PermissionStatus.authorized;
+      if(status==PermissionStatus.deniedNeverAsk){
+        runApp(new MaterialApp(home:new Scaffold(body:new Builder(builder: (context)=>new Container(child:new Center(child:new Padding(padding: EdgeInsets.only(left:MediaQuery.of(context).size.width*.05,right:MediaQuery.of(context).size.width*.05),child:new FittedBox(fit: BoxFit.scaleDown,child:new Text("In order to use PPoll you must enable storage permissions.",style:new TextStyle(fontSize:10000.0))))))))));
+        return;
+      }
     }
   }
   current = await connection.checkConnectivity();
