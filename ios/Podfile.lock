@@ -9,7 +9,7 @@ PODS:
     - Flutter
   - path_provider (0.0.1):
     - Flutter
-  - permission (0.0.1):
+  - permission_handler (2.1.0):
     - Flutter
   - Reachability (3.2)
   - shared_preferences (0.0.1):
@@ -21,7 +21,7 @@ DEPENDENCIES:
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
   - image_picker (from `.symlinks/plugins/image_picker/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
-  - permission (from `.symlinks/plugins/permission/ios`)
+  - permission_handler (from `.symlinks/plugins/permission_handler/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
 
 SPEC REPOS:
@@ -39,8 +39,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/image_picker/ios"
   path_provider:
     :path: ".symlinks/plugins/path_provider/ios"
-  permission:
-    :path: ".symlinks/plugins/permission/ios"
+  permission_handler:
+    :path: ".symlinks/plugins/permission_handler/ios"
   shared_preferences:
     :path: ".symlinks/plugins/shared_preferences/ios"
 
@@ -50,10 +50,10 @@ SPEC CHECKSUMS:
   flutter_secure_storage: cbb73e37aa0c66689fe63799a9619ac66849b8fa
   image_picker: ee00aab0487cedc80a304085219503cc6d0f2e22
   path_provider: 09407919825bfe3c2deae39453b7a5b44f467873
-  permission: 3781bb5a85794b350fa6d978f702abe4d87ff2d9
+  permission_handler: ffc5769b295893830703e8a5b9101e47e12da6af
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
   shared_preferences: 5a1d487c427ee18fcd3ea1f2a131569481834b53
 
-PODFILE CHECKSUM: 1e5af4103afd21ca5ead147d7b81d06f494f51a2
+PODFILE CHECKSUM: e26b4a363b8b520c042cbff2623303e8796700af
 
 COCOAPODS: 1.5.2
