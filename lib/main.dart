@@ -666,7 +666,7 @@ class ViewState extends State<View>{
                 mainAxisSpacing: 0.0,
                 crossAxisSpacing: 0.0,
                 itemCount: sortedMap.keys.length,
-                itemBuilder: (BuildContext context, int i)=>new Poll(sortedMap.keys.toList()[i]),
+                itemBuilder: (BuildContext context, int i)=>new Poll(sortedMap.keys.toList()[i],false),
                 staggeredTileBuilder: (i)=>new StaggeredTile.fit(1),
               )),
               //new SliverList(delegate: new SliverChildBuilderDelegate((context,i)=>new Padding(padding:EdgeInsets.only(top:i==0?5.0:0.0),child:new Poll(sortedMap.keys.toList()[i])), childCount: sortedMap.length))
@@ -684,7 +684,8 @@ class ViewState extends State<View>{
 
 class Poll extends StatefulWidget{
   final String id;
-  Poll(this.id):super(key:new ObjectKey(id));
+  final bool viewPage;
+  Poll(this.id,this.viewPage):super(key:new ObjectKey(id));
   @override
   PollState createState() => new PollState();
 }
@@ -795,12 +796,12 @@ class PollState extends State<Poll>{
 
   @override
   Widget build(BuildContext context){
-    return new Card(color: const Color.fromRGBO(250, 250, 250, 1.0),child: new Column(
+    Widget returnedWidget = new Column(
         children:[
           new Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              new Padding(padding:EdgeInsets.only(top:10.0,left:11.0,right:11.0),child:new Text(data[widget.id]["q"],style: new TextStyle(color:textColor,fontSize: 15.0,fontWeight: FontWeight.w600),maxLines: 2,overflow: TextOverflow.ellipsis)),
+              new Padding(padding:EdgeInsets.only(top:10.0,left:11.0,right:11.0),child:new Text(data[widget.id]["q"],style: new TextStyle(color:textColor,fontSize: 15.0,fontWeight: FontWeight.w600),maxLines: !widget.viewPage?2:100,overflow: TextOverflow.ellipsis)),
               new Padding(padding:EdgeInsets.only(top:5.0,left:11.0,bottom:5.0),child:new Text(widget.id+(data[widget.id]["t"]!=null?" • ${timeago.format(new DateTime.fromMillisecondsSinceEpoch(data[widget.id]["t"]*1000))}":"")+" • ${data[widget.id]["a"].reduce((n1,n2)=>n1+n2)} vote"+((data[widget.id]["a"].reduce((n1,n2)=>n1+n2)==1)?"":"s"),style: new TextStyle(fontSize: 12.0,color:(settings[0]?Colors.white:textColor).withOpacity(.8)))),
               image!=null?new Padding(padding:EdgeInsets.only(top:5.0,bottom:5.0),child:new FutureBuilder<ui.Image>(
                 future: completer.future,
@@ -819,7 +820,7 @@ class PollState extends State<Poll>{
                 },
               )):new Container(),
               new Column(
-                  children: data[widget.id]["c"].map((c)=>new MaterialButton(onPressed: () async{
+                  children: data[widget.id]["c"].map((c)=>widget.viewPage||(hasVoted||(data[widget.id]["c"].indexOf(c)<5))?new MaterialButton(onPressed: () async{
                     if(multiSelect||c!=choice){
                       String pid;
                       do{
@@ -897,18 +898,75 @@ class PollState extends State<Poll>{
                               waitForVote();
                             }
                           ),
-                          new Expanded(child:new Text(c,maxLines:2,style: new TextStyle(color:textColor),overflow: TextOverflow.ellipsis)),
+                          new Expanded(child:new Text(c,maxLines:!widget.viewPage?2:100,style: new TextStyle(color:textColor),overflow: TextOverflow.ellipsis)),
                           new Container(width:5.0)
                         ]
                     ),
                     hasVoted?new Padding(padding: EdgeInsets.only(left:50.0,right:20.0,bottom:5.0),child: new Container(height:(MediaQuery.of(context).size.width/500.0).ceil()==1?5.0:5.0/(3*((MediaQuery.of(context).size.width/500.0).ceil())/4),child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation((!multiSelect?choice==c:choice.contains(data[widget.id]["c"].indexOf(c)))?Colors.blueAccent:Colors.grey[600]),backgroundColor:Colors.black26,value:(data[widget.id]["a"].reduce((n1,n2)=>n1+n2))!=0?data[widget.id]["a"][data[widget.id]["c"].indexOf(c)]/(data[widget.id]["a"].reduce((n1,n2)=>n1+n2)):0.0))):new Container()
-                  ]))).toList().cast<Widget>()
+                  ])):data[widget.id]["c"].indexOf(c)==5?new Text("...",style:new TextStyle(fontSize:20.0)):new Container()).toList().cast<Widget>()
               ),
               new Container(height:!hasVoted?7.0:13.0)
             ]
             //trailing: new Text(data[widget.id]["a"].reduce((n1,n2)=>n1+n2).toString(),style: new TextStyle(color:Colors.black))
           )
         ]
+    );
+    if(widget.viewPage){
+      return returnedWidget;
+    }else{
+      returnedWidget = new Card(color: const Color.fromRGBO(250, 250, 250, 1.0),child:returnedWidget);
+      if(hasVoted||data[widget.id]["a"].length<6){
+        returnedWidget = new GestureDetector(onTap: (){Navigator.push(context,new MaterialPageRoute(builder: (context) => new PollView(widget.id,this)));},child:returnedWidget);
+      }else{
+        returnedWidget = new GestureDetector(onTap: (){Navigator.push(context,new MaterialPageRoute(builder: (context) => new PollView(widget.id,this)));},child:new AbsorbPointer(child:returnedWidget));
+      }
+      return returnedWidget;
+    }
+  }
+}
+
+class PollView extends StatefulWidget{
+  final String id;
+  final PollState state;
+  PollView(this.id,[this.state]);
+  @override
+  PollViewState createState() => new PollViewState();
+}
+
+class PollViewState extends State<PollView>{
+  @override
+  Widget build(BuildContext context){
+    return new WillPopScope(onWillPop:(){
+      if(widget.state!=null){
+        try{
+          widget.state.setState((){
+            widget.state.hasVoted = data[widget.id]["i"]!=null&&data[widget.id]["i"][userId]!=null;
+            widget.state.lastChoice = null;
+            widget.state.choice = widget.state.multiSelect?data[widget.id]["i"][userId]:data[widget.id]["c"][data[widget.id]["i"][userId]];
+          });
+        }catch(e){
+
+        }
+      }
+      return new Future(()=>true);
+    },child:new Scaffold(
+        body: new Container(
+            child: new CustomScrollView(
+                slivers: [
+                  new SliverAppBar(
+                      pinned: false,
+                      backgroundColor: settings[0]?Colors.deepOrange:color,
+                      floating: true,
+                      centerTitle: false,
+                      expandedHeight: 30.0,
+                      title: new Text(widget.id)
+                  ),
+                  new SliverList(
+                      delegate: new SliverChildBuilderDelegate((context,i)=>new Poll(widget.id,true),childCount:1)
+                  )
+                ]
+            )
+        )
     ));
   }
 }
