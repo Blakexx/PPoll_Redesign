@@ -23,6 +23,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter/gestures.dart';
 
 bool light;
 
@@ -71,7 +72,7 @@ void main() async{
     while(!hasPerms){
       hasPerms = (await PermissionHandler().requestPermissions([PermissionGroup.storage]))[PermissionGroup.storage]==PermissionStatus.granted;
       if(++count==10){
-        runApp(new MaterialApp(home:new Scaffold(body:new Builder(builder: (context)=>new Container(child:new Center(child:new Padding(padding: EdgeInsets.only(left:MediaQuery.of(context).size.width*.05,right:MediaQuery.of(context).size.width*.05),child:new FittedBox(fit: BoxFit.scaleDown,child:new Text("In order to use PPoll you must enable storage permissions.",style:new TextStyle(fontSize:10000.0))))))))));
+        runApp(new MaterialApp(home:new Scaffold(body:new Builder(builder:(context)=>new Container(child:new Center(child:new Column(mainAxisAlignment: MainAxisAlignment.center,children:[new Padding(padding: EdgeInsets.only(left:MediaQuery.of(context).size.width*.05,right:MediaQuery.of(context).size.width*.05),child:new FittedBox(fit: BoxFit.scaleDown,child:new Text("In order to use PPoll you must enable storage permissions.",style:new TextStyle(fontSize:10000.0)))),new RichText(text:new TextSpan(text:"\nGrant Permissions",style: new TextStyle(color:Colors.blue,fontSize:20.0),recognizer: new TapGestureRecognizer()..onTap = () async{await PermissionHandler().openAppSettings();if((await PermissionHandler().checkPermissionStatus(PermissionGroup.storage))==PermissionStatus.granted){showDialog(context:context,barrierDismissible:false,builder:(context)=>new AlertDialog(title:new Text("Thank you"),content:new Text("Restart the app to use PPoll")));}}))])))))));
         return;
       }
     }
