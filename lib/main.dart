@@ -942,7 +942,7 @@ class PollViewState extends State<PollView>{
           widget.state.setState((){
             widget.state.hasVoted = data[widget.id]["i"]!=null&&data[widget.id]["i"][userId]!=null;
             widget.state.lastChoice = null;
-            widget.state.choice = widget.state.multiSelect?data[widget.id]["i"][userId]:data[widget.id]["c"][data[widget.id]["i"][userId]];
+            widget.state.choice = widget.state.multiSelect?data[widget.id]["i"][userId]!=null?new Set.from(data[widget.id]["i"][userId]):new Set.from([]):data[widget.id]["c"][data[widget.id]["i"][userId]];
           });
         }catch(e){
 
