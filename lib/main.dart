@@ -609,6 +609,10 @@ class ViewState extends State<View>{
                       s.jumpTo(0.0);
                       setState((){});
                     },
+                    onSubmitted: (str){
+                      s.jumpTo(0.0);
+                      setState((){search = str;});
+                    },
                   ),
                   centerTitle: false,
                   expandedHeight: 30.0,
