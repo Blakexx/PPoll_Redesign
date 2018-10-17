@@ -602,17 +602,12 @@ class ViewState extends State<View>{
                     ),
                     focusNode: f,
                     onChanged: (str){
-                      s.jumpTo(0.0);
                       search = str;
-                    },
-                    onEditingComplete:(){
-                      s.jumpTo(0.0);
-                      setState((){});
                     },
                     onSubmitted: (str){
                       s.jumpTo(0.0);
                       setState((){search = str;});
-                    },
+                    }
                   ),
                   centerTitle: false,
                   expandedHeight: 30.0,
@@ -689,7 +684,8 @@ class ViewState extends State<View>{
 class Poll extends StatefulWidget{
   final String id;
   final bool viewPage;
-  Poll(this.id,this.viewPage):super(key:new ObjectKey(id));
+  final Image image;
+  Poll(this.id,this.viewPage,[this.image]):super(key:new ObjectKey(id));
   @override
   PollState createState() => new PollState();
 }
@@ -723,9 +719,9 @@ class PollState extends State<Poll>{
       choice = new Set.from([]);
     }
     hasImage = data[widget.id]["b"].length==4&&data[widget.id]["b"][3]==1;
-      if(hasImage){
-      image = new Image.network(imageLink+widget.id);
+    if(hasImage){
       completer = new Completer<ui.Image>();
+      image = widget.image==null?new Image.network(imageLink+widget.id):widget.image;
       image.image.resolve(new ImageConfiguration()).addListener((ImageInfo info, bool b){
         if(!completer.isCompleted){
           completer.complete(info.image);
@@ -813,16 +809,18 @@ class PollState extends State<Poll>{
               image!=null?new Padding(padding:EdgeInsets.only(top:5.0,bottom:5.0),child:new FutureBuilder<ui.Image>(
                 future: completer.future,
                 builder: (BuildContext context, AsyncSnapshot<ui.Image> snapshot){
-                  if(snapshot.hasData){
-                    height = snapshot.data.height*1.0;
-                    width = snapshot.data.width*1.0;
-                    return new GestureDetector(onTap:(){Navigator.push(context,new PageRouteBuilder(opaque:false,pageBuilder: (context,a1,a2)=>new ImageView(child:new Center(child:new PhotoView(imageProvider:image.image,minScale: min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height), maxScale:4.0*min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height))),name:widget.id)));},child:new SizedBox(
+                  if(snapshot.hasData||widget.image!=null||height!=null||width!=null){
+                    if(snapshot.hasData){
+                      height = snapshot.data.height*1.0;
+                      width = snapshot.data.width*1.0;
+                    }
+                    return new Hero(tag:widget.id+"image",child:new Material(child:new GestureDetector(onTap:(){Navigator.push(context,new PageRouteBuilder(opaque:false,pageBuilder: (context,a1,a2)=>new ImageView(child:new Center(child:new PhotoView(imageProvider:image.image,minScale: min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height), maxScale:4.0*min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height))),name:widget.id)));},child:new SizedBox(
                         width: double.infinity,
                         height: max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0*((MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?1:3*((MediaQuery.of(context).size.width/500.0).ceil())/4)),
                         child: new Image(image:image.image,fit:BoxFit.cover)
-                    ));
+                    ))));
                   }else{
-                    return new Container(width:double.infinity,height:max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0*((MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?1:3*((MediaQuery.of(context).size.width/500.0).ceil())/4)),color:Colors.black12,child: new Center(child: new Container(height:MediaQuery.of(context).size.height/20.0,width:MediaQuery.of(context).size.height/20.0,child:new CircularProgressIndicator())));
+                    return new Hero(tag:widget.id+"image",child:new Material(child:new Container(width:double.infinity,height:max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0*((MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?1:3*((MediaQuery.of(context).size.width/500.0).ceil())/4)),color:Colors.black12,child: new Center(child: new Container(height:MediaQuery.of(context).size.height/20.0,width:MediaQuery.of(context).size.height/20.0,child:new CircularProgressIndicator())))));
                   }
                 },
               )):new Container(),
@@ -1000,7 +998,7 @@ class PollViewState extends State<PollView>{
                       title: new Text(widget.id)
                   ),
                   new SliverList(
-                      delegate: new SliverChildBuilderDelegate((context,i)=>new Hero(tag:widget.id,child:new Material(child:new Poll(widget.id,true))),childCount:1)
+                      delegate: new SliverChildBuilderDelegate((context,i)=>new Hero(tag:widget.id,child:new Material(child:new Poll(widget.id,true,widget.state.image))),childCount:1)
                   )
                 ]
             )
