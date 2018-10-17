@@ -792,6 +792,7 @@ class PollState extends State<Poll>{
     }catch(e){
       pids.remove(pid);
     }
+    PollViewState.canLeaveView = pids.length==0;
   }
 
   @override
@@ -822,6 +823,7 @@ class PollState extends State<Poll>{
               new Column(
                   children: data[widget.id]["c"].map((c)=>widget.viewPage||(hasVoted||(data[widget.id]["c"].indexOf(c)<5))?new MaterialButton(onPressed: () async{
                     if(multiSelect||c!=choice){
+                      PollViewState.canLeaveView = false;
                       String pid;
                       do{
                         pid = "";
@@ -851,6 +853,7 @@ class PollState extends State<Poll>{
                             groupValue: choice,
                             onChanged: (s){
                               if(s!=choice){
+                                PollViewState.canLeaveView = false;
                                 String pid;
                                 do{
                                   pid = "";
@@ -876,6 +879,7 @@ class PollState extends State<Poll>{
                           ):new Checkbox(
                             value: choice.contains(data[widget.id]["c"].indexOf(c)),
                             onChanged:(b){
+                              PollViewState.canLeaveView = false;
                               String pid;
                               do{
                                 pid = "";
@@ -934,12 +938,16 @@ class PollView extends StatefulWidget{
 }
 
 class PollViewState extends State<PollView>{
+  static bool canLeaveView = true;
   @override
   Widget build(BuildContext context){
     if(!hasLoaded){
       Navigator.of(context).pop();
     }
     return new WillPopScope(onWillPop:(){
+      if(!canLeaveView){
+        return new Future(()=>false);
+      }
       if(widget.state!=null){
         widget.state.hasVoted = data[widget.id]["i"]!=null&&data[widget.id]["i"][userId]!=null;
         widget.state.lastChoice = null;
