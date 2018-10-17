@@ -792,7 +792,9 @@ class PollState extends State<Poll>{
     }catch(e){
       pids.remove(pid);
     }
-    PollViewState.canLeaveView = pids.length==0;
+    if(widget.viewPage){
+      PollViewState.canLeaveView = pids.length==0;
+    }
   }
 
   @override
@@ -823,7 +825,9 @@ class PollState extends State<Poll>{
               new Column(
                   children: data[widget.id]["c"].map((c)=>widget.viewPage||(hasVoted||(data[widget.id]["c"].indexOf(c)<5))?new MaterialButton(onPressed: () async{
                     if(multiSelect||c!=choice){
-                      PollViewState.canLeaveView = false;
+                      if(widget.viewPage){
+                        PollViewState.canLeaveView = false;
+                      }
                       String pid;
                       do{
                         pid = "";
@@ -853,7 +857,9 @@ class PollState extends State<Poll>{
                             groupValue: choice,
                             onChanged: (s){
                               if(s!=choice){
-                                PollViewState.canLeaveView = false;
+                                if(widget.viewPage){
+                                  PollViewState.canLeaveView = false;
+                                }
                                 String pid;
                                 do{
                                   pid = "";
@@ -879,7 +885,9 @@ class PollState extends State<Poll>{
                           ):new Checkbox(
                             value: choice.contains(data[widget.id]["c"].indexOf(c)),
                             onChanged:(b){
-                              PollViewState.canLeaveView = false;
+                              if(widget.viewPage){
+                                PollViewState.canLeaveView = false;
+                              }
                               String pid;
                               do{
                                 pid = "";
@@ -920,9 +928,9 @@ class PollState extends State<Poll>{
     }else{
       returnedWidget = new Card(color: const Color.fromRGBO(250, 250, 250, 1.0),child:returnedWidget);
       if(hasVoted||data[widget.id]["a"].length<6){
-        returnedWidget = new GestureDetector(onTap: (){Navigator.push(context,new MaterialPageRoute(builder: (context) => new PollView(widget.id,this)));},child:returnedWidget);
+        returnedWidget = new GestureDetector(onTap: (){if(pids.length==0){Navigator.push(context,new MaterialPageRoute(builder: (context) => new PollView(widget.id,this)));}},child:returnedWidget);
       }else{
-        returnedWidget = new GestureDetector(onTap: (){Navigator.push(context,new MaterialPageRoute(builder: (context) => new PollView(widget.id,this)));},child:new AbsorbPointer(child:returnedWidget));
+        returnedWidget = new GestureDetector(onTap: (){if(pids.length==0){Navigator.push(context,new MaterialPageRoute(builder: (context) => new PollView(widget.id,this)));}},child:new AbsorbPointer(child:returnedWidget));
       }
       return returnedWidget;
     }
