@@ -288,20 +288,14 @@ class AppState extends State<App>{
       new Timer(new Duration(seconds:1),() async{
         ConnectivityResult r = await connection.checkConnectivity();
         if(r!=current){
+          print("$current $r");
           current = r;
           setState((){
             client.close(force:true);
             hasLoaded = false;
           });
           if(r!=ConnectivityResult.none){
-            try{
-              final result = await InternetAddress.lookup("google.com");
-              if(result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-                setUp(current);
-              }
-            }on SocketException catch(_){
-              current = ConnectivityResult.none;
-            }
+            setUp(current);
           }
         }
         ensureConnection();
