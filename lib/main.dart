@@ -299,7 +299,7 @@ class AppState extends State<App>{
               if(result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
                 setUp(current);
               }
-            }on SocketException catch(n){
+            }on SocketException catch(_){
               current = ConnectivityResult.none;
             }
           }
