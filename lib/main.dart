@@ -933,18 +933,22 @@ class PollState extends State<Poll>{
       if(!(hasVoted||data[widget.id]["a"].length<6)){
         returnedWidget = new AbsorbPointer(child:returnedWidget);
       }
-      returnedWidget = new GestureDetector(onTap: (){if(pids.length==0){Navigator.push(context,new PageRouteBuilder(
-        pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation){
-          return new PollView(widget.id,this);
-        },
-        transitionDuration: new Duration(milliseconds: 300),
-        transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-          return new FadeTransition(
-            opacity: animation,
-            child: child
-          );
-        },
-      ));}},child:returnedWidget);
+      returnedWidget = new GestureDetector(onTap: (){
+        if(pids.length==0){
+          Navigator.push(context,new PageRouteBuilder(
+            pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation){
+              return new PollView(widget.id,this);
+            },
+            transitionDuration: new Duration(milliseconds: 300),
+            transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+              return new FadeTransition(
+                opacity: animation,
+                child: child
+              );
+            },
+          ));
+        }
+      },child:returnedWidget);
       return returnedWidget;
     }
   }
