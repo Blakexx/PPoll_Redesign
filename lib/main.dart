@@ -266,6 +266,10 @@ class AppState extends State<App>{
                   }
                 }).onDone((){
                   print("Done");
+                  if(hasLoaded){
+                    setState((){hasLoaded = false;});
+                    setUp(current);
+                  }
                 });
               }
             });
@@ -292,8 +296,8 @@ class AppState extends State<App>{
           print("$current $r");
           current = r;
           setState((){
-            client.close(force:true);
             hasLoaded = false;
+            client.close(force:true);
           });
           if(r!=ConnectivityResult.none){
             setUp(current);
@@ -308,8 +312,8 @@ class AppState extends State<App>{
       if(r!=current){
         current = r;
         setState((){
-          client.close(force:true);
           hasLoaded = false;
+          client.close(force:true);
         });
         if(current!=ConnectivityResult.none){
           setUp(current);
@@ -921,12 +925,22 @@ class PollState extends State<Poll>{
     if(widget.viewPage){
       return returnedWidget;
     }else{
-      returnedWidget = new Card(color: const Color.fromRGBO(250, 250, 250, 1.0),child:returnedWidget);
-      if(hasVoted||data[widget.id]["a"].length<6){
-        returnedWidget = new GestureDetector(onTap: (){if(pids.length==0){Navigator.push(context,new MaterialPageRoute(builder: (context) => new PollView(widget.id,this)));}},child:returnedWidget);
-      }else{
-        returnedWidget = new GestureDetector(onTap: (){if(pids.length==0){Navigator.push(context,new MaterialPageRoute(builder: (context) => new PollView(widget.id,this)));}},child:new AbsorbPointer(child:returnedWidget));
+      returnedWidget = new Card(color: const Color.fromRGBO(250, 250, 250, 1.0),child:new Hero(tag:widget.id,child:new Material(type:MaterialType.transparency,child:returnedWidget)));
+      if(!(hasVoted||data[widget.id]["a"].length<6)){
+        returnedWidget = new AbsorbPointer(child:returnedWidget);
       }
+      returnedWidget = new GestureDetector(onTap: (){if(pids.length==0){Navigator.push(context,new PageRouteBuilder(
+        pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation){
+          return new PollView(widget.id,this);
+        },
+        transitionDuration: new Duration(milliseconds: 300),
+        transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+          return new FadeTransition(
+            opacity: animation,
+            child: child
+          );
+        },
+      ));}},child:returnedWidget);
       return returnedWidget;
     }
   }
@@ -954,7 +968,7 @@ class PollViewState extends State<PollView>{
       if(widget.state!=null){
         widget.state.hasVoted = data[widget.id]["i"]!=null&&data[widget.id]["i"][userId]!=null;
         widget.state.lastChoice = null;
-        widget.state.choice = widget.state.multiSelect?(data[widget.id]["i"][userId]!=null?new Set.from(data[widget.id]["i"][userId]):new Set.from([])):(data[widget.id]["i"][userId]!=null?data[widget.id]["c"][data[widget.id]["i"][userId]]:null);
+        widget.state.choice = widget.state.multiSelect?(data[widget.id]["i"]!=null&&data[widget.id]["i"][userId]!=null?new Set.from(data[widget.id]["i"][userId]):new Set.from([])):(data[widget.id]["i"]!=null&&(data[widget.id]["i"][userId]!=null)?data[widget.id]["c"][data[widget.id]["i"][userId]]:null);
         /*
         try{
           widget.state.setState((){
@@ -981,7 +995,7 @@ class PollViewState extends State<PollView>{
                       title: new Text(widget.id)
                   ),
                   new SliverList(
-                      delegate: new SliverChildBuilderDelegate((context,i)=>new Poll(widget.id,true),childCount:1)
+                      delegate: new SliverChildBuilderDelegate((context,i)=>new Hero(tag:widget.id,child:new Material(child:new Poll(widget.id,true))),childCount:1)
                   )
                 ]
             )
