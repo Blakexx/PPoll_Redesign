@@ -77,7 +77,7 @@ void main() async{
       }
     }
   }
-  current = await connection.checkConnectivity();
+  //current = await connection.checkConnectivity();
   settings = await settingsData.readData();
   if(settings==null){
     settings = new List<dynamic>();
@@ -284,7 +284,7 @@ class AppState extends State<App>{
   @override
   void initState(){
     super.initState();
-    /*ensureConnection(){
+    ensureConnection(){
       new Timer(new Duration(seconds:1),() async{
         ConnectivityResult r = await connection.checkConnectivity();
         if(r!=current){
@@ -297,7 +297,7 @@ class AppState extends State<App>{
             try{
               final result = await InternetAddress.lookup("google.com");
               if(result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-                setUp();
+                setUp(current);
               }
             }on SocketException catch(n){
               current = ConnectivityResult.none;
@@ -308,7 +308,7 @@ class AppState extends State<App>{
       });
     }
     ensureConnection();
-    */
+    /*
     connection.onConnectivityChanged.listen((r) async{
       if(r!=current){
         current = r;
@@ -324,6 +324,7 @@ class AppState extends State<App>{
     if(current!=ConnectivityResult.none){
       setUp(current);
     }
+    */
   }
 
   @override
