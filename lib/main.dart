@@ -685,7 +685,8 @@ class Poll extends StatefulWidget{
   final String id;
   final bool viewPage;
   final Image image;
-  Poll(this.id,this.viewPage,[this.image]):super(key:new ObjectKey(id));
+  final double height,width;
+  Poll(this.id,this.viewPage,[this.image,this.height,this.width]):super(key:new ObjectKey(id));
   @override
   PollState createState() => new PollState();
 }
@@ -809,7 +810,7 @@ class PollState extends State<Poll>{
               image!=null?new Padding(padding:EdgeInsets.only(top:5.0,bottom:5.0),child:new FutureBuilder<ui.Image>(
                 future: completer.future,
                 builder: (BuildContext context, AsyncSnapshot<ui.Image> snapshot){
-                  if(snapshot.hasData||widget.image!=null||height!=null||width!=null){
+                  if(snapshot.hasData||height!=null||width!=null||(widget.image!=null&&widget.height!=null&&widget.width!=null)){
                     if(snapshot.hasData){
                       height = snapshot.data.height*1.0;
                       width = snapshot.data.width*1.0;
@@ -998,7 +999,7 @@ class PollViewState extends State<PollView>{
                       title: new Text(widget.id)
                   ),
                   new SliverList(
-                      delegate: new SliverChildBuilderDelegate((context,i)=>new Hero(tag:widget.id,child:new Material(child:new Poll(widget.id,true,widget.state.image))),childCount:1)
+                      delegate: new SliverChildBuilderDelegate((context,i)=>new Hero(tag:widget.id,child:new Material(child:new Poll(widget.id,true,widget.state.image,widget.state.height,widget.state.width))),childCount:1)
                   )
                 ]
             )
