@@ -602,11 +602,12 @@ class ViewState extends State<View>{
                     ),
                     focusNode: f,
                     onChanged: (str){
+                      s.jumpTo(0.0);
                       search = str;
                     },
-                    onSubmitted:(str){
+                    onEditingComplete:(){
                       s.jumpTo(0.0);
-                      setState((){search = str;});
+                      setState((){});
                     },
                   ),
                   centerTitle: false,
