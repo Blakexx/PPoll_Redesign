@@ -811,11 +811,11 @@ class PollState extends State<Poll>{
                     width = snapshot.data.width*1.0;
                     return new GestureDetector(onTap:(){Navigator.push(context,new PageRouteBuilder(opaque:false,pageBuilder: (context,a1,a2)=>new ImageView(child:new Center(child:new PhotoView(imageProvider:image.image,minScale: min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height), maxScale:4.0*min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height))),name:widget.id)));},child:new SizedBox(
                         width: double.infinity,
-                        height: max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0*((MediaQuery.of(context).size.width/500.0).ceil()==1?1:3*((MediaQuery.of(context).size.width/500.0).ceil())/4)),
+                        height: max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0*((MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?1:3*((MediaQuery.of(context).size.width/500.0).ceil())/4)),
                         child: new Image(image:image.image,fit:BoxFit.cover)
                     ));
                   }else{
-                    return new Container(width:double.infinity,height:max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0*(MediaQuery.of(context).size.width/500.0).ceil()),color:Colors.black12,child: new Center(child: new Container(height:MediaQuery.of(context).size.height/20.0,width:MediaQuery.of(context).size.height/20.0,child:new CircularProgressIndicator())));
+                    return new Container(width:double.infinity,height:max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0*((MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?1:3*((MediaQuery.of(context).size.width/500.0).ceil())/4)),color:Colors.black12,child: new Center(child: new Container(height:MediaQuery.of(context).size.height/20.0,width:MediaQuery.of(context).size.height/20.0,child:new CircularProgressIndicator())));
                   }
                 },
               )):new Container(),
@@ -902,7 +902,7 @@ class PollState extends State<Poll>{
                           new Container(width:5.0)
                         ]
                     ),
-                    hasVoted?new Padding(padding: EdgeInsets.only(left:50.0,right:20.0,bottom:5.0),child: new Container(height:(MediaQuery.of(context).size.width/500.0).ceil()==1?5.0:5.0/(3*((MediaQuery.of(context).size.width/500.0).ceil())/4),child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation((!multiSelect?choice==c:choice.contains(data[widget.id]["c"].indexOf(c)))?Colors.blueAccent:Colors.grey[600]),backgroundColor:Colors.black26,value:(data[widget.id]["a"].reduce((n1,n2)=>n1+n2))!=0?data[widget.id]["a"][data[widget.id]["c"].indexOf(c)]/(data[widget.id]["a"].reduce((n1,n2)=>n1+n2)):0.0))):new Container()
+                    hasVoted?new Padding(padding: EdgeInsets.only(left:50.0,right:20.0,bottom:5.0),child: new Container(height:(MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?5.0:5.0/(3*((MediaQuery.of(context).size.width/500.0).ceil())/4),child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation((!multiSelect?choice==c:choice.contains(data[widget.id]["c"].indexOf(c)))?Colors.blueAccent:Colors.grey[600]),backgroundColor:Colors.black26,value:(data[widget.id]["a"].reduce((n1,n2)=>n1+n2))!=0?data[widget.id]["a"][data[widget.id]["c"].indexOf(c)]/(data[widget.id]["a"].reduce((n1,n2)=>n1+n2)):0.0))):new Container()
                   ])):data[widget.id]["c"].indexOf(c)==5?/*new Container(color:Colors.red,child:new Text("...",style:new TextStyle(fontSize:20.0,fontWeight: FontWeight.bold)))*/new Icon(Icons.more_horiz):new Container()).toList().cast<Widget>()
               ),
               new Container(height:!hasVoted?7.0:13.0)
@@ -936,11 +936,14 @@ class PollView extends StatefulWidget{
 class PollViewState extends State<PollView>{
   @override
   Widget build(BuildContext context){
+    if(!hasLoaded){
+      Navigator.of(context).pop();
+    }
     return new WillPopScope(onWillPop:(){
       if(widget.state!=null){
         widget.state.hasVoted = data[widget.id]["i"]!=null&&data[widget.id]["i"][userId]!=null;
         widget.state.lastChoice = null;
-        widget.state.choice = widget.state.multiSelect?data[widget.id]["i"][userId]!=null?new Set.from(data[widget.id]["i"][userId]):new Set.from([]):data[widget.id]["c"][data[widget.id]["i"][userId]];
+        widget.state.choice = widget.state.multiSelect?(data[widget.id]["i"][userId]!=null?new Set.from(data[widget.id]["i"][userId]):new Set.from([])):(data[widget.id]["i"][userId]!=null?data[widget.id]["c"][data[widget.id]["i"][userId]]:null);
         /*
         try{
           widget.state.setState((){
