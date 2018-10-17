@@ -988,20 +988,28 @@ class PollViewState extends State<PollView>{
       return new Future(()=>true);
     },child:new Scaffold(
         body: new Container(
-            child: new CustomScrollView(
-                slivers: [
-                  new SliverAppBar(
-                      pinned: false,
-                      backgroundColor: settings[0]?Colors.deepOrange:color,
-                      floating: true,
-                      centerTitle: false,
-                      expandedHeight: 30.0,
-                      title: new Text(widget.id)
-                  ),
-                  new SliverList(
-                      delegate: new SliverChildBuilderDelegate((context,i)=>new Hero(tag:widget.id,child:new Material(child:new Poll(widget.id,true,widget.state.image,widget.state.height,widget.state.width))),childCount:1)
-                  )
-                ]
+            child: new Stack(
+              children: [
+                new CustomScrollView(
+                    slivers: [
+                      new SliverAppBar(
+                          pinned: false,
+                          backgroundColor: settings[0]?Colors.deepOrange:color,
+                          floating: true,
+                          centerTitle: false,
+                          expandedHeight: 30.0,
+                          title: new Text(widget.id)
+                      ),
+                      new SliverList(
+                          delegate: new SliverChildBuilderDelegate((context,i)=>new Hero(tag:widget.id,child:new Material(child:new Poll(widget.id,true,widget.state.image,widget.state.height,widget.state.width))),childCount:1)
+                      )
+                    ]
+                ),
+                new Positioned(
+                    left:0.0,top:0.0,
+                    child:new Container(height:MediaQuery.of(context).padding.top,width:MediaQuery.of(context).size.width,color:settings[0]?Colors.deepOrange[900]:color)
+                )
+              ]
             )
         )
     ));
