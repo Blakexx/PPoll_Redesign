@@ -52,6 +52,13 @@ dev_dependencies:
 
 # The following section is specific to Flutter.
 flutter:
+  fonts:
+    - family: Roboto
+      fonts:
+        - asset: fonts/Roboto-Regular.ttf
+    - family: Futura
+      fonts:
+        - asset: fonts/futura-medium-bt.ttf
   assets:
     - icon/platypus.png
     - icon/platypus2.png
