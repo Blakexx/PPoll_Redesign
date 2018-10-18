@@ -72,7 +72,17 @@ void main() async{
     while(!hasPerms){
       hasPerms = (await PermissionHandler().requestPermissions([PermissionGroup.storage]))[PermissionGroup.storage]==PermissionStatus.granted;
       if(++count==10){
-        runApp(new MaterialApp(home:new Scaffold(body:new Builder(builder:(context)=>new Container(child:new Center(child:new Column(mainAxisAlignment: MainAxisAlignment.center,children:[new Padding(padding: EdgeInsets.only(left:MediaQuery.of(context).size.width*.05,right:MediaQuery.of(context).size.width*.05),child:new FittedBox(fit: BoxFit.scaleDown,child:new Text("In order to use PPoll you must enable storage permissions.",style:new TextStyle(fontSize:10000.0)))),new RichText(text:new TextSpan(text:"\nGrant Permissions",style: new TextStyle(color:Colors.blue,fontSize:20.0),recognizer: new TapGestureRecognizer()..onTap = () async{await PermissionHandler().openAppSettings();if((await PermissionHandler().checkPermissionStatus(PermissionGroup.storage))==PermissionStatus.granted){showDialog(context:context,barrierDismissible:false,builder:(context)=>new AlertDialog(title:new Text("Thank you"),content:new Text("Restart the app to use PPoll")));}}))])))))));
+        runApp(new MaterialApp(home:new Scaffold(body:new Builder(builder:(context)=>new Container(child:new Center(child:new Column(mainAxisAlignment: MainAxisAlignment.center,children:[new Padding(padding: EdgeInsets.only(left:MediaQuery.of(context).size.width*.05,right:MediaQuery.of(context).size.width*.05),child:new FittedBox(fit: BoxFit.scaleDown,child:new Text("In order to use PPoll you must enable storage permissions.",style:new TextStyle(fontSize:10000.0)))),new RichText(text:new TextSpan(text:"\nGrant Permissions",style: new TextStyle(color:Colors.blue,fontSize:20.0),recognizer: new TapGestureRecognizer()..onTap = (){
+          PermissionHandler().openAppSettings();
+          waitForPerms() async{
+            if((await PermissionHandler().checkPermissionStatus(PermissionGroup.storage))==PermissionStatus.granted){
+              main();
+              return;
+            }
+            new Timer(new Duration(seconds:1),waitForPerms);
+          }
+          waitForPerms();
+          }))])))))));
         return;
       }
     }
