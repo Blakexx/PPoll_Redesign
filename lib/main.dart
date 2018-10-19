@@ -787,6 +787,7 @@ class PollState extends State<Poll>{
       data[widget.id]["i"]={};
     }
     data[widget.id]["i"][userId]=!multiSelect?data[widget.id]["c"].indexOf(choice):choice.toList();
+    data[widget.id]["i"][userId].removeWhere((i)=>i==-1);
     await http.put(Uri.encodeFull(database+"/data/${widget.id}/i/$userId.json?auth=$secretKey"),body: json.encode(!multiSelect?data[widget.id]["c"].indexOf(choice):(data[widget.id]["i"][userId].length>0?data[widget.id]["i"][userId]:[-1])));
     await http.get(Uri.encodeFull(functionsLink+"/vote?text={\"poll\":\"${widget.id}\",\"choice\":${data[widget.id]["c"].indexOf(c)},\"changed\":${!multiSelect?lastChoice!=null?data[widget.id]["c"].indexOf(lastChoice):null:!b},\"multiSelect\":$multiSelect,\"key\":\"$secretKey\"}"));
     if(!hasVoted){
