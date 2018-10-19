@@ -58,7 +58,7 @@ flutter:
         - asset: fonts/Roboto-Regular.ttf
     - family: Futura
       fonts:
-        - asset: fonts/futura-medium-bt.ttf
+        - asset: fonts/Rubik-Regular.ttf
   assets:
     - icon/platypus.png
     - icon/platypus2.png
