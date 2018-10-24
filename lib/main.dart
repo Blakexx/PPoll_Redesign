@@ -651,7 +651,6 @@ class ViewState extends State<View>{
                     inSearch?new IconButton(
                       icon: new Icon(Icons.close),
                       onPressed: (){
-                        /*
                         if(f.hasFocus){
                           search = "";
                           s.jumpTo(0.0);
@@ -662,11 +661,7 @@ class ViewState extends State<View>{
                           s.jumpTo(0.0);
                           setState((){inSearch = false;});
                         }
-                        */
-                        search = "";
-                        c.text = "";
-                        s.jumpTo(0.0);
-                        setState((){inSearch = false;});
+
                       },
                     ):new IconButton(
                         icon: new Icon(Icons.search),
