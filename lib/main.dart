@@ -948,7 +948,7 @@ class PollState extends State<Poll>{
         ]
     );
     if(widget.viewPage){
-      return returnedWidget;
+      return new Container(color: !settings[0]?new Color.fromRGBO(250, 250, 250, 1.0):new Color.fromRGBO(32,33,36,1.0),child:returnedWidget);
     }else{
       returnedWidget = new Card(color: !settings[0]?new Color.fromRGBO(250, 250, 250, 1.0):new Color.fromRGBO(32,33,36,1.0),child:new Hero(tag:widget.id,child:new Material(type:MaterialType.transparency,child:returnedWidget)));
       if(!(hasVoted||data[widget.id]["a"].length<6)){
@@ -1002,6 +1002,7 @@ class PollViewState extends State<PollView>{
       return new Future(()=>true);
     },child:new Scaffold(
         body: new Container(
+            color: !settings[0]?new Color.fromRGBO(250, 250, 250, 1.0):new Color.fromRGBO(32,33,36,1.0),
             child: new Stack(
               children: [
                 new CustomScrollView(
