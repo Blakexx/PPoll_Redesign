@@ -100,7 +100,7 @@ void main() async{
     await settingsData.writeData(settings);
   }
   textColor = !settings[0]?new Color.fromRGBO(34, 34, 34,1.0):Colors.white;
-  color = !settings[0]?new Color.fromRGBO(52,52,52,1.0):Colors.black;
+  color = !settings[0]?new Color.fromRGBO(52,52,52,1.0):new Color.fromRGBO(22,22,22,1.0);
   if(Platform.isIOS){
     userId = await realUserId.read(key: "PPollUserID");
     if(userId==null){
@@ -463,7 +463,7 @@ class AppState extends State<App>{
                                       children: settings.asMap().keys.map((i)=>new Switch(value:settings[i],onChanged:(b){
                                         if(i==0){
                                           textColor = !b?new Color.fromRGBO(34,34, 34,1.0):new Color.fromRGBO(238,238,238,1.0);
-                                          color = !b?new Color.fromRGBO(52,52,52,1.0):Colors.black;
+                                          color = !b?new Color.fromRGBO(52,52,52,1.0):new Color.fromRGBO(22,22,22,1.0);
                                         }
                                         setState((){settings[i]=b;});
                                         settingsData.writeData(settings);
@@ -550,7 +550,7 @@ class ViewState extends State<View>{
                   )
               ))
             ],
-            bottom: new PreferredSize(preferredSize: new Size(double.infinity,3.0),child: new Container(height:3.0,child:new LinearProgressIndicator()))
+            bottom: new PreferredSize(preferredSize: new Size(double.infinity,3.0),child: new Container(height:3.0,child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation(settings[0]?Colors.greenAccent[400]:Colors.blueAccent[600]))))
           )
         ]
       );
