@@ -392,6 +392,7 @@ class AppState extends State<App>{
                                 shouldSearchTimer.cancel();
                               }
                               shouldSearchTimer = new Timer(new Duration(milliseconds:500),(){
+                                s.jumpTo(0.0);
                                 setState((){});
                               });
                             });
@@ -517,6 +518,7 @@ class ViewState extends State<View>{
         shouldSearchTimer.cancel();
       }
       shouldSearchTimer = new Timer(new Duration(milliseconds:500),(){
+        s.jumpTo(0.0);
         setState((){});
       });
     });
