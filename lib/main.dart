@@ -57,9 +57,9 @@ ScrollController s = new ScrollController();
 
 bool hasLoaded = false;
 
-Color color = const Color.fromRGBO(52,52,52,1.0);
+Color color = new Color.fromRGBO(52,52,52,1.0);
 
-Color textColor = const Color.fromRGBO(34, 34, 34,1.0);
+Color textColor = new Color.fromRGBO(34, 34, 34,1.0);
 
 ConnectivityResult current;
 
@@ -99,6 +99,8 @@ void main() async{
     settings.addAll(new List<dynamic>(numSettings-settings.length).map((n)=>false));
     await settingsData.writeData(settings);
   }
+  textColor = !settings[0]?new Color.fromRGBO(34, 34, 34,1.0):Colors.white;
+  color = !settings[0]?new Color.fromRGBO(52,52,52,1.0):Colors.black;
   if(Platform.isIOS){
     userId = await realUserId.read(key: "PPollUserID");
     if(userId==null){
@@ -352,7 +354,7 @@ class AppState extends State<App>{
                   bottomNavigationBar: new BottomNavigationBar(
                       currentIndex: index,
                       type: BottomNavigationBarType.fixed,
-                      fixedColor: settings[0]?Colors.deepOrangeAccent:Colors.indigoAccent,
+                      fixedColor: settings[0]?Colors.greenAccent[400]:Colors.indigoAccent,
                       items: [
                         BottomNavigationBarItem(
                           icon: new Icon(Icons.language),
@@ -436,7 +438,7 @@ class AppState extends State<App>{
                         });
                       }
                       return index==0?new Container(
-                          color: const Color.fromRGBO(230, 230, 230, 1.0),
+                          color: !settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),
                           child: new Center(
                               child: new View(false)
                           )
@@ -449,7 +451,7 @@ class AppState extends State<App>{
                               child: new Text("Vote")
                           )
                       ):index==3?new Container(
-                          color: const Color.fromRGBO(230, 230, 230, 1.0),
+                          color: !settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(32,33,36,1.0),
                           child: new Center(
                               child: new View(true)
                           )
@@ -459,6 +461,10 @@ class AppState extends State<App>{
                                 children: [
                                   new Padding(padding: EdgeInsets.only(top:MediaQuery.of(context).padding.top),child: new Column(
                                       children: settings.asMap().keys.map((i)=>new Switch(value:settings[i],onChanged:(b){
+                                        if(i==0){
+                                          textColor = !b?new Color.fromRGBO(34,34, 34,1.0):new Color.fromRGBO(238,238,238,1.0);
+                                          color = !b?new Color.fromRGBO(52,52,52,1.0):Colors.black;
+                                        }
                                         setState((){settings[i]=b;});
                                         settingsData.writeData(settings);
                                       })).toList()
@@ -516,7 +522,7 @@ class ViewState extends State<View>{
         slivers: [
           new SliverAppBar(
             pinned: false,
-            backgroundColor: settings[0]?Colors.deepOrange:color,
+            backgroundColor: color,
             floating: true,
             centerTitle: false,
             expandedHeight: 30.0,
@@ -621,7 +627,7 @@ class ViewState extends State<View>{
                   ),
                   centerTitle: false,
                   expandedHeight: 30.0,
-                  backgroundColor: settings[0]?Colors.deepOrange[900]:color,
+                  backgroundColor: color,
                   actions: [
                     inSearch?new IconButton(
                       icon: new Icon(Icons.close),
@@ -684,7 +690,7 @@ class ViewState extends State<View>{
         ),
         new Positioned(
             left:0.0,top:0.0,
-            child:new Container(height:MediaQuery.of(context).padding.top,width:MediaQuery.of(context).size.width,color:settings[0]?Colors.deepOrange[900]:color)
+            child:new Container(height:MediaQuery.of(context).padding.top,width:MediaQuery.of(context).size.width,color:color)
         )
       ]
     );
@@ -819,7 +825,7 @@ class PollState extends State<Poll>{
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               new Padding(padding:EdgeInsets.only(top:10.0,left:11.0,right:11.0),child:new Text(data[widget.id]["q"],style: new TextStyle(color:textColor,fontSize: 15.0,letterSpacing:.2,fontWeight: FontWeight.w600,fontFamily: "Futura"),maxLines: !widget.viewPage?2:100,overflow: TextOverflow.ellipsis)),
-              new Padding(padding:EdgeInsets.only(top:5.0,left:11.0,bottom:5.0),child:new Text(widget.id+(data[widget.id]["t"]!=null?" • ${timeago.format(new DateTime.fromMillisecondsSinceEpoch(data[widget.id]["t"]*1000))}":"")+" • ${data[widget.id]["a"].reduce((n1,n2)=>n1+n2)} vote"+((data[widget.id]["a"].reduce((n1,n2)=>n1+n2)==1)?"":"s"),style: new TextStyle(fontSize: 12.0,color:(settings[0]?Colors.white:textColor).withOpacity(.8)))),
+              new Padding(padding:EdgeInsets.only(top:5.0,left:11.0,bottom:5.0),child:new Text(widget.id+(data[widget.id]["t"]!=null?" • ${timeago.format(new DateTime.fromMillisecondsSinceEpoch(data[widget.id]["t"]*1000))}":"")+" • ${data[widget.id]["a"].reduce((n1,n2)=>n1+n2)} vote"+((data[widget.id]["a"].reduce((n1,n2)=>n1+n2)==1)?"":"s"),style: new TextStyle(fontSize: 12.0,color:textColor.withOpacity(.8)))),
               image!=null?new Padding(padding:EdgeInsets.only(top:5.0,bottom:5.0),child:new FutureBuilder<ui.Image>(
                 future: completer.future,
                 builder: (BuildContext context, AsyncSnapshot<ui.Image> snapshot){
@@ -868,7 +874,8 @@ class PollState extends State<Poll>{
                     },padding:EdgeInsets.zero,child:new Column(children: [
                     new Row(
                         children: [
-                          !multiSelect?pids.length>0&&choice==c?new Container(width:2*kRadialReactionRadius+8.0,height:2*kRadialReactionRadius+8.0,child:new Center(child:new Container(height:16.0,width:16.0,child: new CircularProgressIndicator(strokeWidth: 2.2)))):new Radio(
+                          !multiSelect?pids.length>0&&choice==c?new Container(width:2*kRadialReactionRadius+8.0,height:2*kRadialReactionRadius+8.0,child:new Center(child:new Container(height:16.0,width:16.0,child: new CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation(!settings[0]?Colors.blueAccent[600]:Colors.greenAccent[400]),strokeWidth: 2.2)))):new Radio(
+                            activeColor: settings[0]?Colors.greenAccent[400]:Colors.blueAccent[600],
                             value: c,
                             groupValue: choice,
                             onChanged: (s){
@@ -899,6 +906,7 @@ class PollState extends State<Poll>{
                               }
                             },
                           ):new Checkbox(
+                            activeColor: settings[0]?Colors.greenAccent[400]:Colors.blueAccent[600],
                             value: choice.contains(data[widget.id]["c"].indexOf(c)),
                             onChanged:(b){
                               if(widget.viewPage){
@@ -930,7 +938,7 @@ class PollState extends State<Poll>{
                           new Container(width:5.0)
                         ]
                     ),
-                    hasVoted?new Padding(padding: EdgeInsets.only(left:50.0,right:20.0,bottom:5.0),child: new Container(height:(MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?5.0:5.0/(3*((MediaQuery.of(context).size.width/500.0).ceil())/4),child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation((!multiSelect?choice==c:choice.contains(data[widget.id]["c"].indexOf(c)))?Colors.blueAccent:Colors.grey[600]),backgroundColor:Colors.black26,value:(data[widget.id]["a"].reduce((n1,n2)=>n1+n2))!=0?data[widget.id]["a"][data[widget.id]["c"].indexOf(c)]/(data[widget.id]["a"].reduce((n1,n2)=>n1+n2)):0.0))):new Container()
+                    hasVoted?new Padding(padding: EdgeInsets.only(left:50.0,right:20.0,bottom:5.0),child: new Container(height:(MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?5.0:5.0/(3*((MediaQuery.of(context).size.width/500.0).ceil())/4),child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation((!multiSelect?choice==c:choice.contains(data[widget.id]["c"].indexOf(c)))?settings[0]?Colors.greenAccent[400]:Colors.blueAccent[600]:settings[0]?Colors.white54:Colors.grey[600]),backgroundColor:settings[0]?Colors.white24:Colors.black26,value:(data[widget.id]["a"].reduce((n1,n2)=>n1+n2))!=0?data[widget.id]["a"][data[widget.id]["c"].indexOf(c)]/(data[widget.id]["a"].reduce((n1,n2)=>n1+n2)):0.0))):new Container()
                   ])):data[widget.id]["c"].indexOf(c)==5?/*new Container(color:Colors.red,child:new Text("...",style:new TextStyle(fontSize:20.0,fontWeight: FontWeight.bold)))*/new Icon(Icons.more_horiz):new Container()).toList().cast<Widget>()
               ),
               new Container(height:!hasVoted?7.0:13.0)
@@ -942,7 +950,7 @@ class PollState extends State<Poll>{
     if(widget.viewPage){
       return returnedWidget;
     }else{
-      returnedWidget = new Card(color: const Color.fromRGBO(250, 250, 250, 1.0),child:new Hero(tag:widget.id,child:new Material(type:MaterialType.transparency,child:returnedWidget)));
+      returnedWidget = new Card(color: !settings[0]?new Color.fromRGBO(250, 250, 250, 1.0):new Color.fromRGBO(32,33,36,1.0),child:new Hero(tag:widget.id,child:new Material(type:MaterialType.transparency,child:returnedWidget)));
       if(!(hasVoted||data[widget.id]["a"].length<6)){
         returnedWidget = new AbsorbPointer(child:returnedWidget);
       }
@@ -990,17 +998,6 @@ class PollViewState extends State<PollView>{
         widget.state.hasVoted = data[widget.id]["i"]!=null&&data[widget.id]["i"][userId]!=null;
         widget.state.lastChoice = null;
         widget.state.choice = widget.state.multiSelect?(data[widget.id]["i"]!=null&&data[widget.id]["i"][userId]!=null?new Set.from(data[widget.id]["i"][userId]):new Set.from([])):(data[widget.id]["i"]!=null&&(data[widget.id]["i"][userId]!=null)?data[widget.id]["c"][data[widget.id]["i"][userId]]:null);
-        /*
-        try{
-          widget.state.setState((){
-            widget.state.hasVoted = data[widget.id]["i"]!=null&&data[widget.id]["i"][userId]!=null;
-            widget.state.lastChoice = null;
-            widget.state.choice = widget.state.multiSelect?data[widget.id]["i"][userId]!=null?new Set.from(data[widget.id]["i"][userId]):new Set.from([]):data[widget.id]["c"][data[widget.id]["i"][userId]];
-          });
-        }catch(e){
-
-        }
-        */
       }
       return new Future(()=>true);
     },child:new Scaffold(
@@ -1011,7 +1008,7 @@ class PollViewState extends State<PollView>{
                     slivers: [
                       new SliverAppBar(
                           pinned: false,
-                          backgroundColor: settings[0]?Colors.deepOrange:color,
+                          backgroundColor:color,
                           floating: true,
                           centerTitle: false,
                           expandedHeight: 30.0,
@@ -1024,7 +1021,7 @@ class PollViewState extends State<PollView>{
                 ),
                 new Positioned(
                     left:0.0,top:0.0,
-                    child:new Container(height:MediaQuery.of(context).padding.top,width:MediaQuery.of(context).size.width,color:settings[0]?Colors.deepOrange[900]:color)
+                    child:new Container(height:MediaQuery.of(context).padding.top,width:MediaQuery.of(context).size.width,color:color)
                 )
               ]
             )

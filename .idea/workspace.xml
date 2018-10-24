@@ -4,7 +4,6 @@
     <list default="true" id="8a20a442-8abe-47f1-8bb0-a802a434ec9a" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change beforePath="$PROJECT_DIR$/lib/main.dart" afterPath="$PROJECT_DIR$/lib/main.dart" />
-      <change beforePath="$PROJECT_DIR$/pubspec.yaml" afterPath="$PROJECT_DIR$/pubspec.yaml" />
     </list>
     <ignored path="$PROJECT_DIR$/.dart_tool/" />
     <ignored path="$PROJECT_DIR$/.idea/" />
@@ -22,8 +21,8 @@
       <file leaf-file-name="main.dart" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/lib/main.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="223">
-              <caret line="820" column="185" lean-forward="false" selection-start-line="820" selection-start-column="185" selection-end-line="820" selection-end-column="185" />
+            <state relative-caret-position="184">
+              <caret line="952" column="123" lean-forward="false" selection-start-line="952" selection-start-column="123" selection-end-line="952" selection-end-column="123" />
               <folding>
                 <element signature="e#0#39#0" expanded="true" />
               </folding>
@@ -34,7 +33,7 @@
       <file leaf-file-name="pubspec.yaml" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/pubspec.yaml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="212">
+            <state relative-caret-position="690">
               <caret line="46" column="16" lean-forward="false" selection-start-line="46" selection-start-column="16" selection-end-line="46" selection-end-column="16" />
               <folding />
             </state>
@@ -84,8 +83,8 @@
       <file leaf-file-name="key.dart" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/key.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="60">
-              <caret line="4" column="14" lean-forward="false" selection-start-line="4" selection-start-column="14" selection-end-line="4" selection-end-column="14" />
+            <state relative-caret-position="75">
+              <caret line="5" column="71" lean-forward="false" selection-start-line="5" selection-start-column="71" selection-end-line="5" selection-end-column="71" />
               <folding />
             </state>
           </provider>
@@ -95,36 +94,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>isViewingPOll</find>
-      <find>isViewingPoll?</find>
-      <find>isViewingPoll=</find>
-      <find>isViewing</find>
-      <find>BottomBar</find>
-      <find>new hero</find>
-      <find>milliseconds:</find>
-      <find>context.</find>
-      <find>bottomBarOPac</find>
-      <find>Checkbox</find>
-      <find>fontFamily:</find>
-      <find>brightness:</find>
-      <find>new Switch</find>
-      <find>new Stack</find>
-      <find>fonts</find>
-      <find>fo</find>
-      <find>fon</find>
-      <find>Product Sa</find>
-      <find>produ</find>
-      <find>family`</find>
-      <find>data[widget.id][&quot;q&quot;]</find>
-      <find>Roboto</find>
-      <find>Produc</find>
-      <find>onSubmit</find>
-      <find>letterspa</find>
-      <find>Product</find>
-      <find>[-1]</find>
-      <find>-1</find>
-      <find>fontFamily</find>
-      <find>letterp</find>
+      <find>new BottomBar</find>
+      <find>linearprog</find>
+      <find>new Radio</find>
+      <find>linearProg</find>
+      <find>Colors.cyan</find>
+      <find>blueacc</find>
+      <find>black87</find>
+      <find>black</find>
+      <find>Colors.black26</find>
+      <find>textColor</find>
+      <find>cyan</find>
+      <find>activeColor</find>
+      <find>get</find>
+      <find>new Card`</find>
+      <find>pollview</find>
+      <find>new Circul</find>
+      <find>AlwaysStopp</find>
+      <find>greenaccent</find>
+      <find>[700]</find>
+      <find>greenace</find>
+      <find>activeColor:</find>
+      <find>active</find>
+      <find>greenAccent[700</find>
+      <find>[400</find>
+      <find>green</find>
+      <find>greenAccent[500]</find>
+      <find>greenAccent</find>
+      <find>450</find>
+      <find>bottom</find>
+      <find>new Card</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -173,10 +172,9 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="PackagesPane" />
-      <pane id="Scratches" />
       <pane id="AndroidView" />
+      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -199,6 +197,7 @@
         </subPane>
         <option name="show-excluded-files" value="false" />
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -345,7 +344,6 @@
     <layout>
       <window_info id="Android Profiler" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32992327" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32992327" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Build Variants" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
@@ -372,6 +370,7 @@
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32992327" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
@@ -653,14 +652,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/key.dart">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
-          <caret line="4" column="14" lean-forward="false" selection-start-line="4" selection-start-column="14" selection-end-line="4" selection-end-column="14" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/ios/Podfile.lock">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -703,11 +694,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/fonts/MavenPro-Bold.ttf" />
     <entry file="file://$PROJECT_DIR$/fonts/MavenPro-Regular.ttf" />
-    <entry file="file://$PROJECT_DIR$/fonts/futura-medium-bt.ttf">
-      <provider selected="true" editor-type-id="fontseditor">
-        <state />
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/fonts/futura-medium-bt.ttf" />
     <entry file="file://$PROJECT_DIR$/android/app/src/main/AndroidManifest.xml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="120">
@@ -718,16 +705,24 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/pubspec.yaml">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="212">
+        <state relative-caret-position="690">
           <caret line="46" column="16" lean-forward="false" selection-start-line="46" selection-start-column="16" selection-end-line="46" selection-end-column="16" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/key.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="75">
+          <caret line="5" column="71" lean-forward="false" selection-start-line="5" selection-start-column="71" selection-end-line="5" selection-end-column="71" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/main.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="223">
-          <caret line="820" column="185" lean-forward="false" selection-start-line="820" selection-start-column="185" selection-end-line="820" selection-end-column="185" />
+        <state relative-caret-position="184">
+          <caret line="952" column="123" lean-forward="false" selection-start-line="952" selection-start-column="123" selection-end-line="952" selection-end-column="123" />
           <folding>
             <element signature="e#0#39#0" expanded="true" />
           </folding>
