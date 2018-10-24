@@ -704,7 +704,7 @@ class ViewState extends State<View>{
                 itemBuilder: (BuildContext context, int i)=>new Poll(sortedMap.keys.toList()[i],false),
                 staggeredTileBuilder:(i)=>new StaggeredTile.fit(1),
               ):new SliverList(
-                delegate: new SliverChildListDelegate([new Padding(padding:EdgeInsets.only(top:7.0,left:MediaQuery.of(context).size.width*.125,right:MediaQuery.of(context).size.width*.125),child:new Center(child:new FittedBox(fit: BoxFit.scaleDown,child:new Text("Your search did not match any polls",style: new TextStyle(fontSize:1000.0,color:textColor)))))])
+                delegate: new SliverChildListDelegate([new Padding(padding:EdgeInsets.only(top:7.0,left:MediaQuery.of(context).size.width*.12,right:MediaQuery.of(context).size.width*.12),child:new Center(child:new FittedBox(fit: BoxFit.scaleDown,child:new Text("Your search did not match any polls",style: new TextStyle(fontSize:1000.0,color:textColor)))))])
               )),
               //new SliverList(delegate: new SliverChildBuilderDelegate((context,i)=>new Padding(padding:EdgeInsets.only(top:i==0?5.0:0.0),child:new Poll(sortedMap.keys.toList()[i])), childCount: sortedMap.length))
             ],
