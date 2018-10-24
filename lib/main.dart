@@ -386,6 +386,15 @@ class AppState extends State<App>{
                             ViewState.inSearch = false;
                             ViewState.hasSearched = false;
                             ViewState.c = new TextEditingController();
+                            shouldSearchTimer = null;
+                            ViewState.c.addListener((){
+                              if(shouldSearchTimer!=null){
+                                shouldSearchTimer.cancel();
+                              }
+                              shouldSearchTimer = new Timer(new Duration(milliseconds:500),(){
+                                setState((){});
+                              });
+                            });
                             if(s.hasClients){
                               s.jumpTo(0.0);
                             }
@@ -451,7 +460,7 @@ class AppState extends State<App>{
                               child: new Text("Vote")
                           )
                       ):index==3?new Container(
-                          color: !settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(32,33,36,1.0),
+                          color: !settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),
                           child: new Center(
                               child: new View(true)
                           )
@@ -487,6 +496,8 @@ class AppState extends State<App>{
   }
 }
 
+Timer shouldSearchTimer;
+
 class View extends StatefulWidget{
   final bool onlyCreated;
   View(this.onlyCreated);
@@ -501,6 +512,14 @@ class ViewState extends State<View>{
   @override
   void initState(){
     super.initState();
+    c.addListener((){
+      if(shouldSearchTimer!=null){
+        shouldSearchTimer.cancel();
+      }
+      shouldSearchTimer = new Timer(new Duration(milliseconds:500),(){
+        setState((){});
+      });
+    });
   }
 
   static String search = "";
