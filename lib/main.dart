@@ -663,7 +663,6 @@ class ViewState extends State<View>{
                           s.jumpTo(0.0);
                           setState((){inSearch = false;});
                         }
-
                       },
                     ):new IconButton(
                         icon: new Icon(Icons.search),
@@ -697,13 +696,15 @@ class ViewState extends State<View>{
                     )),
                   ],
               ),
-              new SliverPadding(padding: new EdgeInsets.only(right:5.0,left:5.0,top:5.0),sliver:new SliverStaggeredGrid.countBuilder(
+              new SliverPadding(padding: new EdgeInsets.only(right:5.0,left:5.0,top:5.0),sliver:sortedMap.keys.length>0?new SliverStaggeredGrid.countBuilder(
                 crossAxisCount: (MediaQuery.of(context).size.width/500.0).ceil(),
                 mainAxisSpacing: 0.0,
                 crossAxisSpacing: 0.0,
                 itemCount: sortedMap.keys.length,
                 itemBuilder: (BuildContext context, int i)=>new Poll(sortedMap.keys.toList()[i],false),
-                staggeredTileBuilder: (i)=>new StaggeredTile.fit(1),
+                staggeredTileBuilder:(i)=>new StaggeredTile.fit(1),
+              ):new SliverList(
+                delegate: new SliverChildListDelegate([new Padding(padding:EdgeInsets.only(top:7.0),child:new Center(child:new Text("0 matching polls",style: new TextStyle(color:textColor))))])
               )),
               //new SliverList(delegate: new SliverChildBuilderDelegate((context,i)=>new Padding(padding:EdgeInsets.only(top:i==0?5.0:0.0),child:new Poll(sortedMap.keys.toList()[i])), childCount: sortedMap.length))
             ],
@@ -861,7 +862,7 @@ class PollState extends State<Poll>{
                         child: new Image(image:image.image,fit:BoxFit.cover)
                     ));
                   }else{
-                    return new Container(width:double.infinity,height:max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0*((MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?1:3*((MediaQuery.of(context).size.width/500.0).ceil())/4)),color:Colors.black12,child: new Center(child: new Container(height:MediaQuery.of(context).size.height/20.0,width:MediaQuery.of(context).size.height/20.0,child:new CircularProgressIndicator())));
+                    return new Container(width:double.infinity,height:max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0*((MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?1:3*((MediaQuery.of(context).size.width/500.0).ceil())/4)),color:Colors.black12,child: new Center(child: new Container(height:MediaQuery.of(context).size.height/20.0,width:MediaQuery.of(context).size.height/20.0,child:new CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation(!settings[0]?Colors.blueAccent[600]:Colors.greenAccent[400])))));
                   }
                 },
               )):new Container(),
