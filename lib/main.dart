@@ -465,27 +465,43 @@ class AppState extends State<App>{
                           child: new Center(
                               child: new View(true)
                           )
-                      ):new Container(
+                      ):new Stack(children: [new Container(
                           child: new Center(
                               child: new Column(
                                 children: [
                                   new Padding(padding: EdgeInsets.only(top:MediaQuery.of(context).padding.top),child: new Column(
-                                      children: settings.asMap().keys.map((i)=>new Switch(value:settings[i],onChanged:(b){
+                                      children: settings.asMap().keys.map((i)=>new Padding(padding:EdgeInsets.only(top:10.0),child:new GestureDetector(onTap:(){
+                                        bool b = !settings[0];
                                         if(i==0){
                                           textColor = !b?new Color.fromRGBO(34,34, 34,1.0):new Color.fromRGBO(238,238,238,1.0);
                                           color = !b?new Color.fromRGBO(52,52,52,1.0):new Color.fromRGBO(22,22,22,1.0);
                                         }
                                         setState((){settings[i]=b;});
                                         settingsData.writeData(settings);
-                                      })).toList()
+                                      },child:new Container(color:settings[0]?Colors.black:Colors.grey[300],child:new ListTile(
+                                        title: new Text(i==0?"Dark mode":"Placeholder"),
+                                        trailing: new Switch(value:settings[i],onChanged:(b){
+                                          if(i==0){
+                                            textColor = !b?new Color.fromRGBO(34,34, 34,1.0):new Color.fromRGBO(238,238,238,1.0);
+                                            color = !b?new Color.fromRGBO(52,52,52,1.0):new Color.fromRGBO(22,22,22,1.0);
+                                          }
+                                          setState((){settings[i]=b;});
+                                          settingsData.writeData(settings);
+                                        })
+                                      ))))).toList()
                                   )),
-                                  actualUserLevel==1?new Switch(value: currentUserLevel==1, onChanged: (b){
-                                    setState((){currentUserLevel = b?1:0;});
-                                  }):new Container()
+                                  actualUserLevel==1?new Padding(padding:EdgeInsets.only(top:10.0),child:new GestureDetector(onTap:(){
+                                    setState((){currentUserLevel = currentUserLevel==0?1:0;});
+                                  },child:new Container(color:settings[0]?Colors.black:Colors.grey[300],child:new ListTile(
+                                    title: new Text("Admin"),
+                                    trailing: new Switch(value: currentUserLevel==1, onChanged: (b){
+                                      setState((){currentUserLevel = b?1:0;});
+                                    })
+                                  )))):new Container()
                                 ]
                               )
                           )
-                      );
+                      ),new Positioned(left:0.0,top:0.0, child:new Container(height:MediaQuery.of(context).padding.top,width:MediaQuery.of(context).size.width,color:color))]);
                     }
                   )
               )
