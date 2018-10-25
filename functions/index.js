@@ -51,10 +51,19 @@ exports.create = functions.https.onRequest((req,res)=>{
                 "b":map["b"],
                 "c":map["c"],
                 "q":map["q"],
+                "u":map["u"],
                 "t":Math.floor(Date.now()/1000)
             };
-            admin.database().ref("data/"+code).set(returned);
-            return res.send(JSON.stringify(code));
+            return admin.database().ref("users/"+map["u"]+"/1").once("value",(snapshot)=>{
+                var created = snapshot.val();
+                if(created==null){
+                    created = [];
+                }
+                created.push(code);
+                admin.database().ref("users/"+map["u"]+"/1").set(created);
+                admin.database().ref("data/"+code).set(returned);
+                return res.send(JSON.stringify(code));
+            });
         });
     }else{
         return res.send(JSON.stringify({"Error":"No Permissions"}));
