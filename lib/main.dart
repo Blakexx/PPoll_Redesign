@@ -1308,8 +1308,8 @@ class CreatePollPageState extends State<CreatePollPage>{
                   )
                 ),
                 new Container(height:5.0),
-                new MaterialButton(color:settings[0]?Colors.black:new Color.fromRGBO(253,253,253,1.0),onPressed:(){setState((){multiSelect=!multiSelect;public=false;});},padding:EdgeInsets.zero,child:new ListTile(leading:new Text("Multiple selections"),trailing:new Switch(value:multiSelect,onChanged:(b){setState((){multiSelect=b;});}))),
-                new MaterialButton(color:settings[0]?Colors.black:new Color.fromRGBO(253,253,253,1.0),onPressed:(){setState((){public=!public;multiSelect=false;});},padding:EdgeInsets.zero,child:new ListTile(leading:new Text("Publicly searchable"),trailing:new Switch(value:public,onChanged:(b){setState((){public=b;});}))),
+                new MaterialButton(color:settings[0]?Colors.black:new Color.fromRGBO(253,253,253,1.0),onPressed:(){setState((){multiSelect=!multiSelect;public=false;});},padding:EdgeInsets.zero,child:new ListTile(leading:new Text("Multiple selections"),trailing:new Switch(value:multiSelect,onChanged:(b){setState((){multiSelect=b;public=false;});}))),
+                new MaterialButton(color:settings[0]?Colors.black:new Color.fromRGBO(253,253,253,1.0),onPressed:(){setState((){public=!public;multiSelect=false;});},padding:EdgeInsets.zero,child:new ListTile(leading:new Text("Publicly searchable"),trailing:new Switch(value:public,onChanged:(b){setState((){public=b;multiSelect=false;});}))),
                 new MaterialButton(color:settings[0]?Colors.black:new Color.fromRGBO(253,253,253,1.0),onPressed:() async{
                   if(image!=null&&width!=null){
                     Navigator.push(context,new PageRouteBuilder(opaque:false,pageBuilder: (context,a1,a2)=>new ImageView(child:new Center(child:new PhotoView(imageProvider:new Image.file(image).image,minScale: min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height),maxScale:4.0*min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height))),name:"Image")));
