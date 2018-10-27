@@ -36,7 +36,7 @@ exports.create = functions.https.onRequest((req,res)=>{
     var chars = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
     var key = keyFile.key();
     var map = JSON.parse(req.query.text);
-    if(map["key"]==key){
+    if(map["key"]===key){
         return admin.database().ref("data").once("value",(snapshot)=>{
             var code = "";
             var list = Object.keys(snapshot.val());
@@ -56,7 +56,7 @@ exports.create = functions.https.onRequest((req,res)=>{
             };
             return admin.database().ref("users/"+map["u"]+"/1").once("value",(snapshot)=>{
                 var created = snapshot.val();
-                if(created==null){
+                if(created===null){
                     created = [];
                 }
                 created.push(code);

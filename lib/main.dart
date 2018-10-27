@@ -403,6 +403,8 @@ class AppState extends State<App>{
                           setState((){index = i;});
                         }else if(((index==0&&i==0)||(index==3&&i==3))&&hasLoaded){
                           s.animateTo(0.0,curve: Curves.easeOut, duration: const Duration(milliseconds: 300));
+                        }else if(index==1){
+                          createController.animateTo(0.0,curve: Curves.easeOut, duration: const Duration(milliseconds: 300));
                         }
                       }
                   ),
@@ -442,7 +444,7 @@ class AppState extends State<App>{
                             lastMessage = s;
                             messages.writeData(lastMessage);
                             if(lastMessage!=null){
-                              showDialog(context:context,builder:(context)=>new AlertDialog(actions: [new RaisedButton(color:Colors.grey,child: new Text("OK",style:new TextStyle(color:Colors.black87)),onPressed:(){Navigator.of(context).pop();})],title:new Text("Alert",textAlign: TextAlign.center),content:new Text(lastMessage)));
+                              showDialog(context:context,builder:(context)=>new AlertDialog(actions: [new RaisedButton(color:Colors.grey,child: new Text("OK",style:new TextStyle(color:Colors.black)),onPressed:(){Navigator.of(context).pop();})],title:new Text("Alert",textAlign: TextAlign.center),content:new Text(lastMessage)));
                             }
                           }
                         });
@@ -452,10 +454,7 @@ class AppState extends State<App>{
                           child: new Center(
                               child: new View(false)
                           )
-                      ):index==1?new Container(
-                          child: new Center(
-                              child: new Text("New")
-                          )
+                      ):index==1?new CreatePollPage(
                       ):index==2?new Container(
                           child: new Center(
                               child: new Text("Vote")
@@ -465,12 +464,13 @@ class AppState extends State<App>{
                           child: new Center(
                               child: new View(true)
                           )
-                      ):new Stack(children: [new Container(
+                      ):new Scaffold(appBar:new AppBar(title:new Text("Settings"),backgroundColor: color),body:new Container(
+                          color: !settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),
                           child: new Center(
                               child: new Column(
                                 children: [
                                   new Padding(padding: EdgeInsets.only(top:MediaQuery.of(context).padding.top),child: new Column(
-                                      children: settings.asMap().keys.map((i)=>new Padding(padding:EdgeInsets.only(top:10.0),child:new GestureDetector(onTap:(){
+                                      children: settings.asMap().keys.map((i)=>new Padding(padding:EdgeInsets.only(bottom:12.0),child:new GestureDetector(onTap:(){
                                         bool b = !settings[0];
                                         if(i==0){
                                           textColor = !b?new Color.fromRGBO(34,34, 34,1.0):new Color.fromRGBO(238,238,238,1.0);
@@ -478,7 +478,8 @@ class AppState extends State<App>{
                                         }
                                         setState((){settings[i]=b;});
                                         settingsData.writeData(settings);
-                                      },child:new Container(color:settings[0]?Colors.black:Colors.grey[300],child:new ListTile(
+                                      },child:new Container(color:settings[0]?Colors.black:new Color.fromRGBO(253,253,253,1.0),child:new ListTile(
+                                        leading: new Icon(i==0?Icons.brightness_2:Icons.settings),
                                         title: new Text(i==0?"Dark mode":"Placeholder"),
                                         trailing: new Switch(value:settings[i],onChanged:(b){
                                           if(i==0){
@@ -490,18 +491,19 @@ class AppState extends State<App>{
                                         })
                                       ))))).toList()
                                   )),
-                                  actualUserLevel==1?new Padding(padding:EdgeInsets.only(top:10.0),child:new GestureDetector(onTap:(){
+                                  actualUserLevel==1?new GestureDetector(onTap:(){
                                     setState((){currentUserLevel = currentUserLevel==0?1:0;});
-                                  },child:new Container(color:settings[0]?Colors.black:Colors.grey[300],child:new ListTile(
+                                  },child:new Container(color:settings[0]?Colors.black:new Color.fromRGBO(253,253,253,1.0),child:new ListTile(
+                                    leading: new Icon(Icons.stars),
                                     title: new Text("Admin"),
                                     trailing: new Switch(value: currentUserLevel==1, onChanged: (b){
                                       setState((){currentUserLevel = b?1:0;});
                                     })
-                                  )))):new Container()
+                                  ))):new Container()
                                 ]
                               )
                           )
-                      ),new Positioned(left:0.0,top:0.0, child:new Container(height:MediaQuery.of(context).padding.top,width:MediaQuery.of(context).size.width,color:color))]);
+                      ));
                     }
                   )
               )
@@ -644,6 +646,7 @@ class ViewState extends State<View>{
                   pinned: false,
                   floating: true,
                   title: !inSearch?new Text(!widget.onlyCreated?"Browse":"Created"):new TextField(
+                    textCapitalization: TextCapitalization.sentences,
                     style: new TextStyle(fontSize:20.0,color: Colors.white),
                     controller: c,
                     autofocus: true,
@@ -1054,7 +1057,7 @@ class PollViewState extends State<PollView>{
                           title: new Text(widget.id)
                       ),
                       new SliverList(
-                          delegate: new SliverChildBuilderDelegate((context,i)=>new Hero(tag:widget.id,child:new Material(child:new Poll(widget.id,true,widget.state.image,widget.state.height,widget.state.width))),childCount:1)
+                          delegate: new SliverChildBuilderDelegate((context,i)=>new Hero(tag:widget.id,child:new Material(child:widget.state!=null?new Poll(widget.id,true,widget.state.image,widget.state.height,widget.state.width):new Poll(widget.id,true))),childCount:1)
                       )
                     ]
                 ),
@@ -1163,6 +1166,381 @@ class ImageViewState extends State<ImageView> with SingleTickerProviderStateMixi
   }
 }
 
+ScrollController createController = new ScrollController();
+
+class CreatePollPage extends StatefulWidget{
+  @override
+  CreatePollPageState createState() => new CreatePollPageState();
+}
+
+class CreatePollPageState extends State<CreatePollPage>{
+
+  List<String> choices = [null,null];
+
+  String question;
+
+  bool multiSelect = false;
+
+  bool public = false;
+
+  File image;
+
+  double height,width;
+
+  Completer<ui.Image> completer = new Completer<ui.Image>();
+
+  bool imageLoading = false;
+
+  bool removing = false;
+
+  int removedIndex = -1;
+
+  List<TextEditingController> controllers = new List<TextEditingController>()..addAll([new TextEditingController(),new TextEditingController()]);
+
+  TextEditingController questionController = new TextEditingController();
+
+  @override
+  Widget build(BuildContext context){
+    return new Scaffold(appBar:new AppBar(backgroundColor:color,title:new Text("Create a Poll"),actions:[new IconButton(icon:new Icon(removing?Icons.check:Icons.delete),onPressed: (){setState((){removing=!removing;});})]),body:new Container(
+        color: !settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),
+        child: new Center(
+            child: new ListView(
+              controller: createController,
+              children:[
+                new Card(
+                  color: !settings[0]?new Color.fromRGBO(250, 250, 250, 1.0):new Color.fromRGBO(32,33,36,1.0),
+                  child:new Column(
+                    children:[
+                      new Padding(padding:EdgeInsets.only(top:10.0,left:11.0,right:11.0),child:new TextField(
+                        textCapitalization: TextCapitalization.sentences,
+                        style: new TextStyle(
+                          color:textColor,fontSize: 15.0,letterSpacing:.2,fontWeight: FontWeight.w600,fontFamily: "Futura"
+                        ),
+                        onChanged: (s){
+                          question = s;
+                        },
+                        onSubmitted: (s){
+                          question = s;
+                        },
+                        decoration: new InputDecoration(
+                            hintText: "Question",
+                            border: InputBorder.none,
+                            hintStyle: new TextStyle(color:textColor.withOpacity(0.8)),
+                        ),
+                        controller: questionController
+                      )),
+                      image!=null?new Padding(padding:EdgeInsets.only(top:5.0,bottom:5.0),child:new FutureBuilder<ui.Image>(
+                        future: completer.future,
+                        builder: (BuildContext context, AsyncSnapshot<ui.Image> snapshot){
+                          if(snapshot.hasData){
+                            if(snapshot.hasData){
+                              height = snapshot.data.height*1.0;
+                              width = snapshot.data.width*1.0;
+                            }
+                            return new GestureDetector(onTap:(){Navigator.push(context,new PageRouteBuilder(opaque:false,pageBuilder: (context,a1,a2)=>new ImageView(child:new Center(child:new PhotoView(imageProvider:new Image.file(image).image,minScale: min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height), maxScale:4.0*min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height))),name:"Image")));},child:new SizedBox(
+                                width: double.infinity,
+                                height: max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0),
+                                child: new Image(image:new Image.file(image).image,fit:BoxFit.cover)
+                            ));
+                          }else{
+                            return new Container(width:double.infinity,height:max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0),color:Colors.black12,child: new Center(child: new Container(height:MediaQuery.of(context).size.height/20.0,width:MediaQuery.of(context).size.height/20.0,child:new CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation(!settings[0]?Colors.blueAccent[600]:Colors.greenAccent[400])))));
+                          }
+                        },
+                      )):new Container(),
+                      new Column(
+                        children:choices.asMap().keys.map((i)=>new AnimatedOpacity(opacity:removedIndex==i?0.0:1.0,duration:new Duration(milliseconds:250),child:new Container(key:new ObjectKey(i),height:50.0,child:new Row(
+                            children: [
+                              !removing?!multiSelect?new Radio(groupValue: null,value:i,onChanged:(i){}):new Checkbox(onChanged:(b){},value:false):new IconButton(icon:new Icon(Icons.delete),onPressed:(){
+                                if(choices.length>2&&removedIndex==-1){
+                                  setState((){removedIndex=i;});
+                                  new Timer(new Duration(milliseconds:250),(){
+                                    choices.removeAt(i);controllers.removeAt(i);
+                                    for(int j = 0; j<choices.length;j++){
+                                      controllers[j].text = choices[j];
+                                    }
+                                    createController.jumpTo(max(0.0,createController.position.pixels-50));
+                                    setState((){removedIndex=-1;});
+                                  });
+                                }
+                              }),
+                              new Expanded(
+                                  child: new TextField(
+                                    textCapitalization: TextCapitalization.sentences,
+                                    style: new TextStyle(color:textColor),
+                                    onChanged: (s){
+                                      choices[i]=s;
+                                    },
+                                    onSubmitted: (s){
+                                      choices[i]=s;
+                                    },
+                                    decoration: new InputDecoration(
+                                      hintText: "Choice ${i+1}",
+                                      border: InputBorder.none,
+                                      hintStyle: new TextStyle(color:textColor.withOpacity(0.8)),
+                                    ),
+                                    controller: controllers[i]
+                                  ),
+                              ),
+                              new Container(width:5.0)
+                            ]
+                        )))).toList()
+                      ),
+                      new MaterialButton(
+                        padding:EdgeInsets.zero,
+                        child: new Container(height:50.0,child:new Row(
+                          children:[
+                            new Container(width:2*kRadialReactionRadius+8.0,height:2*kRadialReactionRadius+8.0,child:new Icon(Icons.add)),
+                            new Expanded(child:new Text("Add",style:new TextStyle(color:textColor)))
+                          ]
+                        )),
+                        onPressed:(){
+                          if(choices.length<20){
+                            if(createController.position.pixels>0){
+                              createController.jumpTo(createController.position.pixels+50.0);
+                            }
+                            controllers.add(new TextEditingController());
+                            setState((){choices.add(null);});
+                          }
+                        }
+                      ),
+                      new Container(height:7.0)
+                    ]
+                  )
+                ),
+                new Container(height:5.0),
+                new MaterialButton(color:settings[0]?Colors.black:new Color.fromRGBO(253,253,253,1.0),onPressed:(){setState((){multiSelect=!multiSelect;});},padding:EdgeInsets.zero,child:new ListTile(leading:new Text("Multiple selections"),trailing:new Switch(value:multiSelect,onChanged:(b){setState((){multiSelect=b;});}))),
+                new MaterialButton(color:settings[0]?Colors.black:new Color.fromRGBO(253,253,253,1.0),onPressed:(){setState((){public=!public;});},padding:EdgeInsets.zero,child:new ListTile(leading:new Text("Publicly searchable"),trailing:new Switch(value:public,onChanged:(b){setState((){public=b;});}))),
+                new MaterialButton(color:settings[0]?Colors.black:new Color.fromRGBO(253,253,253,1.0),onPressed:() async{
+                  if(image!=null&&width!=null){
+                    Navigator.push(context,new PageRouteBuilder(opaque:false,pageBuilder: (context,a1,a2)=>new ImageView(child:new Center(child:new PhotoView(imageProvider:new Image.file(image).image,minScale: min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height),maxScale:4.0*min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height))),name:"Image")));
+                  }else if(!imageLoading){
+                    completer = new Completer<ui.Image>();
+                    File tempImage = await ImagePicker.pickImage(source: ImageSource.gallery);
+                    if(tempImage!=null){
+                      if(tempImage!=null&&(basename(tempImage.path)==null||lookupMimeType(basename(tempImage.path))==null||!["image/png","image/jpeg"].contains(lookupMimeType(basename(tempImage.path))))){
+                        imageLoading=false;
+                        showDialog(
+                            context: context,
+                            barrierDismissible: true,
+                            builder: (context){
+                              return new AlertDialog(
+                                  title:new Text("Error"),
+                                  content:new Text(basename(tempImage.path)==null?"Invalid file path":"Invalid file type"),
+                                  actions: [
+                                    new RaisedButton(
+                                        child: new Text("OK",style:new TextStyle(color: Colors.black)),
+                                        onPressed: (){
+                                          Navigator.of(context).pop();
+                                        },
+                                        color: Colors.grey
+                                    )
+                                  ]
+                              );
+                            }
+                        );
+                        return;
+                      }
+                      setState((){imageLoading = true;image = tempImage;});
+                      new Timer(new Duration(milliseconds:5),(){
+                        createController.jumpTo(createController.position.pixels+MediaQuery.of(context).size.height/3.0);
+                      });
+                      new Image.file(tempImage).image.resolve(new ImageConfiguration()).addListener((ImageInfo info, bool b){
+                        completer.complete(info.image);
+                        height = info.image.height*1.0;
+                        width = info.image.width*1.0;
+                        setState((){imageLoading = false;});
+                      });
+                    }else{
+                      height=null;
+                      width=null;
+                      imageLoading=false;
+                      image=null;
+                    }
+                  }
+                },padding:EdgeInsets.zero,child:new ListTile(leading:new Text(image!=null?"Image selected":"Add an image",style:new TextStyle(color:textColor)),trailing:image!=null?new Padding(padding:EdgeInsets.only(right:10.0),child:new SizedBox(height:40.0,width:40.0,child:!imageLoading?!removing?new Image.file(image,fit:BoxFit.cover):new IconButton(color:Colors.black,icon: new Icon(Icons.delete),onPressed:(){
+                  createController.jumpTo(max(0.0,createController.position.pixels-MediaQuery.of(context).size.height/3.0));
+                  setState((){
+                    image = null;
+                    height = null;
+                    width = null;
+                  });
+                }):new CircularProgressIndicator())):new Padding(padding:EdgeInsets.only(right:10.0),child:new Icon(Icons.add,color:Colors.black)))),
+                new Container(height:20.0),
+                new Padding(padding:EdgeInsets.only(left:MediaQuery.of(context).size.width/2.0-60.0,right:MediaQuery.of(context).size.width/2.0-60.0),child:new MaterialButton(
+                  color:settings[0]?Colors.black:Colors.grey,
+                  child:new Text("Submit"),
+                  onPressed:() async{
+                    try{
+                      await InternetAddress.lookup("google.com");
+                    }on SocketException catch(_){
+                      showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context){
+                            return new AlertDialog(
+                                title: new Text("Error"),
+                                content: new Text("Please check your internet connection"),
+                                actions: [
+                                  new RaisedButton(
+                                      child: new Text("OK",style:new TextStyle(color: Colors.black)),
+                                      onPressed: (){
+                                        Navigator.of(context).pop();
+                                      },
+                                      color: Colors.grey
+                                  )
+                                ]
+                            );
+                          }
+                      );
+                      return;
+                    }
+                    bool validQuestion = question!=null&&question!="";
+                    bool validChoices = !choices.contains(null)&&!choices.contains("")&&(choices.toSet().length==choices.length);
+                    bool validImage;
+                    if(image==null){
+                      validImage = true;
+                    }else{
+                      validImage = ((await image.length())<5000000)&&(basename(image.path)!=null&&lookupMimeType(basename(image.path))!=null&&["image/png","image/jpeg"].contains(lookupMimeType(basename(image.path))));
+                    }
+                    if(validQuestion&&validChoices&&validImage){
+                      showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context){
+                            return new AlertDialog(
+                                title: new Text("Loading"),
+                                content: new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation(settings[0]?Colors.greenAccent[400]:Colors.blueAccent[600]))
+                            );
+                          }
+                      );
+                      String code;
+                      await http.get(Uri.encodeFull(functionsLink+"/create?text={\"key\":"+json.encode(secretKey)+",\"a\":"+json.encode(new List<int>(choices.length).map((i)=>0).toList())+",\"c\":"+json.encode(choices.map((s)=>s.replaceAll("\\","\\\\").replaceAll("\"","\\\"")).toList())+",\"q\":"+json.encode(question.replaceAll("\\","\\\\").replaceAll("\"","\\\""))+",\"u\":"+json.encode(userId)+",\"b\":"+json.encode([multiSelect?1:0,0,public?1:0,image!=null?1:0])+"}")).then((r){
+                        code = json.decode(r.body);
+                      }).catchError((e){
+                        Navigator.of(context).pop();
+                        showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (context){
+                              return new AlertDialog(
+                                  title: new Text("Error"),
+                                  content: new Text("Something went wrong"),
+                                  actions: [
+                                    new RaisedButton(
+                                        child: new Text("OK",style:new TextStyle(color: Colors.black)),
+                                        onPressed: (){
+                                          Navigator.of(context).pop();
+                                        },
+                                        color: Colors.grey
+                                    )
+                                  ]
+                              );
+                            }
+                        );
+                        throw e;
+                      });
+                      if(code==null){
+                        return;
+                      }
+                      if(image!=null){
+                        await http.post(Uri.encodeFull(cloudUploadDatabase+"/o?uploadType=media&name="+code),headers:{"content-type":lookupMimeType(basename(image.path))},body:await image.readAsBytes());
+                      }
+                      createdPolls.add(code);
+                      Navigator.of(context).pop();
+                      showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context){
+                            return new AlertDialog(
+                                title: new Text("Success"),
+                                content: new Text("Poll created with code $code"),
+                                actions: [
+                                  new RaisedButton(
+                                      child: new Text("OK",style:new TextStyle(color: Colors.black)),
+                                      onPressed: (){
+                                        Navigator.of(context).pop();
+                                        createController.jumpTo(0.0);
+                                        choices = [null,null];
+                                        question = null;
+                                        multiSelect = false;
+                                        public = false;
+                                        image = null;
+                                        height = null;
+                                        width = null;
+                                        completer = new Completer<ui.Image>();
+                                        imageLoading = false;
+                                        removing = false;
+                                        removedIndex = -1;
+                                        questionController = new TextEditingController();
+                                        controllers = new List<TextEditingController>()..addAll([new TextEditingController(),new TextEditingController()]);
+                                        setState((){});
+                                        Navigator.push(context,new PageRouteBuilder(
+                                          pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation){
+                                            return new PollView(code);
+                                          },
+                                          transitionDuration: new Duration(milliseconds: 300),
+                                          transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+                                            return new FadeTransition(
+                                                opacity: animation,
+                                                child: child
+                                            );
+                                          },
+                                        ));
+                                      },
+                                      color: Colors.grey
+                                  )
+                                ]
+                            );
+                          }
+                      );
+                    }else{
+                      String errorMessage = "";
+                      if((question==null||choices.contains(null)||question==""||choices.contains(""))&&choices.toSet().length!=choices.length){
+                        errorMessage="Please complete all the fields without duplicates";
+                      }else if(question==null||choices.contains(null)||question==""||choices.contains("")){
+                        errorMessage="Please complete all the fields";
+                      }else if(choices.toSet().length!=choices.length){
+                        errorMessage="Please do not include duplicate choices";
+                      }
+                      if(image!=null&&((await image.length()>5000000))){
+                        if(errorMessage==""){
+                          errorMessage="That image is too big (max size is 5 MB)";
+                        }else{
+                          errorMessage+=" and reduce the image size to below 5 MB";
+                        }
+                      }
+                      if(image!=null&&(basename(image.path)==null||lookupMimeType(basename(image.path))==null||!["image/png","image/jpeg"].contains(lookupMimeType(basename(image.path))))){
+                        errorMessage+=(errorMessage==""?"Invalid image format":". The image format is invalid");
+                      }
+                      showDialog(
+                          context: context,
+                          barrierDismissible: true,
+                          builder: (context){
+                            return new AlertDialog(
+                                title:new Text("Error"),
+                                content:new Text(errorMessage),
+                                actions: [
+                                  new RaisedButton(
+                                      child: new Text("OK",style:new TextStyle(color: Colors.black)),
+                                      onPressed: (){
+                                        Navigator.of(context).pop();
+                                      },
+                                      color: Colors.grey
+                                  )
+                                ]
+                            );
+                          }
+                      );
+                    }
+                  }
+                )),
+                new Container(height:20.0)
+              ]
+            )
+        )
+    ));
+  }
+}
 /*
 settings.asMap().keys.map((i)=>new Switch(value:settings[i],onChanged: (b){
                     setState((){settings[i]=b;});
