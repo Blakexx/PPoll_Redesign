@@ -1214,7 +1214,7 @@ class CreatePollPageState extends State<CreatePollPage>{
                       new Padding(padding:EdgeInsets.only(top:10.0,left:11.0,right:11.0),child:new TextField(
                         textCapitalization: TextCapitalization.sentences,
                         style: new TextStyle(
-                          color:textColor,fontSize: 15.0,letterSpacing:.2,fontWeight: FontWeight.w600,fontFamily: "Futura"
+                          color:textColor,fontSize: 15.0,letterSpacing:.2,fontFamily: "Futura"
                         ),
                         onChanged: (s){
                           question = s;
@@ -1266,7 +1266,7 @@ class CreatePollPageState extends State<CreatePollPage>{
                               new Expanded(
                                   child: new TextField(
                                     textCapitalization: TextCapitalization.sentences,
-                                    style: new TextStyle(color:textColor),
+                                    style: new TextStyle(color:textColor,fontSize:14.0),
                                     onChanged: (s){
                                       choices[i]=s;
                                     },
@@ -1276,7 +1276,7 @@ class CreatePollPageState extends State<CreatePollPage>{
                                     decoration: new InputDecoration(
                                       hintText: "Choice ${i+1}",
                                       border: InputBorder.none,
-                                      hintStyle: new TextStyle(color:textColor.withOpacity(0.8)),
+                                      hintStyle: new TextStyle(color:textColor.withOpacity(0.7)),
                                     ),
                                     controller: controllers[i]
                                   ),
@@ -1357,14 +1357,14 @@ class CreatePollPageState extends State<CreatePollPage>{
                       image=null;
                     }
                   }
-                },padding:EdgeInsets.zero,child:new ListTile(leading:new Text(image!=null?"Image selected":"Add an image",style:new TextStyle(color:textColor)),trailing:image!=null?new Padding(padding:EdgeInsets.only(right:10.0),child:new SizedBox(height:40.0,width:40.0,child:!imageLoading?!removing?new Image.file(image,fit:BoxFit.cover):new IconButton(color:Colors.black,icon: new Icon(Icons.delete),onPressed:(){
+                },padding:EdgeInsets.zero,child:new ListTile(leading:new Text(image!=null?"Image selected":"Add an image",style:new TextStyle(color:textColor)),trailing:new Padding(padding:EdgeInsets.only(right:10.0),child:new SizedBox(height:40.0,width:40.0,child:image!=null?!imageLoading?!removing?new Image.file(image,fit:BoxFit.cover):new IconButton(color:Colors.black,icon: new Icon(Icons.delete),onPressed:(){
                   createController.jumpTo(max(0.0,createController.position.pixels-MediaQuery.of(context).size.height/3.0));
                   setState((){
                     image = null;
                     height = null;
                     width = null;
                   });
-                }):new CircularProgressIndicator())):new Padding(padding:EdgeInsets.only(right:10.0),child:new Icon(Icons.add,color:Colors.black)))),
+                }):new CircularProgressIndicator():new Icon(Icons.add,color:Colors.black))))),
                 new Container(height:20.0),
                 new Padding(padding:EdgeInsets.only(left:MediaQuery.of(context).size.width/2.0-60.0,right:MediaQuery.of(context).size.width/2.0-60.0),child:new MaterialButton(
                   color:settings[0]?Colors.black:Colors.grey,
