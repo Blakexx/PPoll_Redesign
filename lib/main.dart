@@ -527,9 +527,7 @@ class AppState extends State<App>{
                     }
                   )
               ):new Builder(builder:(context){
-                double ratio = MediaQuery.of(context).size.height/736.0;
-                return new Scaffold(appBar:new AppBar(automaticallyImplyLeading:false,title:new Text("User agreement"),backgroundColor: color),body:new Container(color:!settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),child:new Center(child:new Column(children:[
-                  new Container(height:20.0*ratio),
+                return new Scaffold(appBar:new AppBar(automaticallyImplyLeading:false,title:new Text("User agreement"),backgroundColor: color),body:new Container(color:!settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),child:new Center(child:new Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly,children:[
                   new FutureBuilder(
                     future: iconCompleter.future,
                     builder: (BuildContext context, AsyncSnapshot<ui.Image> snapshot){
@@ -549,13 +547,11 @@ class AppState extends State<App>{
                       }
                     },
                   ),
-                  new Container(height:20.0*ratio),
                   new Text("Hi there!",style:new TextStyle(fontSize:25.0,color:textColor),textAlign: TextAlign.center),
                   new Text("Welcome to PPoll.",style: new TextStyle(fontSize:25.0,color:textColor),textAlign: TextAlign.center),
-                  new Container(height:10.0*ratio),
-                  new Text("PPoll provides a completely anonymous and ad-free experience.",style:new TextStyle(fontSize:15.0,color:textColor.withOpacity(0.9)),textAlign: TextAlign.center),
-                  new Container(height:10.0*ratio),
-                  new Center(child:new RichText(
+                  new Padding(padding:EdgeInsets.only(left:5.0,right:5.0),child:new Text("PPoll provides a completely anonymous and ad-free experience.",style:new TextStyle(fontSize:15.0,color:textColor.withOpacity(0.9)),textAlign: TextAlign.center)),
+                  new Padding(padding:EdgeInsets.only(left:5.0,right:5.0),child:new Center(child:new RichText(
+                      textAlign:TextAlign.center,
                       text:new TextSpan(
                           children:[
                             new TextSpan(
@@ -593,7 +589,7 @@ class AppState extends State<App>{
                             ),
                           ]
                       )
-                  )),
+                  ))),
                   new RaisedButton(
                       color:Colors.grey,
                       child:new Text("Get started"),
