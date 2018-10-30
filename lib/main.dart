@@ -985,7 +985,7 @@ class PollState extends State<Poll>{
                         child: new Image(image:image.image,fit:BoxFit.cover)
                     ));
                   }else{
-                    return new Container(width:double.infinity,height:max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0*((MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?1:3*((MediaQuery.of(context).size.width/500.0).ceil())/4)),color:Colors.black12,child: new Center(child: new Container(height:MediaQuery.of(context).size.width/(15*(MediaQuery.of(context).size.width/500.0).ceil()),width:MediaQuery.of(context).size.width/(15*(MediaQuery.of(context).size.width/500.0).ceil()),child:new CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation(!settings[0]?Colors.blueAccent[600]:Colors.greenAccent[400])))));
+                    return new Container(width:double.infinity,height:max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0*((MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?1:3*((MediaQuery.of(context).size.width/500.0).ceil())/4)),color:Colors.black12,child: new Center(child: new Container(height:MediaQuery.of(context).size.width/(15*(!widget.viewPage?(MediaQuery.of(context).size.width/500.0).ceil():1)),width:MediaQuery.of(context).size.width/(15*(!widget.viewPage?(MediaQuery.of(context).size.width/500.0).ceil():1)),child:new CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation(!settings[0]?Colors.blueAccent[600]:Colors.greenAccent[400])))));
                   }
                 },
               )):new Container(),
