@@ -30,6 +30,7 @@ dependencies:
   flutter_secure_storage:
   flutter_launcher_icons:
   flutter_staggered_grid_view:
+  url_launcher:
   permission_handler:
   dynamic_theme:
       git:

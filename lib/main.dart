@@ -16,6 +16,7 @@ import 'key.dart';
 import 'package:collection/collection.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:path/path.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -36,6 +37,8 @@ dynamic realUserId = Platform.isAndroid?new PersistentData(name:"userId",externa
 PersistentData createdPollsData = new PersistentData(name:"createdinfo",external:false);
 
 PersistentData messages = new PersistentData(name:"messages",external:false);
+
+PersistentData policy = new PersistentData(name:"policy",external:false);
 
 String lastMessage;
 
@@ -65,6 +68,8 @@ ConnectivityResult current;
 
 Connectivity connection = new Connectivity();
 
+bool agreesToPolicy = false;
+
 void main() async{
   if(Platform.isAndroid){
     int count = 0;
@@ -88,6 +93,11 @@ void main() async{
     }
   }
   current = await connection.checkConnectivity();
+  agreesToPolicy = await policy.readData();
+  if(agreesToPolicy==null){
+    policy.writeData(false);
+    agreesToPolicy=false;
+  }
   settings = await settingsData.readData();
   if(settings==null){
     settings = new List<dynamic>();
@@ -297,6 +307,8 @@ class AppState extends State<App>{
 
   int index = 0;
 
+  Image icon;
+
   @override
   void initState(){
     super.initState();
@@ -335,7 +347,18 @@ class AppState extends State<App>{
     if(current!=ConnectivityResult.none){
       setUp(current);
     }
+    if(!agreesToPolicy){
+      iconCompleter = new Completer<ui.Image>();
+      icon = new Image.asset("icon/platypus2.png");
+      icon.image.resolve(new ImageConfiguration()).addListener((ImageInfo info, bool b){
+        if(!iconCompleter.isCompleted){
+          iconCompleter.complete(info.image);
+        }
+      });
+    }
   }
+
+  Completer<ui.Image> iconCompleter;
 
   @override
   void dispose(){
@@ -350,7 +373,7 @@ class AppState extends State<App>{
           return new MaterialApp(
               theme: theme,
               debugShowCheckedModeBanner: false,
-              home: new Scaffold(
+              home: agreesToPolicy?new Scaffold(
                   bottomNavigationBar: new BottomNavigationBar(
                       currentIndex: index,
                       type: BottomNavigationBarType.fixed,
@@ -433,7 +456,7 @@ class AppState extends State<App>{
                         }
                         tryToGetId();
                       }
-                      if(start&&hasLoaded){
+                      if(start&&hasLoaded&&agreesToPolicy){
                         start = false;
                         http.get(Uri.encodeFull("$database/message.json?auth=$secretKey")).then((r){
                           String s = json.decode(r.body);
@@ -455,10 +478,7 @@ class AppState extends State<App>{
                               child: new View(false)
                           )
                       ):index==1?new CreatePollPage(
-                      ):index==2?new Container(
-                          child: new Center(
-                              child: new Text("Vote")
-                          )
+                      ):index==2?new OpenPollPage(
                       ):index==3?new Container(
                           color: !settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),
                           child: new Center(
@@ -506,7 +526,86 @@ class AppState extends State<App>{
                       ));
                     }
                   )
-              )
+              ):new Builder(builder:(context){
+                double ratio = MediaQuery.of(context).size.height/736.0;
+                return new Scaffold(appBar:new AppBar(automaticallyImplyLeading:false,title:new Text("User agreement"),backgroundColor: color),body:new Container(color:!settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),child:new Center(child:new Column(children:[
+                  new Container(height:20.0*ratio),
+                  new FutureBuilder(
+                    future: iconCompleter.future,
+                    builder: (BuildContext context, AsyncSnapshot<ui.Image> snapshot){
+                      if(snapshot.hasData){
+                        if(snapshot.hasData){
+                          return new Image(image:icon.image,width:MediaQuery.of(context).size.width*5/8,height:MediaQuery.of(context).size.width*5/8);
+                        }
+                      }else{
+                        return new Container(
+                          width:MediaQuery.of(context).size.width*5/8,
+                          height:MediaQuery.of(context).size.width*5/8,
+                          child:new Padding(
+                            padding:EdgeInsets.all(MediaQuery.of(context).size.width*5/16-25),
+                            child:new CircularProgressIndicator()
+                          )
+                        );
+                      }
+                    },
+                  ),
+                  new Container(height:20.0*ratio),
+                  new Text("Hi there!",style:new TextStyle(fontSize:25.0,color:textColor),textAlign: TextAlign.center),
+                  new Text("Welcome to PPoll.",style: new TextStyle(fontSize:25.0,color:textColor),textAlign: TextAlign.center),
+                  new Container(height:10.0*ratio),
+                  new Text("PPoll provides a completely anonymous and ad-free experience.",style:new TextStyle(fontSize:15.0,color:textColor.withOpacity(0.9)),textAlign: TextAlign.center),
+                  new Container(height:10.0*ratio),
+                  new Center(child:new RichText(
+                      text:new TextSpan(
+                          children:[
+                            new TextSpan(
+                              text:"By using PPoll, you agree to our ",
+                              style: new TextStyle(color: textColor,fontSize:11.0),
+                            ),
+                            new TextSpan(
+                              text:"Privacy Policy",
+                              style: new TextStyle(color: Colors.blue,fontSize:11.0),
+                              recognizer: new TapGestureRecognizer()..onTap = () async{
+                                if(await canLaunch("https://platypuslabs.llc/privacypolicy")){
+                                  await launch("https://platypuslabs.llc/privacypolicy");
+                                }else{
+                                  throw "Could not launch $url";
+                                }
+                              },
+                            ),
+                            new TextSpan(
+                              text:" and ",
+                              style: new TextStyle(color: textColor,fontSize:11.0),
+                            ),
+                            new TextSpan(
+                              text:"Terms of Use",
+                              style: new TextStyle(color: Colors.blue,fontSize:11.0),
+                              recognizer: new TapGestureRecognizer()..onTap = () async{
+                                if(await canLaunch("https://platypuslabs.llc/termsandconditions")){
+                                  await launch("https://platypuslabs.llc/termsandconditions");
+                                }else{
+                                  throw "Could not launch $url";
+                                }
+                              },
+                            ),
+                            new TextSpan(
+                                text:"."
+                            ),
+                          ]
+                      )
+                  )),
+                  new RaisedButton(
+                      color:Colors.grey,
+                      child:new Text("Get started"),
+                      onPressed:(){
+                        setState((){
+                          agreesToPolicy=true;
+                          policy.writeData(true);
+                        });
+                      }
+                  )
+                ]))));
+              })
           );
         },
         data: (brightness) => new ThemeData(fontFamily: "Roboto",brightness: settings!=null&&settings[0]?Brightness.dark:Brightness.light),
@@ -1201,7 +1300,7 @@ class CreatePollPageState extends State<CreatePollPage>{
 
   @override
   Widget build(BuildContext context){
-    return new Scaffold(appBar:new AppBar(backgroundColor:color,title:new Text("Create a Poll"),actions:[new IconButton(icon:new Icon(removing?Icons.check:Icons.delete),onPressed: (){setState((){removing=!removing;});})]),body:new Container(
+    return new Scaffold(resizeToAvoidBottomPadding:false,appBar:new AppBar(backgroundColor:color,title:new Text("Create a Poll"),actions:[new IconButton(icon:new Icon(removing?Icons.check:Icons.delete),onPressed: (){setState((){removing=!removing;});})]),body:new Container(
         color: !settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),
         child: new Center(
             child: new ListView(
@@ -1227,17 +1326,46 @@ class CreatePollPageState extends State<CreatePollPage>{
                             border: InputBorder.none,
                             hintStyle: new TextStyle(color:textColor.withOpacity(0.8)),
                         ),
-                        controller: questionController
+                        controller: questionController,
+                        inputFormatters: [new MaxInputFormatter(200)],
                       )),
                       image!=null?new Padding(padding:EdgeInsets.only(top:5.0,bottom:5.0),child:new FutureBuilder<ui.Image>(
                         future: completer.future,
-                        builder: (BuildContext context, AsyncSnapshot<ui.Image> snapshot){
+                        builder:(BuildContext context, AsyncSnapshot<ui.Image> snapshot){
                           if(snapshot.hasData){
-                            if(snapshot.hasData){
-                              height = snapshot.data.height*1.0;
-                              width = snapshot.data.width*1.0;
+                            height = snapshot.data.height*1.0;
+                            width = snapshot.data.width*1.0;
+                            if(removing){
+                              return new GestureDetector(
+                                onTap: (){
+                                  createController.jumpTo(max(0.0,createController.position.pixels-MediaQuery.of(context).size.height/3.0));
+                                  setState((){
+                                    image = null;
+                                    height = null;
+                                    width = null;
+                                  });
+                                },
+                                child:new Container(color:Colors.grey[400],child:new SizedBox(
+                                  width: double.infinity,
+                                  height: max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0),
+                                  child: new Center(
+                                    child:new IconButton(
+                                      onPressed:(){
+                                        setState((){
+                                          image = null;
+                                          height = null;
+                                          width = null;
+                                        });
+                                      },
+                                      icon:new Icon(Icons.delete),
+                                      iconSize:MediaQuery.of(context).size.height/736.0*50,
+                                      color:Colors.black
+                                    )
+                                  )
+                                ))
+                              );
                             }
-                            return new GestureDetector(onTap:(){Navigator.push(context,new PageRouteBuilder(opaque:false,pageBuilder: (context,a1,a2)=>new ImageView(child:new Center(child:new PhotoView(imageProvider:new Image.file(image).image,minScale: min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height), maxScale:4.0*min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height))),name:"Image")));},child:new SizedBox(
+                            return new GestureDetector(onTap:(){Navigator.push(context,new PageRouteBuilder(opaque:false,pageBuilder: (context,a1,a2)=>new ImageView(child:new Center(child:new PhotoView(imageProvider:new Image.file(image).image,minScale: min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height),maxScale:4.0*min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height))),name:"Image")));},child:new SizedBox(
                                 width: double.infinity,
                                 height: max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0),
                                 child: new Image(image:new Image.file(image).image,fit:BoxFit.cover)
@@ -1274,11 +1402,12 @@ class CreatePollPageState extends State<CreatePollPage>{
                                       choices[i]=s;
                                     },
                                     decoration: new InputDecoration(
-                                      hintText: "Choice ${i+1}",
+                                      hintText: "Option ${i+1}",
                                       border: InputBorder.none,
                                       hintStyle: new TextStyle(color:textColor.withOpacity(0.7)),
                                     ),
-                                    controller: controllers[i]
+                                    controller: controllers[i],
+                                    inputFormatters: [new MaxInputFormatter(100)]
                                   ),
                               ),
                               new Container(width:5.0)
@@ -1357,14 +1486,14 @@ class CreatePollPageState extends State<CreatePollPage>{
                       image=null;
                     }
                   }
-                },padding:EdgeInsets.zero,child:new ListTile(leading:new Text(image!=null?"Image selected":"Add an image",style:new TextStyle(color:textColor)),trailing:new Padding(padding:EdgeInsets.only(right:10.0),child:new SizedBox(height:40.0,width:40.0,child:image!=null?!imageLoading?!removing?new Image.file(image,fit:BoxFit.cover):new IconButton(color:Colors.black,icon: new Icon(Icons.delete),onPressed:(){
+                },padding:EdgeInsets.zero,child:new ListTile(leading:new Text(image!=null?"Image selected":"Add an image",style:new TextStyle(color:textColor)),trailing:new Padding(padding:EdgeInsets.only(right:10.0),child:new SizedBox(height:40.0,width:40.0,child:image!=null?!imageLoading?!removing?new Image.file(image,fit:BoxFit.cover):new IconButton(color:settings[0]?Colors.white:Colors.black,icon: new Icon(Icons.delete),onPressed:(){
                   createController.jumpTo(max(0.0,createController.position.pixels-MediaQuery.of(context).size.height/3.0));
                   setState((){
                     image = null;
                     height = null;
                     width = null;
                   });
-                }):new CircularProgressIndicator():new Icon(Icons.add,color:Colors.black))))),
+                }):new CircularProgressIndicator():new Icon(Icons.add,color:settings[0]?Colors.white:Colors.black))))),
                 new Container(height:20.0),
                 new Padding(padding:EdgeInsets.only(left:MediaQuery.of(context).size.width/2.0-60.0,right:MediaQuery.of(context).size.width/2.0-60.0),child:new MaterialButton(
                   color:settings[0]?Colors.black:Colors.grey,
@@ -1541,6 +1670,96 @@ class CreatePollPageState extends State<CreatePollPage>{
     ));
   }
 }
+
+class OpenPollPage extends StatefulWidget{
+  @override
+  OpenPollPageState createState() => new OpenPollPageState();
+}
+
+class OpenPollPageState extends State<OpenPollPage>{
+  TextEditingController openController = new TextEditingController();
+  FocusNode f = new FocusNode();
+  String input;
+  @override
+  Widget build(BuildContext context){
+    return new Scaffold(
+      resizeToAvoidBottomPadding: false,
+      appBar:new AppBar(title:new Text("Vote"),backgroundColor: color),
+      body:new Container(color:!settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),child:new Center(
+        child:new Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children:[
+            new Padding(padding:EdgeInsets.only(left:MediaQuery.of(context).size.width/2.0-60.0,right:MediaQuery.of(context).size.width/2.0-60.0),child:new TextField(
+              controller:openController,
+              focusNode: f,
+              inputFormatters: [new UpperCaseTextFormatter()],
+              onChanged:(s){
+                input=s;
+              },
+              onSubmitted:(s){
+                input=s;
+              },
+              textAlign:TextAlign.center,
+              style:new TextStyle(
+                color:textColor,
+              ),
+              decoration: new InputDecoration(
+                hintText: "Poll Code"
+              ),
+            )),
+            new RaisedButton(
+              color:Colors.grey,
+              child:new Text("Open poll",style:new TextStyle(color:textColor)),
+              onPressed:(){
+                if(input==null||input.length<4){
+                  Scaffold.of(context).removeCurrentSnackBar();
+                  Scaffold.of(context).showSnackBar(new SnackBar(duration:new Duration(milliseconds:300),content:new Text("Invalid code")));
+                }else if(data[input]==null){
+                  Scaffold.of(context).removeCurrentSnackBar();
+                  Scaffold.of(context).showSnackBar(new SnackBar(duration:new Duration(milliseconds:300),content:new Text("Poll not found")));
+                }else{
+                  String temp = input;
+                  openController = new TextEditingController();
+                  f = new FocusNode();
+                  setState((){input = null;});
+                  Navigator.push(context,new PageRouteBuilder(
+                    pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation){
+                      return new PollView(temp);
+                    },
+                    transitionDuration: new Duration(milliseconds: 300),
+                    transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+                      return new FadeTransition(
+                          opacity: animation,
+                          child: child
+                      );
+                    },
+                  ));
+                }
+              }
+            )
+          ]
+        )
+      ))
+    );
+  }
+}
+
+class UpperCaseTextFormatter extends TextInputFormatter{
+  @override
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue){
+    return newValue.text.length>4?oldValue.copyWith(text: oldValue.text.toUpperCase().replaceAll(" ", "")):newValue.copyWith(text: newValue.text.toUpperCase().replaceAll(" ", ""));
+  }
+}
+
+class MaxInputFormatter extends TextInputFormatter{
+  int max;
+  MaxInputFormatter(this.max);
+  @override
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue){
+    return newValue.text.length>max?oldValue.copyWith(text: oldValue.text):newValue.copyWith(text: newValue.text);
+  }
+}
+
 /*
 settings.asMap().keys.map((i)=>new Switch(value:settings[i],onChanged: (b){
                     setState((){settings[i]=b;});
