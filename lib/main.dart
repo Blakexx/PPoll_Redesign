@@ -527,29 +527,37 @@ class AppState extends State<App>{
                     }
                   )
               ):new Builder(builder:(context){
-                return new Scaffold(appBar:new AppBar(automaticallyImplyLeading:false,title:new Text("User agreement"),backgroundColor: color),body:new Container(color:!settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),child:new Center(child:new Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly,children:[
+                double heightOrWidth = min(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height);
+                double ratio = heightOrWidth/568.0;
+                //width:320.0
+                //height:568.0
+                return new Scaffold(appBar:new AppBar(automaticallyImplyLeading:false,title:new Text("User agreement"),backgroundColor: color),body:new Container(color:!settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),child:new Center(child:new ListView(children:[
+                  new Container(height:20.0*ratio),
                   new FutureBuilder(
                     future: iconCompleter.future,
                     builder: (BuildContext context, AsyncSnapshot<ui.Image> snapshot){
                       if(snapshot.hasData){
                         if(snapshot.hasData){
-                          return new Image(image:icon.image,width:MediaQuery.of(context).size.width*5/8,height:MediaQuery.of(context).size.width*5/8);
+                          return new Image(image:icon.image,width:heightOrWidth*5/8,height:heightOrWidth*5/8);
                         }
                       }else{
                         return new Container(
-                          width:MediaQuery.of(context).size.width*5/8,
-                          height:MediaQuery.of(context).size.width*5/8,
+                          width:heightOrWidth*5/8,
+                          height:heightOrWidth*5/8,
                           child:new Padding(
-                            padding:EdgeInsets.all(MediaQuery.of(context).size.width*5/16-25),
+                            padding:EdgeInsets.all(heightOrWidth*5/16-25),
                             child:new CircularProgressIndicator()
                           )
                         );
                       }
                     },
                   ),
+                  new Container(height:20.0*ratio),
                   new Text("Hi there!",style:new TextStyle(fontSize:25.0,color:textColor),textAlign: TextAlign.center),
                   new Text("Welcome to PPoll.",style: new TextStyle(fontSize:25.0,color:textColor),textAlign: TextAlign.center),
+                  new Container(height:20.0*ratio),
                   new Padding(padding:EdgeInsets.only(left:5.0,right:5.0),child:new Text("PPoll provides a completely anonymous and ad-free experience.",style:new TextStyle(fontSize:15.0,color:textColor.withOpacity(0.9)),textAlign: TextAlign.center)),
+                  new Container(height:20.0*ratio),
                   new Padding(padding:EdgeInsets.only(left:5.0,right:5.0),child:new Center(child:new RichText(
                       textAlign:TextAlign.center,
                       text:new TextSpan(
@@ -590,7 +598,8 @@ class AppState extends State<App>{
                           ]
                       )
                   ))),
-                  new RaisedButton(
+                  new Container(height:20.0*ratio),
+                  new Padding(padding:EdgeInsets.only(left:MediaQuery.of(context).size.width/20.0,right:MediaQuery.of(context).size.width/20.0),child:new RaisedButton(
                       color:Colors.grey,
                       child:new Text("Get started"),
                       onPressed:(){
@@ -599,7 +608,8 @@ class AppState extends State<App>{
                           policy.writeData(true);
                         });
                       }
-                  )
+                  )),
+                  new Container(height:50.0*ratio),
                 ]))));
               })
           );
