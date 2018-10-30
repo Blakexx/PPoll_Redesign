@@ -528,11 +528,7 @@ class AppState extends State<App>{
                   )
               ):new Builder(builder:(context){
                 double heightOrWidth = min(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height);
-                print(MediaQuery.of(context).size.height);
                 double ratio = max(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height)/568.0;
-                print(ratio);
-                //width:320.0
-                //height:568.0
                 return new Scaffold(appBar:new AppBar(automaticallyImplyLeading:false,title:new Text("User agreement"),backgroundColor: color),body:new Container(color:!settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),child:new Center(child:new ListView(children:[
                   new Container(height:20.0*ratio),
                   new FutureBuilder(
