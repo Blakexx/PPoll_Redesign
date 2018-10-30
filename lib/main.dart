@@ -528,7 +528,9 @@ class AppState extends State<App>{
                   )
               ):new Builder(builder:(context){
                 double heightOrWidth = min(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height);
-                double ratio = heightOrWidth/568.0;
+                print(MediaQuery.of(context).size.height);
+                double ratio = max(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height)/568.0;
+                print(ratio);
                 //width:320.0
                 //height:568.0
                 return new Scaffold(appBar:new AppBar(automaticallyImplyLeading:false,title:new Text("User agreement"),backgroundColor: color),body:new Container(color:!settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),child:new Center(child:new ListView(children:[
@@ -553,10 +555,10 @@ class AppState extends State<App>{
                     },
                   ),
                   new Container(height:20.0*ratio),
-                  new Text("Hi there!",style:new TextStyle(fontSize:25.0,color:textColor),textAlign: TextAlign.center),
-                  new Text("Welcome to PPoll.",style: new TextStyle(fontSize:25.0,color:textColor),textAlign: TextAlign.center),
+                  new Text("Hi there!",style:new TextStyle(fontSize:25.0*ratio,color:textColor),textAlign: TextAlign.center),
+                  new Text("Welcome to PPoll.",style: new TextStyle(fontSize:25.0*ratio,color:textColor),textAlign: TextAlign.center),
                   new Container(height:20.0*ratio),
-                  new Padding(padding:EdgeInsets.only(left:5.0,right:5.0),child:new Text("PPoll provides a completely anonymous and ad-free experience.",style:new TextStyle(fontSize:15.0,color:textColor.withOpacity(0.9)),textAlign: TextAlign.center)),
+                  new Padding(padding:EdgeInsets.only(left:5.0,right:5.0),child:new Text("PPoll provides a completely anonymous and ad-free experience.",style:new TextStyle(fontSize:15.0*ratio,color:textColor.withOpacity(0.9)),textAlign: TextAlign.center)),
                   new Container(height:20.0*ratio),
                   new Padding(padding:EdgeInsets.only(left:5.0,right:5.0),child:new Center(child:new RichText(
                       textAlign:TextAlign.center,
@@ -564,11 +566,11 @@ class AppState extends State<App>{
                           children:[
                             new TextSpan(
                               text:"By using PPoll, you agree to our ",
-                              style: new TextStyle(color: textColor,fontSize:11.0),
+                              style: new TextStyle(color: textColor,fontSize:11.0*ratio),
                             ),
                             new TextSpan(
                               text:"Privacy Policy",
-                              style: new TextStyle(color: Colors.blue,fontSize:11.0),
+                              style: new TextStyle(color: Colors.blue,fontSize:11.0*ratio),
                               recognizer: new TapGestureRecognizer()..onTap = () async{
                                 if(await canLaunch("https://platypuslabs.llc/privacypolicy")){
                                   await launch("https://platypuslabs.llc/privacypolicy");
@@ -579,11 +581,11 @@ class AppState extends State<App>{
                             ),
                             new TextSpan(
                               text:" and ",
-                              style: new TextStyle(color: textColor,fontSize:11.0),
+                              style: new TextStyle(color: textColor,fontSize:11.0*ratio),
                             ),
                             new TextSpan(
                               text:"Terms of Use",
-                              style: new TextStyle(color: Colors.blue,fontSize:11.0),
+                              style: new TextStyle(color: Colors.blue,fontSize:11.0*ratio),
                               recognizer: new TapGestureRecognizer()..onTap = () async{
                                 if(await canLaunch("https://platypuslabs.llc/termsandconditions")){
                                   await launch("https://platypuslabs.llc/termsandconditions");
@@ -600,8 +602,9 @@ class AppState extends State<App>{
                   ))),
                   new Container(height:20.0*ratio),
                   new Padding(padding:EdgeInsets.only(left:MediaQuery.of(context).size.width/20.0,right:MediaQuery.of(context).size.width/20.0),child:new RaisedButton(
+                      padding: EdgeInsets.all(13.0),
                       color:Colors.grey,
-                      child:new Text("Get started"),
+                      child:new Text("Get started",style:new TextStyle(fontSize:12.0*ratio)),
                       onPressed:(){
                         setState((){
                           agreesToPolicy=true;
