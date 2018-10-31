@@ -6,14 +6,14 @@ admin.initializeApp();
 const keyFile = require('./key');
 
 exports.vote = functions.https.onRequest((req,res)=>{
-	var key = keyFile.key();
+	let key = keyFile.key();
 	const text = req.query.text;
-	var map = JSON.parse(text);
+	let map = JSON.parse(text);
 	if(map["key"]===key){
-		var multiSelect = map["multiSelect"];
-		var choice = map["choice"];
-		var changedFrom = map["changed"];
-		var currentList;
+		let multiSelect = map["multiSelect"];
+		let choice = map["choice"];
+		let changedFrom = map["changed"];
+		let currentList;
 		return admin.database().ref("data/"+map["poll"]+"/a").once("value", (snapshot)=>{
 			currentList = snapshot.val();
 			if(!multiSelect){
@@ -33,20 +33,20 @@ exports.vote = functions.https.onRequest((req,res)=>{
 });
 
 exports.create = functions.https.onRequest((req,res)=>{
-    var chars = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
-    var key = keyFile.key();
-    var map = JSON.parse(req.query.text);
+    let chars = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
+    let key = keyFile.key();
+    let map = JSON.parse(req.query.text);
     if(map["key"]===key){
         return admin.database().ref("data").once("value",(snapshot)=>{
-            var code = "";
-            var list = Object.keys(snapshot.val());
+            let code = "";
+            let list = Object.keys(snapshot.val());
             do{
                 code = "";
                 for(var i = 0;i<4;i++){
                     code+=chars[Math.floor(Math.random()*36)];
                 }
             }while(list.includes(code));
-            var returned = {
+            let returned = {
                 "a":map["a"],
                 "b":map["b"],
                 "c":map["c"],
@@ -55,7 +55,7 @@ exports.create = functions.https.onRequest((req,res)=>{
                 "t":Math.floor(Date.now()/1000)
             };
             return admin.database().ref("users/"+map["u"]+"/1").once("value",(snapshot)=>{
-                var created = snapshot.val();
+                let created = snapshot.val();
                 if(created===null){
                     created = [];
                 }

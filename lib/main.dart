@@ -554,19 +554,19 @@ class AppState extends State<App>{
                   new Text("Hi there!",style:new TextStyle(fontSize:25.0*ratio,color:textColor),textAlign: TextAlign.center),
                   new Text("Welcome to PPoll.",style: new TextStyle(fontSize:25.0*ratio,color:textColor),textAlign: TextAlign.center),
                   new Container(height:20.0*ratio),
-                  new Padding(padding:EdgeInsets.only(left:5.0,right:5.0),child:new Text("PPoll provides a completely anonymous and ad-free experience.",style:new TextStyle(fontSize:15.0*ratio,color:textColor.withOpacity(0.9)),textAlign: TextAlign.center)),
+                  new Padding(padding:EdgeInsets.only(left:MediaQuery.of(context).size.width/20.0,right:MediaQuery.of(context).size.width/20.0),child:new Text("PPoll provides a completely anonymous and ad-free experience.",style:new TextStyle(fontSize:15.0*ratio,color:textColor.withOpacity(0.9)),textAlign: TextAlign.center)),
                   new Container(height:20.0*ratio),
-                  new Padding(padding:EdgeInsets.only(left:5.0,right:5.0),child:new Center(child:new RichText(
+                  new Padding(padding:EdgeInsets.only(left:MediaQuery.of(context).size.width/20.0,right:MediaQuery.of(context).size.width/20.0),child:new Center(child:new RichText(
                       textAlign:TextAlign.center,
                       text:new TextSpan(
                           children:[
                             new TextSpan(
-                              text:"By using PPoll, you agree to our ",
-                              style: new TextStyle(color: textColor,fontSize:11.0*ratio),
+                              text:"By pressing the \"Get started\" button and using PPoll, you agree to our ",
+                              style: new TextStyle(color: textColor,fontSize:10.0*ratio),
                             ),
                             new TextSpan(
                               text:"Privacy Policy",
-                              style: new TextStyle(color: Colors.blue,fontSize:11.0*ratio),
+                              style: new TextStyle(color: Colors.blue,fontSize:10.0*ratio),
                               recognizer: new TapGestureRecognizer()..onTap = () async{
                                 if(await canLaunch("https://platypuslabs.llc/privacypolicy")){
                                   await launch("https://platypuslabs.llc/privacypolicy");
@@ -577,11 +577,11 @@ class AppState extends State<App>{
                             ),
                             new TextSpan(
                               text:" and ",
-                              style: new TextStyle(color: textColor,fontSize:11.0*ratio),
+                              style: new TextStyle(color: textColor,fontSize:10.0*ratio),
                             ),
                             new TextSpan(
                               text:"Terms of Use",
-                              style: new TextStyle(color: Colors.blue,fontSize:11.0*ratio),
+                              style: new TextStyle(color: Colors.blue,fontSize:10.0*ratio),
                               recognizer: new TapGestureRecognizer()..onTap = () async{
                                 if(await canLaunch("https://platypuslabs.llc/termsandconditions")){
                                   await launch("https://platypuslabs.llc/termsandconditions");
@@ -990,101 +990,104 @@ class PollState extends State<Poll>{
                 },
               )):new Container(),
               new Column(
-                  children: data[widget.id]["c"].map((c)=>widget.viewPage||(hasVoted||(data[widget.id]["c"].indexOf(c)<5))?new MaterialButton(onPressed: () async{
-                    if(multiSelect||c!=choice){
-                      if(widget.viewPage){
-                        PollViewState.canLeaveView = false;
-                      }
-                      String pid;
-                      do{
-                        pid = "";
-                        Random r = new Random();
-                        List<String> nums = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
-                        for(int i = 0;i<8;i++){
-                          pid+=(r.nextInt(2)==0?nums[r.nextInt(36)]:nums[r.nextInt(36)].toLowerCase());
+                  children: data[widget.id]["c"].map((c){
+                    double percent = ((data[widget.id]["a"].reduce((n1,n2)=>n1+n2))!=0?data[widget.id]["a"][data[widget.id]["c"].indexOf(c)]/(data[widget.id]["a"].reduce((n1,n2)=>n1+n2)):0.0);
+                    return widget.viewPage||(hasVoted||(data[widget.id]["c"].indexOf(c)<5))?new MaterialButton(onPressed: () async{
+                      if(multiSelect||c!=choice){
+                        if(widget.viewPage){
+                          PollViewState.canLeaveView = false;
                         }
-                      }while(pids.contains(pid));
-                      pids.add(pid);
-                      waitForVote(){
-                        new Timer(Duration.zero,(){
-                          if(pids[0]==pid){
-                            vote(c,context,pid,multiSelect?!choice.contains(data[widget.id]["c"].indexOf(c)):null);
-                          }else if(pids.length>0){
-                            waitForVote();
+                        String pid;
+                        do{
+                          pid = "";
+                          Random r = new Random();
+                          List<String> nums = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
+                          for(int i = 0;i<8;i++){
+                            pid+=(r.nextInt(2)==0?nums[r.nextInt(36)]:nums[r.nextInt(36)].toLowerCase());
                           }
-                        });
-                      }
-                      waitForVote();
-                    }
-                    },padding:EdgeInsets.zero,child:new Column(children: [
-                    new Row(
-                        children: [
-                          !multiSelect?pids.length>0&&choice==c?new Container(width:2*kRadialReactionRadius+8.0,height:2*kRadialReactionRadius+8.0,child:new Center(child:new Container(height:16.0,width:16.0,child: new CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation(!settings[0]?Colors.blueAccent[600]:Colors.greenAccent[400]),strokeWidth: 2.2)))):new Radio(
-                            activeColor: settings[0]?Colors.greenAccent[400]:Colors.blueAccent[600],
-                            value: c,
-                            groupValue: choice,
-                            onChanged: (s){
-                              if(s!=choice){
-                                if(widget.viewPage){
-                                  PollViewState.canLeaveView = false;
-                                }
-                                String pid;
-                                do{
-                                  pid = "";
-                                  Random r = new Random();
-                                  List<String> nums = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
-                                  for(int i = 0;i<8;i++){
-                                    pid+=(r.nextInt(2)==0?nums[r.nextInt(36)]:nums[r.nextInt(36)].toLowerCase());
-                                  }
-                                }while(pids.contains(pid));
-                                pids.add(pid);
-                                waitForVote(){
-                                  new Timer(Duration.zero,(){
-                                    if(pids[0]==pid){
-                                      vote(c,context,pid);
-                                    }else if(pids.length>0){
-                                      waitForVote();
-                                    }
-                                  });
-                                }
-                                waitForVote();
-                              }
-                            },
-                          ):new Checkbox(
-                            activeColor: settings[0]?Colors.greenAccent[400]:Colors.blueAccent[600],
-                            value: choice.contains(data[widget.id]["c"].indexOf(c)),
-                            onChanged:(b){
-                              if(widget.viewPage){
-                                PollViewState.canLeaveView = false;
-                              }
-                              String pid;
-                              do{
-                                pid = "";
-                                Random r = new Random();
-                                List<String> nums = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
-                                for(int i = 0;i<8;i++){
-                                  pid+=(r.nextInt(2)==0?nums[r.nextInt(36)]:nums[r.nextInt(36)].toLowerCase());
-                                }
-                              }while(pids.contains(pid));
-                              pids.add(pid);
-                              waitForVote(){
-                                new Timer(Duration.zero,(){
-                                  if(pids[0]==pid){
-                                    vote(c,context,pid,b);
-                                  }else if(pids.length>0){
-                                    waitForVote();
-                                  }
-                                });
-                              }
+                        }while(pids.contains(pid));
+                        pids.add(pid);
+                        waitForVote(){
+                          new Timer(Duration.zero,(){
+                            if(pids[0]==pid){
+                              vote(c,context,pid,multiSelect?!choice.contains(data[widget.id]["c"].indexOf(c)):null);
+                            }else if(pids.length>0){
                               waitForVote();
                             }
-                          ),
-                          new Expanded(child:new Text(c,maxLines:!widget.viewPage?2:100,style: new TextStyle(color:textColor),overflow: TextOverflow.ellipsis)),
-                          new Container(width:5.0)
-                        ]
-                    ),
-                    hasVoted?new Padding(padding: EdgeInsets.only(left:50.0,right:20.0,bottom:5.0),child: new Container(height:(MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?5.0:5.0/(3*((MediaQuery.of(context).size.width/500.0).ceil())/4),child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation((!multiSelect?choice==c:choice.contains(data[widget.id]["c"].indexOf(c)))?settings[0]?Colors.greenAccent[400]:Colors.blueAccent[600]:settings[0]?Colors.white54:Colors.grey[600]),backgroundColor:settings[0]?Colors.white24:Colors.black26,value:(data[widget.id]["a"].reduce((n1,n2)=>n1+n2))!=0?data[widget.id]["a"][data[widget.id]["c"].indexOf(c)]/(data[widget.id]["a"].reduce((n1,n2)=>n1+n2)):0.0))):new Container()
-                  ])):data[widget.id]["c"].indexOf(c)==5?/*new Container(color:Colors.red,child:new Text("...",style:new TextStyle(fontSize:20.0,fontWeight: FontWeight.bold)))*/new Icon(Icons.more_horiz):new Container()).toList().cast<Widget>()
+                          });
+                        }
+                        waitForVote();
+                      }
+                    },padding:EdgeInsets.zero,child:new Column(children: [
+                      new Row(
+                          children: [
+                            !multiSelect?pids.length>0&&choice==c?new Container(width:2*kRadialReactionRadius+8.0,height:2*kRadialReactionRadius+8.0,child:new Center(child:new Container(height:16.0,width:16.0,child: new CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation(!settings[0]?Colors.blueAccent[600]:Colors.greenAccent[400]),strokeWidth: 2.2)))):new Radio(
+                              activeColor: settings[0]?Colors.greenAccent[400]:Colors.blueAccent[600],
+                              value: c,
+                              groupValue: choice,
+                              onChanged: (s){
+                                if(s!=choice){
+                                  if(widget.viewPage){
+                                    PollViewState.canLeaveView = false;
+                                  }
+                                  String pid;
+                                  do{
+                                    pid = "";
+                                    Random r = new Random();
+                                    List<String> nums = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
+                                    for(int i = 0;i<8;i++){
+                                      pid+=(r.nextInt(2)==0?nums[r.nextInt(36)]:nums[r.nextInt(36)].toLowerCase());
+                                    }
+                                  }while(pids.contains(pid));
+                                  pids.add(pid);
+                                  waitForVote(){
+                                    new Timer(Duration.zero,(){
+                                      if(pids[0]==pid){
+                                        vote(c,context,pid);
+                                      }else if(pids.length>0){
+                                        waitForVote();
+                                      }
+                                    });
+                                  }
+                                  waitForVote();
+                                }
+                              },
+                            ):new Checkbox(
+                                activeColor: settings[0]?Colors.greenAccent[400]:Colors.blueAccent[600],
+                                value: choice.contains(data[widget.id]["c"].indexOf(c)),
+                                onChanged:(b){
+                                  if(widget.viewPage){
+                                    PollViewState.canLeaveView = false;
+                                  }
+                                  String pid;
+                                  do{
+                                    pid = "";
+                                    Random r = new Random();
+                                    List<String> nums = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
+                                    for(int i = 0;i<8;i++){
+                                      pid+=(r.nextInt(2)==0?nums[r.nextInt(36)]:nums[r.nextInt(36)].toLowerCase());
+                                    }
+                                  }while(pids.contains(pid));
+                                  pids.add(pid);
+                                  waitForVote(){
+                                    new Timer(Duration.zero,(){
+                                      if(pids[0]==pid){
+                                        vote(c,context,pid,b);
+                                      }else if(pids.length>0){
+                                        waitForVote();
+                                      }
+                                    });
+                                  }
+                                  waitForVote();
+                                }
+                            ),
+                            new Expanded(child:new Text(c,maxLines:!widget.viewPage?2:100,style: new TextStyle(color:textColor),overflow: TextOverflow.ellipsis)),
+                            new Container(width:5.0)
+                          ]
+                      ),
+                      hasVoted?new Row(crossAxisAlignment: CrossAxisAlignment.center,children:[new Expanded(child:new Padding(padding: EdgeInsets.only(top:5.0 add ,left:48.0,bottom:5.0),child: new Container(height:(MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?5.0:5.0/(3*((MediaQuery.of(context).size.width/500.0).ceil())/4),child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation((!multiSelect?choice==c:choice.contains(data[widget.id]["c"].indexOf(c)))?settings[0]?Colors.greenAccent[400]:Colors.blueAccent[600]:settings[0]?Colors.white54:Colors.grey[600]),backgroundColor:settings[0]?Colors.white24:Colors.black26,value:percent)))),new Padding(padding:EdgeInsets.only(left:5.0,right:8.0),child:new Container(width:35.0,child:new FittedBox(fit:BoxFit.scaleDown,alignment: Alignment.centerRight,child:new Text((100*percent).toStringAsFixed(percent==1?0:percent==0?2:1)+"%"))))]):new Container()
+                    ])):data[widget.id]["c"].indexOf(c)==5?/*new Container(color:Colors.red,child:new Text("...",style:new TextStyle(fontSize:20.0,fontWeight: FontWeight.bold)))*/new Icon(Icons.more_horiz):new Container();
+                  }).toList().cast<Widget>()
               ),
               new Container(height:!hasVoted?7.0:13.0)
             ]
