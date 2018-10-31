@@ -13,7 +13,6 @@ import 'dart:collection';
 import 'package:flutter_circular_chart/flutter_circular_chart.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'key.dart';
-import 'package:collection/collection.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -1085,7 +1084,7 @@ class PollState extends State<Poll>{
                             new Container(width:5.0)
                           ]
                       ),
-                      hasVoted?new Row(crossAxisAlignment: CrossAxisAlignment.center,children:[new Expanded(child:new Padding(padding: EdgeInsets.only(top:5.0,left:48.0,bottom:5.0),child: new Container(height:(MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?5.0:5.0/(3*((MediaQuery.of(context).size.width/500.0).ceil())/4),child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation((!multiSelect?choice==c:choice.contains(data[widget.id]["c"].indexOf(c)))?settings[0]?Colors.greenAccent[400]:Colors.blueAccent[600]:settings[0]?Colors.white54:Colors.grey[600]),backgroundColor:settings[0]?Colors.white24:Colors.black26,value:percent)))),new Padding(padding:EdgeInsets.only(left:5.0,right:8.0),child:new Container(width:35.0,child:new FittedBox(fit:BoxFit.scaleDown,alignment: Alignment.centerRight,child:new Text((100*percent).toStringAsFixed(percent==1?0:percent==0?2:1)+"%"))))]):new Container()
+                      hasVoted?new Row(crossAxisAlignment: CrossAxisAlignment.center,children:[new Expanded(child:new Padding(padding: EdgeInsets.only(top:7.0,left:48.0,bottom:5.0),child: new Container(height:(MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?5.0:5.0/(3*((MediaQuery.of(context).size.width/500.0).ceil())/4),child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation((!multiSelect?choice==c:choice.contains(data[widget.id]["c"].indexOf(c)))?settings[0]?Colors.greenAccent[400]:Colors.blueAccent[600]:settings[0]?Colors.white54:Colors.grey[600]),backgroundColor:settings[0]?Colors.white24:Colors.black26,value:percent)))),new Padding(padding:EdgeInsets.only(left:5.0,right:8.0),child:new Container(width:35.0,child:new FittedBox(fit:BoxFit.scaleDown,alignment: Alignment.centerRight,child:new Text((100*percent).toStringAsFixed(percent==1?0:percent==0?2:1)+"%"))))]):new Container()
                     ])):data[widget.id]["c"].indexOf(c)==5?/*new Container(color:Colors.red,child:new Text("...",style:new TextStyle(fontSize:20.0,fontWeight: FontWeight.bold)))*/new Icon(Icons.more_horiz):new Container();
                   }).toList().cast<Widget>()
               ),
@@ -1096,9 +1095,9 @@ class PollState extends State<Poll>{
         ]
     );
     if(widget.viewPage){
-      return new Container(color: !settings[0]?new Color.fromRGBO(250, 250, 250, 1.0):new Color.fromRGBO(32,33,36,1.0),child:returnedWidget);
+      return new Container(color:!settings[0]?new Color.fromRGBO(250, 250, 250, 1.0):new Color.fromRGBO(32,33,36,1.0),child:returnedWidget);
     }else{
-      returnedWidget = new Card(color: !settings[0]?new Color.fromRGBO(250, 250, 250, 1.0):new Color.fromRGBO(32,33,36,1.0),child:new Hero(tag:widget.id,child:new Material(type:MaterialType.transparency,child:returnedWidget)));
+      returnedWidget = new Card(color:!settings[0]?new Color.fromRGBO(250, 250, 250, 1.0):new Color.fromRGBO(32,33,36,1.0),child:new Hero(tag:widget.id,child:new Material(type:MaterialType.transparency,child:returnedWidget)));
       if(!(hasVoted||data[widget.id]["a"].length<6)){
         returnedWidget = new AbsorbPointer(child:returnedWidget);
       }
