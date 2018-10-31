@@ -69,6 +69,8 @@ Connectivity connection = new Connectivity();
 
 bool agreesToPolicy = false;
 
+String openedPoll;
+
 void main() async{
   if(Platform.isAndroid){
     int count = 0;
@@ -221,13 +223,14 @@ class AppState extends State<App>{
                   }else{
                     dynamic returned;
                     try{
-                      returned = json.decode(text.substring (text.indexOf("{"),text.lastIndexOf("}")+1));
+                      returned = json.decode(text.substring(text.indexOf("{"),text.lastIndexOf("}")+1));
                     }catch(e){
                       return;
                     }
                     List<dynamic> path = returned["path"].split("/");
                     dynamic finalPath = path[path.length-1];
                     dynamic temp = data;
+                    String code = path!=null&&path.length>1?path[1].toString():null;
                     path.sublist(1,path.length-1).forEach((o){
                       try{
                         int i = int.parse(o);
@@ -239,7 +242,7 @@ class AppState extends State<App>{
                         temp = temp[o];
                       }
                     });
-                    if(index==0||index==3){
+                    if(index==0||index==3||(index==1||index==2&&openedPoll!=null&&openedPoll==code)){
                       setState((){
                         try{
                           int i = int.parse(finalPath);
@@ -488,7 +491,7 @@ class AppState extends State<App>{
                           child: new Center(
                               child: new Column(
                                 children: [
-                                  new Padding(padding: EdgeInsets.only(top:MediaQuery.of(context).padding.top),child: new Column(
+                                  new Padding(padding: EdgeInsets.only(top:12.0),child: new Column(
                                       children: settings.asMap().keys.map((i)=>new Padding(padding:EdgeInsets.only(bottom:12.0),child:new GestureDetector(onTap:(){
                                         bool b = !settings[0];
                                         if(i==0){
@@ -528,8 +531,9 @@ class AppState extends State<App>{
               ):new Builder(builder:(context){
                 double heightOrWidth = min(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height);
                 double ratio = max(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height)/568.0;
-                return new Scaffold(appBar:new AppBar(automaticallyImplyLeading:false,title:new Text("User agreement"),backgroundColor: color),body:new Container(color:!settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),child:new Center(child:new ListView(children:[
-                  new Container(height:20.0*ratio),
+                bool landscape = MediaQuery.of(context).size.width>MediaQuery.of(context).size.height;
+                List<Widget> widgets = [
+                  new Container(height:landscape?20.0*ratio:0.0),
                   new FutureBuilder(
                     future: iconCompleter.future,
                     builder: (BuildContext context, AsyncSnapshot<ui.Image> snapshot){
@@ -539,76 +543,82 @@ class AppState extends State<App>{
                         }
                       }else{
                         return new Container(
-                          width:heightOrWidth*5/8,
-                          height:heightOrWidth*5/8,
-                          child:new Padding(
-                            padding:EdgeInsets.all(heightOrWidth*5/16-25),
-                            child:new CircularProgressIndicator()
-                          )
+                            width:heightOrWidth*5/8,
+                            height:heightOrWidth*5/8,
+                            child:new Padding(
+                                padding:EdgeInsets.all(heightOrWidth*5/16-25),
+                                child:new CircularProgressIndicator()
+                            )
                         );
                       }
                     },
                   ),
-                  new Container(height:20.0*ratio),
+                  new Container(height:landscape?20.0*ratio:0.0),
                   new Text("Hi there!",style:new TextStyle(fontSize:25.0*ratio,color:textColor),textAlign: TextAlign.center),
                   new Text("Welcome to PPoll.",style: new TextStyle(fontSize:25.0*ratio,color:textColor),textAlign: TextAlign.center),
-                  new Container(height:20.0*ratio),
+                  new Container(height:landscape?20.0*ratio:0.0),
                   new Padding(padding:EdgeInsets.only(left:MediaQuery.of(context).size.width/20.0,right:MediaQuery.of(context).size.width/20.0),child:new Text("PPoll provides a completely anonymous and ad-free experience.",style:new TextStyle(fontSize:15.0*ratio,color:textColor.withOpacity(0.9)),textAlign: TextAlign.center)),
-                  new Container(height:20.0*ratio),
-                  new Padding(padding:EdgeInsets.only(left:MediaQuery.of(context).size.width/20.0,right:MediaQuery.of(context).size.width/20.0),child:new Center(child:new RichText(
-                      textAlign:TextAlign.center,
-                      text:new TextSpan(
-                          children:[
-                            new TextSpan(
-                              text:"By pressing the \"Get started\" button and using PPoll, you agree to our ",
-                              style: new TextStyle(color: textColor,fontSize:10.0*ratio),
-                            ),
-                            new TextSpan(
-                              text:"Privacy Policy",
-                              style: new TextStyle(color: Colors.blue,fontSize:10.0*ratio),
-                              recognizer: new TapGestureRecognizer()..onTap = () async{
-                                if(await canLaunch("https://platypuslabs.llc/privacypolicy")){
-                                  await launch("https://platypuslabs.llc/privacypolicy");
-                                }else{
-                                  throw "Could not launch $url";
-                                }
-                              },
-                            ),
-                            new TextSpan(
-                              text:" and ",
-                              style: new TextStyle(color: textColor,fontSize:10.0*ratio),
-                            ),
-                            new TextSpan(
-                              text:"Terms of Use",
-                              style: new TextStyle(color: Colors.blue,fontSize:10.0*ratio),
-                              recognizer: new TapGestureRecognizer()..onTap = () async{
-                                if(await canLaunch("https://platypuslabs.llc/termsandconditions")){
-                                  await launch("https://platypuslabs.llc/termsandconditions");
-                                }else{
-                                  throw "Could not launch $url";
-                                }
-                              },
-                            ),
-                            new TextSpan(
-                                text:"."
-                            ),
-                          ]
-                      )
-                  ))),
-                  new Container(height:20.0*ratio),
-                  new Padding(padding:EdgeInsets.only(left:MediaQuery.of(context).size.width/20.0,right:MediaQuery.of(context).size.width/20.0),child:new RaisedButton(
-                      padding: EdgeInsets.all(13.0),
-                      color:Colors.grey,
-                      child:new Text("Get started",style:new TextStyle(fontSize:12.0*ratio)),
-                      onPressed:(){
-                        setState((){
-                          agreesToPolicy=true;
-                          policy.writeData(true);
-                        });
-                      }
-                  )),
-                  new Container(height:50.0*ratio),
-                ]))));
+                  new Container(height:landscape?40.0*ratio:0.0),
+                  new Column(
+                    children:[
+                      new Padding(padding:EdgeInsets.only(left:MediaQuery.of(context).size.width/20.0,right:MediaQuery.of(context).size.width/20.0),child:new Center(child:new RichText(
+                          textAlign:TextAlign.center,
+                          text:new TextSpan(
+                              children:[
+                                new TextSpan(
+                                  text:"By pressing the \"Get started\" button and using PPoll, you agree to our ",
+                                  style: new TextStyle(color: textColor,fontSize:8.0*ratio),
+                                ),
+                                new TextSpan(
+                                  text:"Privacy Policy",
+                                  style: new TextStyle(color: Colors.blue,fontSize:8.0*ratio),
+                                  recognizer: new TapGestureRecognizer()..onTap = () async{
+                                    if(await canLaunch("https://platypuslabs.llc/privacypolicy")){
+                                      await launch("https://platypuslabs.llc/privacypolicy");
+                                    }else{
+                                      throw "Could not launch $url";
+                                    }
+                                  },
+                                ),
+                                new TextSpan(
+                                  text:" and ",
+                                  style: new TextStyle(color: textColor,fontSize:8.0*ratio),
+                                ),
+                                new TextSpan(
+                                  text:"Terms of Use",
+                                  style: new TextStyle(color: Colors.blue,fontSize:8.0*ratio),
+                                  recognizer: new TapGestureRecognizer()..onTap = () async{
+                                    if(await canLaunch("https://platypuslabs.llc/termsandconditions")){
+                                      await launch("https://platypuslabs.llc/termsandconditions");
+                                    }else{
+                                      throw "Could not launch $url";
+                                    }
+                                  },
+                                ),
+                                new TextSpan(
+                                    text:".",
+                                    style: new TextStyle(fontSize:8.0)
+                                ),
+                              ]
+                          )
+                      ))),
+                      new Container(height:landscape?10.0*ratio:5.0*ratio),
+                      new Padding(padding:EdgeInsets.only(left:MediaQuery.of(context).size.width/20.0,right:MediaQuery.of(context).size.width/20.0),child:new Container(width:double.infinity,child:new RaisedButton(
+                          padding: EdgeInsets.all(13.0),
+                          color:Colors.grey,
+                          child:new Text("Get started",style:new TextStyle(fontSize:12.0*ratio)),
+                          onPressed:(){
+                            setState((){
+                              agreesToPolicy=true;
+                              policy.writeData(true);
+                            });
+                          }
+                      )))
+                    ]
+                  ),
+                  new Container(height:landscape?50.0*ratio:0.0),
+                ];
+                return new Scaffold(appBar:new AppBar(automaticallyImplyLeading:false,title:new Text("User agreement"),backgroundColor: color),body:new Container(color:!settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),child:new Center(child:!landscape?new Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly,children:widgets):new ListView(children:widgets))));
               })
           );
         },
@@ -988,6 +998,7 @@ class PollState extends State<Poll>{
                   }
                 },
               )):new Container(),
+              new Container(height:5.0),
               new Column(
                   children: data[widget.id]["c"].map((c){
                     double percent = ((data[widget.id]["a"].reduce((n1,n2)=>n1+n2))!=0?data[widget.id]["a"][data[widget.id]["c"].indexOf(c)]/(data[widget.id]["a"].reduce((n1,n2)=>n1+n2)):0.0);
@@ -1017,10 +1028,10 @@ class PollState extends State<Poll>{
                         }
                         waitForVote();
                       }
-                    },padding:EdgeInsets.zero,child:new Column(children: [
+                    },padding:EdgeInsets.only(top:12.0,bottom:12.0),child:new Column(children: [
                       new Row(
                           children: [
-                            !multiSelect?pids.length>0&&choice==c?new Container(width:2*kRadialReactionRadius+8.0,height:2*kRadialReactionRadius+8.0,child:new Center(child:new Container(height:16.0,width:16.0,child: new CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation(!settings[0]?Colors.blueAccent[600]:Colors.greenAccent[400]),strokeWidth: 2.2)))):new Radio(
+                            !multiSelect?pids.length>0&&choice==c?new Container(width:2*kRadialReactionRadius+8.0,height:kRadialReactionRadius,child:new Center(child:new Container(height:16.0,width:16.0,child: new CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation(!settings[0]?Colors.blueAccent[600]:Colors.greenAccent[400]),strokeWidth: 2.2)))):new Container(height:kRadialReactionRadius,child:new Radio(
                               activeColor: settings[0]?Colors.greenAccent[400]:Colors.blueAccent[600],
                               value: c,
                               groupValue: choice,
@@ -1051,7 +1062,7 @@ class PollState extends State<Poll>{
                                   waitForVote();
                                 }
                               },
-                            ):new Checkbox(
+                            )):new Container(height:18.0,child:new Checkbox(
                                 activeColor: settings[0]?Colors.greenAccent[400]:Colors.blueAccent[600],
                                 value: choice.contains(data[widget.id]["c"].indexOf(c)),
                                 onChanged:(b){
@@ -1079,16 +1090,17 @@ class PollState extends State<Poll>{
                                   }
                                   waitForVote();
                                 }
-                            ),
+                            )),
                             new Expanded(child:new Text(c,maxLines:!widget.viewPage?2:100,style: new TextStyle(color:textColor),overflow: TextOverflow.ellipsis)),
                             new Container(width:8.0)
                           ]
                       ),
+                      new Container(height:6.0),
                       hasVoted?new Row(crossAxisAlignment: CrossAxisAlignment.center,children:[new Expanded(child:new Padding(padding: EdgeInsets.only(top:7.0,left:48.0,bottom:5.0),child: new Container(height:(MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?5.0:5.0/(3*((MediaQuery.of(context).size.width/500.0).ceil())/4),child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation((!multiSelect?choice==c:choice.contains(data[widget.id]["c"].indexOf(c)))?settings[0]?Colors.greenAccent[400]:Colors.blueAccent[600]:settings[0]?Colors.white54:Colors.grey[600]),backgroundColor:settings[0]?Colors.white24:Colors.black26,value:percent)))),new Padding(padding:EdgeInsets.only(right:8.0),child:new Container(height:15.0,width:42.0,child:new FittedBox(fit:BoxFit.fitHeight,alignment: Alignment.centerRight,child:new Text((100*percent).toStringAsFixed(percent==1?0:percent==0?2:1)+"%",style:new TextStyle(color:textColor.withOpacity(0.8))))))]):new Container()
                     ])):data[widget.id]["c"].indexOf(c)==5?/*new Container(color:Colors.red,child:new Text("...",style:new TextStyle(fontSize:20.0,fontWeight: FontWeight.bold)))*/new Icon(Icons.more_horiz):new Container();
                   }).toList().cast<Widget>()
               ),
-              new Container(height:!hasVoted?7.0:13.0)
+              new Container(height:7.0)
             ]
             //trailing: new Text(data[widget.id]["a"].reduce((n1,n2)=>n1+n2).toString(),style: new TextStyle(color:Colors.black))
           )
@@ -1133,6 +1145,11 @@ class PollView extends StatefulWidget{
 class PollViewState extends State<PollView>{
   static bool canLeaveView = true;
   @override
+  void initState(){
+    super.initState();
+    openedPoll=widget.id;
+  }
+  @override
   Widget build(BuildContext context){
     if(!hasLoaded){
       Navigator.of(context).pop();
@@ -1146,7 +1163,10 @@ class PollViewState extends State<PollView>{
         widget.state.lastChoice = null;
         widget.state.choice = widget.state.multiSelect?(data[widget.id]["i"]!=null&&data[widget.id]["i"][userId]!=null?new Set.from(data[widget.id]["i"][userId]):new Set.from([])):(data[widget.id]["i"]!=null&&(data[widget.id]["i"][userId]!=null)?data[widget.id]["c"][data[widget.id]["i"][userId]]:null);
       }
-      return new Future(()=>true);
+      return new Future((){
+        openedPoll=null;
+        return true;
+      });
     },child:new Scaffold(
         body: new Container(
             color: !settings[0]?new Color.fromRGBO(250, 250, 250, 1.0):new Color.fromRGBO(32,33,36,1.0),
