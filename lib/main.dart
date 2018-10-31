@@ -901,7 +901,7 @@ class PollState extends State<Poll>{
     }
   }
 
-  String lastChoice;
+  dynamic lastChoice;
 
   var choice;
 
@@ -917,16 +917,17 @@ class PollState extends State<Poll>{
       return;
     }
     if(!multiSelect){
+      lastChoice = choice;
       try{
         setState((){
-          lastChoice = choice;
           choice = c;
         });
       }catch(e){
-        lastChoice = choice;
         choice = c;
       }
     }else{
+      lastChoice = new Set.from([]);
+      lastChoice.addAll(choice);
       try{
         setState((){
           if(b){
@@ -1001,6 +1002,7 @@ class PollState extends State<Poll>{
               new Container(height:5.0),
               new Column(
                   children: data[widget.id]["c"].map((c){
+                    dynamic used = pids.length>0?lastChoice:choice;
                     double percent = ((data[widget.id]["a"].reduce((n1,n2)=>n1+n2))!=0?data[widget.id]["a"][data[widget.id]["c"].indexOf(c)]/(data[widget.id]["a"].reduce((n1,n2)=>n1+n2)):0.0);
                     return widget.viewPage||(hasVoted||(data[widget.id]["c"].indexOf(c)<5))?new MaterialButton(onPressed: () async{
                       if(multiSelect||c!=choice){
@@ -1096,7 +1098,7 @@ class PollState extends State<Poll>{
                           ]
                       ),
                       new Container(height:6.0),
-                      hasVoted?new Row(crossAxisAlignment: CrossAxisAlignment.center,children:[new Expanded(child:new Padding(padding: EdgeInsets.only(top:7.0,left:48.0,bottom:5.0),child: new Container(height:(MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?5.0:5.0/(3*((MediaQuery.of(context).size.width/500.0).ceil())/4),child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation((!multiSelect?choice==c:choice.contains(data[widget.id]["c"].indexOf(c)))?settings[0]?Colors.greenAccent[400]:Colors.blue:settings[0]?Colors.white54:Colors.grey[600]),backgroundColor:settings[0]?Colors.white24:Colors.black26,value:percent)))),new Padding(padding:EdgeInsets.only(right:8.0),child:new Container(height:15.0,width:42.0,child:new FittedBox(fit:BoxFit.fitHeight,alignment: Alignment.centerRight,child:new Text((100*percent).toStringAsFixed(percent==1?0:percent==0?2:1)+"%",style:new TextStyle(color:(choice!=null&&((multiSelect&&choice.contains(c))||(!multiSelect&&choice==c)))?settings[0]?Colors.greenAccent[400]:Colors.blue:textColor.withOpacity(0.8))))))]):new Container()
+                      hasVoted?new Row(crossAxisAlignment: CrossAxisAlignment.center,children:[new Expanded(child:new Padding(padding: EdgeInsets.only(top:7.0,left:48.0,bottom:5.0),child: new Container(height:(MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?5.0:5.0/(3*((MediaQuery.of(context).size.width/500.0).ceil())/4),child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation((!multiSelect?used==c:used.contains(data[widget.id]["c"].indexOf(c)))?settings[0]?Colors.greenAccent[400]:Colors.blue:settings[0]?Colors.white54:Colors.grey[600]),backgroundColor:settings[0]?Colors.white24:Colors.black26,value:percent)))),new Padding(padding:EdgeInsets.only(right:8.0),child:new Container(height:15.0,width:42.0,child:new FittedBox(fit:BoxFit.fitHeight,alignment: Alignment.centerRight,child:new Text((100*percent).toStringAsFixed(percent==1?0:percent==0?2:1)+"%",style:new TextStyle(color:(used!=null&&((multiSelect&&used.contains(c))||(!multiSelect&&used==c)))?settings[0]?Colors.greenAccent[400]:Colors.blue:textColor.withOpacity(0.8))))))]):new Container()
                     ])):data[widget.id]["c"].indexOf(c)==5?/*new Container(color:Colors.red,child:new Text("...",style:new TextStyle(fontSize:20.0,fontWeight: FontWeight.bold)))*/new Icon(Icons.more_horiz):new Container();
                   }).toList().cast<Widget>()
               ),
