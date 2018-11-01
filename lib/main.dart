@@ -37,7 +37,7 @@ PersistentData createdPollsData = new PersistentData(name:"createdinfo",external
 
 PersistentData messages = new PersistentData(name:"messages",external:false);
 
-PersistentData policy = new PersistentData(name:"policy",external:false);
+PersistentData policy = new PersistentData(name:"privacyPolicy",external:false);
 
 String lastMessage;
 
@@ -69,6 +69,8 @@ Connectivity connection = new Connectivity();
 
 bool agreesToPolicy = false;
 
+int permsCount = 0;
+
 String openedPoll;
 
 void main() async{
@@ -80,14 +82,19 @@ void main() async{
       if(++count==10){
         runApp(new MaterialApp(home:new Scaffold(body:new Builder(builder:(context)=>new Container(child:new Center(child:new Column(mainAxisAlignment: MainAxisAlignment.center,children:[new Padding(padding: EdgeInsets.only(left:MediaQuery.of(context).size.width*.05,right:MediaQuery.of(context).size.width*.05),child:new FittedBox(fit: BoxFit.scaleDown,child:new Text("In order to use PPoll you must enable storage permissions.",style:new TextStyle(fontSize:10000.0)))),new RichText(text:new TextSpan(text:"\nGrant Permissions",style: new TextStyle(color:Colors.blue,fontSize:20.0),recognizer: new TapGestureRecognizer()..onTap = (){
           PermissionHandler().openAppSettings();
-          waitForPerms() async{
-            if((await PermissionHandler().checkPermissionStatus(PermissionGroup.storage))==PermissionStatus.granted){
+          waitForPerms(int count) async{
+            if(!hasPerms&&(await PermissionHandler().checkPermissionStatus(PermissionGroup.storage))==PermissionStatus.granted){
+              hasPerms = true;
               main();
               return;
             }
-            new Timer(new Duration(seconds:1),waitForPerms);
+            if(count==permsCount){
+              new Timer(new Duration(seconds:1),(){
+                waitForPerms(count);
+              });
+            }
           }
-          waitForPerms();
+          waitForPerms(++permsCount);
           }))])))))));
         return;
       }
@@ -1098,7 +1105,7 @@ class PollState extends State<Poll>{
                           ]
                       ),
                       new Container(height:6.0),
-                      hasVoted?new Row(crossAxisAlignment: CrossAxisAlignment.center,children:[new Expanded(child:new Padding(padding: EdgeInsets.only(top:7.0,left:48.0,bottom:5.0),child: new Container(height:(MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?5.0:5.0/(3*((MediaQuery.of(context).size.width/500.0).ceil())/4),child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation((!multiSelect?used==c:used.contains(data[widget.id]["c"].indexOf(c)))?settings[0]?Colors.greenAccent[400]:Colors.blue:settings[0]?Colors.white54:Colors.grey[600]),backgroundColor:settings[0]?Colors.white24:Colors.black26,value:percent)))),new Padding(padding:EdgeInsets.only(right:8.0),child:new Container(height:15.0,width:42.0,child:new FittedBox(fit:BoxFit.fitHeight,alignment: Alignment.centerRight,child:new Text((100*percent).toStringAsFixed(percent==1?0:percent==0?2:1)+"%",style:new TextStyle(color:(used!=null&&((multiSelect&&used.contains(c))||(!multiSelect&&used==c)))?settings[0]?Colors.greenAccent[400]:Colors.blue:textColor.withOpacity(0.8))))))]):new Container()
+                      hasVoted?new Row(crossAxisAlignment: CrossAxisAlignment.center,children:[new Expanded(child:new Padding(padding: EdgeInsets.only(top:7.0,left:48.0,bottom:5.0),child: new Container(height:(MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?5.0:5.0/(3*((MediaQuery.of(context).size.width/500.0).ceil())/4),child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation((!multiSelect?used==c:used.contains(data[widget.id]["c"].indexOf(c)))?settings[0]?Colors.greenAccent[400]:Colors.blue:settings[0]?Colors.white54:Colors.grey[600]),backgroundColor:settings[0]?Colors.white24:Colors.black26,value:percent)))),new Padding(padding:EdgeInsets.only(right:8.0),child:new Container(height:15.0,width:42.0,child:new FittedBox(fit:BoxFit.fitHeight,alignment: Alignment.centerRight,child:new Text((100*percent).toStringAsFixed(percent>=.9995?0:percent==0?2:1)+"%",style:new TextStyle(color:(used!=null&&((multiSelect&&used.contains(c))||(!multiSelect&&used==c)))?settings[0]?Colors.greenAccent[400]:Colors.blue:textColor.withOpacity(0.8))))))]):new Container()
                     ])):data[widget.id]["c"].indexOf(c)==5?/*new Container(color:Colors.red,child:new Text("...",style:new TextStyle(fontSize:20.0,fontWeight: FontWeight.bold)))*/new Icon(Icons.more_horiz):new Container();
                   }).toList().cast<Widget>()
               ),
@@ -1788,14 +1795,6 @@ class MaxInputFormatter extends TextInputFormatter{
     return newValue.text.length>max?oldValue.copyWith(text: oldValue.text):newValue.copyWith(text: newValue.text);
   }
 }
-
-/*
-settings.asMap().keys.map((i)=>new Switch(value:settings[i],onChanged: (b){
-                    setState((){settings[i]=b;});
-                    settingsData.writeData(settings);
-                  })).toList()
- */
-
 
 class PersistentData{
 
