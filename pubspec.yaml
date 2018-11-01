@@ -31,6 +31,7 @@ dependencies:
   flutter_launcher_icons:
   flutter_staggered_grid_view:
   url_launcher:
+  share:
   permission_handler:
   dynamic_theme:
       git:

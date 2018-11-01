@@ -24,6 +24,7 @@ import 'package:connectivity/connectivity.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/gestures.dart';
+import 'package:share/share.dart';
 
 bool light;
 
@@ -73,6 +74,8 @@ int permsCount = 0;
 
 String openedPoll;
 
+Color indicatorColor;
+
 void main() async{
   if(Platform.isAndroid){
     int count = 0;
@@ -117,6 +120,7 @@ void main() async{
     settings.addAll(new List<dynamic>(numSettings-settings.length).map((n)=>false));
     await settingsData.writeData(settings);
   }
+  indicatorColor = !settings[0]?new Color.fromRGBO(33,150,243,1.0):new Color.fromRGBO(100,255,218,1.0);
   textColor = !settings[0]?new Color.fromRGBO(34, 34, 34,1.0):Colors.white;
   color = !settings[0]?new Color.fromRGBO(52,52,52,1.0):new Color.fromRGBO(22,22,22,1.0);
   if(Platform.isIOS){
@@ -386,7 +390,7 @@ class AppState extends State<App>{
                   bottomNavigationBar: new BottomNavigationBar(
                       currentIndex: index,
                       type: BottomNavigationBarType.fixed,
-                      fixedColor: settings[0]?Colors.greenAccent[400]:Colors.indigoAccent,
+                      fixedColor: settings[0]?indicatorColor:Colors.indigoAccent,
                       items: [
                         BottomNavigationBarItem(
                           icon: new Icon(Icons.language),
@@ -502,6 +506,7 @@ class AppState extends State<App>{
                                       children: settings.asMap().keys.map((i)=>new Padding(padding:EdgeInsets.only(bottom:12.0),child:new GestureDetector(onTap:(){
                                         bool b = !settings[0];
                                         if(i==0){
+                                          indicatorColor = !b?new Color.fromRGBO(33,150,243,1.0):new Color.fromRGBO(100,255,218,1.0);
                                           textColor = !b?new Color.fromRGBO(34,34, 34,1.0):new Color.fromRGBO(238,238,238,1.0);
                                           color = !b?new Color.fromRGBO(52,52,52,1.0):new Color.fromRGBO(22,22,22,1.0);
                                         }
@@ -709,7 +714,7 @@ class ViewState extends State<View>{
                   )
               ))
             ],
-            bottom: new PreferredSize(preferredSize: new Size(double.infinity,3.0),child: new Container(height:3.0,child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation(settings[0]?Colors.greenAccent[400]:Colors.blue))))
+            bottom: new PreferredSize(preferredSize: new Size(double.infinity,3.0),child: new Container(height:3.0,child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor))))
           )
         ]
       );
@@ -1002,7 +1007,7 @@ class PollState extends State<Poll>{
                         child: new Image(image:image.image,fit:BoxFit.cover)
                     ));
                   }else{
-                    return new Container(width:double.infinity,height:max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0*((MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?1:3*((MediaQuery.of(context).size.width/500.0).ceil())/4)),color:Colors.black12,child: new Center(child: new Container(height:MediaQuery.of(context).size.width/(15*(!widget.viewPage?(MediaQuery.of(context).size.width/500.0).ceil():1)),width:MediaQuery.of(context).size.width/(15*(!widget.viewPage?(MediaQuery.of(context).size.width/500.0).ceil():1)),child:new CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation(!settings[0]?Colors.blue:Colors.greenAccent[400])))));
+                    return new Container(width:double.infinity,height:max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0*((MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?1:3*((MediaQuery.of(context).size.width/500.0).ceil())/4)),color:Colors.black12,child: new Center(child: new Container(height:MediaQuery.of(context).size.width/(15*(!widget.viewPage?(MediaQuery.of(context).size.width/500.0).ceil():1)),width:MediaQuery.of(context).size.width/(15*(!widget.viewPage?(MediaQuery.of(context).size.width/500.0).ceil():1)),child:new CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor)))));
                   }
                 },
               )):new Container(),
@@ -1040,8 +1045,8 @@ class PollState extends State<Poll>{
                     },padding:EdgeInsets.only(top:12.0,bottom:12.0),child:new Column(children: [
                       new Row(
                           children: [
-                            !multiSelect?pids.length>0&&choice==c?new Container(width:2*kRadialReactionRadius+8.0,height:kRadialReactionRadius,child:new Center(child:new Container(height:16.0,width:16.0,child: new CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation(!settings[0]?Colors.blue:Colors.greenAccent[400]),strokeWidth: 2.2)))):new Container(height:kRadialReactionRadius,child:new Radio(
-                              activeColor: settings[0]?Colors.greenAccent[400]:Colors.blue,
+                            !multiSelect?pids.length>0&&choice==c?new Container(width:2*kRadialReactionRadius+8.0,height:kRadialReactionRadius,child:new Center(child:new Container(height:16.0,width:16.0,child: new CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor),strokeWidth: 2.2)))):new Container(height:kRadialReactionRadius,child:new Radio(
+                              activeColor: indicatorColor,
                               value: c,
                               groupValue: choice,
                               onChanged: (s){
@@ -1072,7 +1077,7 @@ class PollState extends State<Poll>{
                                 }
                               },
                             )):new Container(height:18.0,child:new Checkbox(
-                                activeColor: settings[0]?Colors.greenAccent[400]:Colors.blue,
+                                activeColor: indicatorColor,
                                 value: choice.contains(data[widget.id]["c"].indexOf(c)),
                                 onChanged:(b){
                                   if(widget.viewPage){
@@ -1105,7 +1110,7 @@ class PollState extends State<Poll>{
                           ]
                       ),
                       new Container(height:6.0),
-                      hasVoted?new Row(crossAxisAlignment: CrossAxisAlignment.center,children:[new Expanded(child:new Padding(padding: EdgeInsets.only(top:7.0,left:48.0,bottom:5.0),child: new Container(height:(MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?5.0:5.0/(3*((MediaQuery.of(context).size.width/500.0).ceil())/4),child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation((!multiSelect?used==c:used.contains(data[widget.id]["c"].indexOf(c)))?settings[0]?Colors.greenAccent[400]:Colors.blue:settings[0]?Colors.white54:Colors.grey[600]),backgroundColor:settings[0]?Colors.white24:Colors.black26,value:percent)))),new Padding(padding:EdgeInsets.only(right:8.0),child:new Container(height:15.0,width:42.0,child:new FittedBox(fit:BoxFit.fitHeight,alignment: Alignment.centerRight,child:new Text((100*percent).toStringAsFixed(percent>=.9995?0:percent==0?2:1)+"%",style:new TextStyle(color:(used!=null&&((multiSelect&&used.contains(c))||(!multiSelect&&used==c)))?settings[0]?Colors.greenAccent[400]:Colors.blue:textColor.withOpacity(0.8))))))]):new Container()
+                      hasVoted?new Row(crossAxisAlignment: CrossAxisAlignment.center,children:[new Expanded(child:new Padding(padding: EdgeInsets.only(top:7.0,left:48.0,bottom:5.0),child: new Container(height:(MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?5.0:5.0/(3*((MediaQuery.of(context).size.width/500.0).ceil())/4),child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation((!multiSelect?used==c:used.contains(data[widget.id]["c"].indexOf(c)))?indicatorColor:settings[0]?Colors.white54:Colors.grey[600]),backgroundColor:settings[0]?Colors.white24:Colors.black26,value:percent)))),new Padding(padding:EdgeInsets.only(right:8.0),child:new Container(height:15.0,width:42.0,child:new FittedBox(fit:BoxFit.fitHeight,alignment: Alignment.centerRight,child:new Text((100*percent).toStringAsFixed(percent>=.9995?0:percent==0?2:1)+"%",style:new TextStyle(color:(used!=null&&((multiSelect&&used.contains(c))||(!multiSelect&&used==c)))?indicatorColor:textColor.withOpacity(0.8))))))]):new Container()
                     ])):data[widget.id]["c"].indexOf(c)==5?/*new Container(color:Colors.red,child:new Text("...",style:new TextStyle(fontSize:20.0,fontWeight: FontWeight.bold)))*/new Icon(Icons.more_horiz):new Container();
                   }).toList().cast<Widget>()
               ),
@@ -1184,6 +1189,12 @@ class PollViewState extends State<PollView>{
                 new CustomScrollView(
                     slivers: [
                       new SliverAppBar(
+                          actions: [new IconButton(
+                            icon: new Icon(Icons.share),
+                            onPressed: (){
+                              Share.share("Vote on \""+data[widget.id]["q"]+"\" (PIN=${widget.id}) using PPoll. Download now at https://platypuslabs.llc/downloadppoll");
+                            }
+                          )],
                           pinned: false,
                           backgroundColor:color,
                           floating: true,
@@ -1407,7 +1418,7 @@ class CreatePollPageState extends State<CreatePollPage>{
                                 child: new Image(image:new Image.file(image).image,fit:BoxFit.cover)
                             ));
                           }else{
-                            return new Container(width:double.infinity,height:max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0),color:Colors.black12,child: new Center(child: new Container(height:MediaQuery.of(context).size.height/20.0,width:MediaQuery.of(context).size.height/20.0,child:new CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation(!settings[0]?Colors.blue:Colors.greenAccent[400])))));
+                            return new Container(width:double.infinity,height:max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0),color:Colors.black12,child: new Center(child: new Container(height:MediaQuery.of(context).size.height/20.0,width:MediaQuery.of(context).size.height/20.0,child:new CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor)))));
                           }
                         },
                       )):new Container(),
@@ -1574,7 +1585,7 @@ class CreatePollPageState extends State<CreatePollPage>{
                           builder: (context){
                             return new AlertDialog(
                                 title: new Text("Loading"),
-                                content: new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation(settings[0]?Colors.greenAccent[400]:Colors.blue))
+                                content: new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor))
                             );
                           }
                       );
