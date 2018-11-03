@@ -845,7 +845,7 @@ class ViewState extends State<View>{
                 mainAxisSpacing: 0.0,
                 crossAxisSpacing: 0.0,
                 itemCount: sortedMap.keys.length,
-                itemBuilder: (BuildContext context, int i)=>new Poll(sortedMap.keys.toList()[i],false),
+                itemBuilder: (BuildContext context, int i)=>new Poll(sortedMap.keys.toList()[i],false) ,
                 staggeredTileBuilder:(i)=>new StaggeredTile.fit(1),
               ):new SliverList(
                 delegate: new SliverChildListDelegate([new Padding(padding:EdgeInsets.only(top:7.0,left:MediaQuery.of(context).size.width*.12,right:MediaQuery.of(context).size.width*.12),child:new Center(child:new FittedBox(fit: BoxFit.scaleDown,child:new Text("Your search did not match any polls",style: new TextStyle(fontSize:1000.0,color:textColor)))))])
@@ -1001,7 +1001,7 @@ class PollState extends State<Poll>{
                       height = snapshot.data.height*1.0;
                       width = snapshot.data.width*1.0;
                     }
-                    return new GestureDetector(onTap:(){Navigator.push(context,new PageRouteBuilder(opaque:false,pageBuilder: (context,a1,a2)=>new ImageView(child:new Center(child:new PhotoView(imageProvider:image.image,minScale: min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height), maxScale:4.0*min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height))),name:widget.id)));},child:new SizedBox(
+                    return new GestureDetector(onTap:(){Navigator.push(context,new PageRouteBuilder(opaque:false,pageBuilder:(context,a1,a2)=>new ImageView(child:new Center(child:new PhotoView(imageProvider:image.image,minScale: min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height), maxScale:4.0*min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height))),name:widget.id)));},child:new SizedBox(
                         width: double.infinity,
                         height: max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0*((MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?1:3*((MediaQuery.of(context).size.width/500.0).ceil())/4)),
                         child: new Image(image:image.image,fit:BoxFit.cover)
@@ -1045,7 +1045,7 @@ class PollState extends State<Poll>{
                     },padding:EdgeInsets.only(top:12.0,bottom:12.0),child:new Column(children: [
                       new Row(
                           children: [
-                            !multiSelect?pids.length>0&&choice==c?new Container(width:2*kRadialReactionRadius+8.0,height:kRadialReactionRadius,child:new Center(child:new Container(height:16.0,width:16.0,child: new CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor),strokeWidth: 2.2)))):new Container(height:kRadialReactionRadius,child:new Radio(
+                            !multiSelect?pids.length>0&&choice==c?new Container(width:2*kRadialReactionRadius+8.0,height:kRadialReactionRadius,child:new Center(child:new Container(height:16.0,width:16.0,child: new CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor),strokeWidth: 2.0)))):new Container(height:kRadialReactionRadius,child:new Radio(
                               activeColor: indicatorColor,
                               value: c,
                               groupValue: choice,
@@ -1192,7 +1192,7 @@ class PollViewState extends State<PollView>{
                           actions: [new IconButton(
                             icon: new Icon(Icons.share),
                             onPressed: (){
-                              Share.share("Vote on \""+data[widget.id]["q"]+"\" (PIN=${widget.id}) using PPoll. Download now at https://platypuslabs.llc/downloadppoll");
+                              Share.share("Vote on \""+data[widget.id]["q"]+"\" (Code: ${widget.id}) using PPoll. Download now at https://platypuslabs.llc/downloadppoll");
                             }
                           )],
                           pinned: false,
@@ -1484,9 +1484,9 @@ class CreatePollPageState extends State<CreatePollPage>{
                   )
                 ),
                 new Container(height:5.0),
-                new MaterialButton(color:settings[0]?Colors.black:new Color.fromRGBO(253,253,253,1.0),onPressed:(){setState((){multiSelect=!multiSelect;public=false;});},padding:EdgeInsets.zero,child:new ListTile(leading:new Text("Multiple selections",style:new TextStyle(color:textColor)),trailing:new Switch(value:multiSelect,onChanged:(b){setState((){multiSelect=b;public=false;});}))),
-                new MaterialButton(color:settings[0]?Colors.black:new Color.fromRGBO(253,253,253,1.0),onPressed:(){setState((){public=!public;multiSelect=false;});},padding:EdgeInsets.zero,child:new ListTile(leading:new Text("Publicly searchable",style:new TextStyle(color:textColor)),trailing:new Switch(value:public,onChanged:(b){setState((){public=b;multiSelect=false;});}))),
-                new MaterialButton(color:settings[0]?Colors.black:new Color.fromRGBO(253,253,253,1.0),onPressed:() async{
+                new MaterialButton(color:settings[0]?new Color.fromRGBO(32,33,36,1.0):new Color.fromRGBO(253,253,253,1.0),onPressed:(){setState((){multiSelect=!multiSelect;public=false;});},padding:EdgeInsets.zero,child:new ListTile(leading:new Text("Multiple selections",style:new TextStyle(color:textColor)),trailing:new Switch(value:multiSelect,onChanged:(b){setState((){multiSelect=b;public=false;});}))),
+                new MaterialButton(color:settings[0]?new Color.fromRGBO(32,33,36,1.0):new Color.fromRGBO(253,253,253,1.0),onPressed:(){setState((){public=!public;multiSelect=false;});},padding:EdgeInsets.zero,child:new ListTile(leading:new Text("Publicly searchable",style:new TextStyle(color:textColor)),trailing:new Switch(value:public,onChanged:(b){setState((){public=b;multiSelect=false;});}))),
+                new MaterialButton(color:settings[0]?new Color.fromRGBO(32,33,36,1.0):new Color.fromRGBO(253,253,253,1.0),onPressed:() async{
                   if(image!=null&&width!=null){
                     Navigator.push(context,new PageRouteBuilder(opaque:false,pageBuilder: (context,a1,a2)=>new ImageView(child:new Center(child:new PhotoView(imageProvider:new Image.file(image).image,minScale: min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height),maxScale:4.0*min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height))),name:"Image")));
                   }else if(!imageLoading){
@@ -1623,52 +1623,22 @@ class CreatePollPageState extends State<CreatePollPage>{
                       }
                       createdPolls.add(code);
                       Navigator.of(context).pop();
-                      showDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (context){
-                            return new AlertDialog(
-                                title: new Text("Success"),
-                                content: new Text("Poll created with code $code"),
-                                actions: [
-                                  new RaisedButton(
-                                      child: new Text("OK",style:new TextStyle(color: Colors.black)),
-                                      onPressed: (){
-                                        Navigator.of(context).pop();
-                                        createController.jumpTo(0.0);
-                                        choices = [null,null];
-                                        question = null;
-                                        multiSelect = false;
-                                        public = false;
-                                        image = null;
-                                        height = null;
-                                        width = null;
-                                        completer = new Completer<ui.Image>();
-                                        imageLoading = false;
-                                        removing = false;
-                                        removedIndex = -1;
-                                        questionController = new TextEditingController();
-                                        controllers = new List<TextEditingController>()..addAll([new TextEditingController(),new TextEditingController()]);
-                                        setState((){});
-                                        Navigator.push(context,new PageRouteBuilder(
-                                          pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation){
-                                            return new PollView(code);
-                                          },
-                                          transitionDuration: new Duration(milliseconds: 300),
-                                          transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-                                            return new FadeTransition(
-                                                opacity: animation,
-                                                child: child
-                                            );
-                                          },
-                                        ));
-                                      },
-                                      color: Colors.grey
-                                  )
-                                ]
-                            );
-                          }
-                      );
+                      createController.jumpTo(0.0);
+                      choices = [null,null];
+                      question = null;
+                      multiSelect = false;
+                      public = false;
+                      image = null;
+                      height = null;
+                      width = null;
+                      completer = new Completer<ui.Image>();
+                      imageLoading = false;
+                      removing = false;
+                      removedIndex = -1;
+                      questionController = new TextEditingController();
+                      controllers = new List<TextEditingController>()..addAll([new TextEditingController(),new TextEditingController()]);
+                      setState((){});
+                      Navigator.push(context,new MaterialPageRoute(builder: (context) => new PollView(code)));
                     }else{
                       String errorMessage = "";
                       if((question==null||choices.contains(null)||question==""||choices.contains(""))&&choices.toSet().length!=choices.length){
@@ -1755,7 +1725,7 @@ class OpenPollPageState extends State<OpenPollPage>{
               ),
             )),
             new RaisedButton(
-              color:Colors.grey,
+              color:settings[0]?Colors.black:Colors.grey,
               child:new Text("Open poll",style:new TextStyle(color:textColor)),
               onPressed:(){
                 if(input==null||input.length<4){
