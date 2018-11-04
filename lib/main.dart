@@ -480,7 +480,7 @@ class AppState extends State<App>{
                             lastMessage = s;
                             messages.writeData(lastMessage);
                             if(lastMessage!=null){
-                              showDialog(context:context,builder:(context)=>new AlertDialog(actions: [new RaisedButton(color:Colors.grey,child: new Text("OK",style:new TextStyle(color:Colors.black)),onPressed:(){Navigator.of(context).pop();})],title:new Text("Alert",textAlign: TextAlign.center),content:new Text(lastMessage)));
+                              showDialog(context:context,builder:(context)=>new AlertDialog(actions: [new FlatButton(child: new Text("OK"),onPressed:(){Navigator.of(context).pop();})],title:new Text("Alert",textAlign: TextAlign.center),content:new Text(lastMessage)));
                             }
                           }
                         });
@@ -1503,19 +1503,18 @@ class CreatePollPageState extends State<CreatePollPage>{
                                   title:new Text("Error"),
                                   content:new Text(basename(tempImage.path)==null?"Invalid file path":"Invalid file type"),
                                   actions: [
-                                    new RaisedButton(
-                                        child: new Text("OK",style:new TextStyle(color: Colors.black)),
+                                    new FlatButton(
+                                        child: new Text("OK"),
                                         onPressed: (){
                                           Navigator.of(context).pop();
-                                        },
-                                        color: Colors.grey
+                                        }
                                     )
                                   ]
                               );
                             }
                         );
                         return;
-                      }
+                      }gt
                       setState((){imageLoading = true;image = tempImage;});
                       new Timer(new Duration(milliseconds:5),(){
                         createController.jumpTo(createController.position.pixels+MediaQuery.of(context).size.height/3.0);
@@ -1557,12 +1556,11 @@ class CreatePollPageState extends State<CreatePollPage>{
                                 title: new Text("Error"),
                                 content: new Text("Please check your internet connection"),
                                 actions: [
-                                  new RaisedButton(
-                                      child: new Text("OK",style:new TextStyle(color: Colors.black)),
+                                  new FlatButton(
+                                      child: new Text("OK"),
                                       onPressed: (){
                                         Navigator.of(context).pop();
-                                      },
-                                      color: Colors.grey
+                                      }
                                   )
                                 ]
                             );
@@ -1602,12 +1600,11 @@ class CreatePollPageState extends State<CreatePollPage>{
                                   title: new Text("Error"),
                                   content: new Text("Something went wrong"),
                                   actions: [
-                                    new RaisedButton(
-                                        child: new Text("OK",style:new TextStyle(color: Colors.black)),
+                                    new FlatButton(
+                                        child: new Text("OK"),
                                         onPressed: (){
                                           Navigator.of(context).pop();
-                                        },
-                                        color: Colors.grey
+                                        }
                                     )
                                   ]
                               );
@@ -1666,12 +1663,11 @@ class CreatePollPageState extends State<CreatePollPage>{
                                 title:new Text("Error"),
                                 content:new Text(errorMessage),
                                 actions: [
-                                  new RaisedButton(
-                                      child: new Text("OK",style:new TextStyle(color: Colors.black)),
+                                  new FlatButton(
+                                      child: new Text("OK"),
                                       onPressed: (){
                                         Navigator.of(context).pop();
-                                      },
-                                      color: Colors.grey
+                                      }
                                   )
                                 ]
                             );
