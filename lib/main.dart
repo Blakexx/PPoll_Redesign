@@ -13,6 +13,7 @@ import 'dart:collection';
 import 'package:flutter_circular_chart/flutter_circular_chart.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'key.dart';
+import 'package:flutter/rendering.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -194,6 +195,8 @@ bool start = true;
 
 bool hasGotLevel = false;
 
+ValueNotifier<int> indexNotifier = new ValueNotifier<int>(0);
+
 class App extends StatefulWidget{
   @override
   AppState createState() => new AppState();
@@ -318,7 +321,7 @@ class AppState extends State<App>{
     waitForConnection();
   }
 
-  int index = 0;
+  static int index = 0;
 
   Image icon;
 
@@ -414,6 +417,9 @@ class AppState extends State<App>{
                         ),
                       ],
                       onTap:(i){
+                        if(loadingData){
+                          return;
+                        }
                         if(index!=i){
                           if(i==0||i==3){
                             ViewState.f.unfocus();
@@ -423,20 +429,12 @@ class AppState extends State<App>{
                             ViewState.hasSearched = false;
                             ViewState.c = new TextEditingController();
                             shouldSearchTimer = null;
-                            ViewState.c.addListener((){
-                              if(shouldSearchTimer!=null){
-                                shouldSearchTimer.cancel();
-                              }
-                              shouldSearchTimer = new Timer(new Duration(milliseconds:500),(){
-                                s.jumpTo(0.0);
-                                setState((){});
-                              });
-                            });
                             if(s.hasClients){
                               s.jumpTo(0.0);
                             }
                           }
                           setState((){index = i;});
+                          indexNotifier.value = index;
                         }else if(((index==0&&i==0)||(index==3&&i==3))&&hasLoaded){
                           s.animateTo(0.0,curve: Curves.easeOut, duration: const Duration(milliseconds: 300));
                         }else if(index==1){
@@ -663,7 +661,78 @@ class ViewState extends State<View>{
       shouldSearchTimer = new Timer(new Duration(milliseconds:500),(){
         s.jumpTo(0.0);
         setState((){});
+        sortMap(widget.onlyCreated);
       });
+    });
+    indexNotifier.addListener((){
+      if([0,3].contains(AppState.index)){
+        sortMap(AppState.index==3);
+      }
+      if(!c.hasListeners){ // ignore: invalid_use_of_protected_member
+        c.addListener((){
+          if(shouldSearchTimer!=null){
+            shouldSearchTimer.cancel();
+          }
+          shouldSearchTimer = new Timer(new Duration(milliseconds:500),(){
+            s.jumpTo(0.0);
+            setState((){});
+            sortMap(widget.onlyCreated);
+          });
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose(){
+    super.dispose();
+    indexNotifier = new ValueNotifier<int>(AppState.index);
+  }
+
+  void sortMap(bool onlyCreated){
+    Map<String,dynamic> tempMap = new Map<String,dynamic>()..addAll(data)..removeWhere((key,value){
+      return (onlyCreated&&!createdPolls.contains(key))||(!(key.toUpperCase().contains(search.toUpperCase())||((value as Map<String,dynamic>)["q"] as String).toUpperCase().contains(search.toUpperCase()))||((!onlyCreated&&currentUserLevel!=1)&&((((value as Map<String,dynamic>)["b"])[2]==0)||((value as Map<String,dynamic>)["b"])[0]==1||((value as Map<String,dynamic>)["b"])[1]==1)));
+    });
+    sortedMap = SplayTreeMap.from(tempMap,(o1,o2){
+      int voters1 = tempMap[o1]["a"].reduce((n1,n2)=>n1+n2);
+      int voters2 = tempMap[o2]["a"].reduce((n1,n2)=>n1+n2);
+      if(!onlyCreated){
+        if(sorting=="trending"){
+          double currentTime = (new DateTime.now().millisecondsSinceEpoch/1000.0);
+          double timeChange1 = (currentTime-(tempMap[o1]["t"]!=null?tempMap[o1]["t"]:currentTime/2.0));
+          double timeChange2 = (currentTime-(tempMap[o2]["t"]!=null?tempMap[o2]["t"]:currentTime/2.0));
+          double trendingIndex1 = pow((voters1+1),1.5)/(pow(timeChange1!=0?timeChange1:.0001,2));
+          double trendingIndex2 = pow((voters2+1),1.5)/(pow(timeChange2!=0?timeChange2:.0001,2));
+          if(trendingIndex1!=trendingIndex2){
+            return trendingIndex2>trendingIndex1?1:-1;
+          }else if(tempMap[o1]["q"].compareTo(tempMap[o2]["q"])!=0){
+            return tempMap[o1]["q"].compareTo(tempMap[o2]["q"]);
+          }
+          return o1.compareTo(o2);
+        }
+        if((sorting=="newest"||sorting=="oldest")&&tempMap[o2]["t"]!=tempMap[o1]["t"]){
+          double currentTime = (new DateTime.now().millisecondsSinceEpoch/1000.0);
+          double time1 = tempMap[o1]["t"]!=null?tempMap[o1]["t"].toDouble():(currentTime/2.0).roundToDouble();
+          double time2 = tempMap[o2]["t"]!=null?tempMap[o2]["t"].toDouble():(currentTime/2.0).roundToDouble();
+          return sorting=="newest"?time1>time2?-1:1:time1>time2?1:-1;
+        }else if(voters2!=voters1){
+          return voters2-voters1;
+        }else if(tempMap[o1]["q"].compareTo(tempMap[o2]["q"])!=0){
+          return tempMap[o1]["q"].compareTo(tempMap[o2]["q"]);
+        }
+        return o1.compareTo(o2);
+      }else{
+        if(sorting=="newest"||sorting=="oldest"){
+          return sorting=="newest"?createdPolls.indexOf(o2)-createdPolls.indexOf(o1):createdPolls.indexOf(o1)-createdPolls.indexOf(o2);
+        }else{
+          if(voters2!=voters1){
+            return voters2-voters1;
+          }else if(tempMap[o1]["q"].compareTo(tempMap[o2]["q"])!=0){
+            return tempMap[o1]["q"].compareTo(tempMap[o2]["q"]);
+          }
+          return o1.compareTo(o2);
+        }
+      }
     });
   }
 
@@ -718,140 +787,112 @@ class ViewState extends State<View>{
           )
         ]
       );
+    }else if(sortedMap==null){
+      sortMap(widget.onlyCreated);
     }
-    Map<String,dynamic> tempMap = new Map<String,dynamic>()..addAll(data)..removeWhere((key,value){
-      return (widget.onlyCreated&&!createdPolls.contains(key))||(!(key.toUpperCase().contains(search.toUpperCase())||((value as Map<String,dynamic>)["q"] as String).toUpperCase().contains(search.toUpperCase()))||((!widget.onlyCreated&&currentUserLevel!=1)&&((((value as Map<String,dynamic>)["b"])[2]==0)||((value as Map<String,dynamic>)["b"])[0]==1||((value as Map<String,dynamic>)["b"])[1]==1)));
-    });
-    sortedMap = SplayTreeMap.from(tempMap,(o1,o2){
-      int voters1 = tempMap[o1]["a"].reduce((n1,n2)=>n1+n2);
-      int voters2 = tempMap[o2]["a"].reduce((n1,n2)=>n1+n2);
-      if(!widget.onlyCreated){
-        if(sorting=="trending"){
-          double currentTime = (new DateTime.now().millisecondsSinceEpoch/1000.0);
-          double timeChange1 = (currentTime-(tempMap[o1]["t"]!=null?tempMap[o1]["t"]:currentTime/2.0));
-          double timeChange2 = (currentTime-(tempMap[o2]["t"]!=null?tempMap[o2]["t"]:currentTime/2.0));
-          double trendingIndex1 = pow((voters1+1),1.5)/(pow(timeChange1!=0?timeChange1:.0001,2));
-          double trendingIndex2 = pow((voters2+1),1.5)/(pow(timeChange2!=0?timeChange2:.0001,2));
-          if(trendingIndex1!=trendingIndex2){
-            return trendingIndex2>trendingIndex1?1:-1;
-          }else if(tempMap[o1]["q"].compareTo(tempMap[o2]["q"])!=0){
-            return tempMap[o1]["q"].compareTo(tempMap[o2]["q"]);
-          }
-          return o1.compareTo(o2);
-        }
-        if((sorting=="newest"||sorting=="oldest")&&tempMap[o2]["t"]!=tempMap[o1]["t"]){
-          double currentTime = (new DateTime.now().millisecondsSinceEpoch/1000.0);
-          double time1 = tempMap[o1]["t"]!=null?tempMap[o1]["t"].toDouble():(currentTime/2.0).roundToDouble();
-          double time2 = tempMap[o2]["t"]!=null?tempMap[o2]["t"].toDouble():(currentTime/2.0).roundToDouble();
-          return sorting=="newest"?time1>time2?-1:1:time1>time2?1:-1;
-        }else if(voters2!=voters1){
-          return voters2-voters1;
-        }else if(tempMap[o1]["q"].compareTo(tempMap[o2]["q"])!=0){
-          return tempMap[o1]["q"].compareTo(tempMap[o2]["q"]);
-        }
-        return o1.compareTo(o2);
-      }else{
-        if(sorting=="newest"||sorting=="oldest"){
-          return sorting=="newest"?createdPolls.indexOf(o2)-createdPolls.indexOf(o1):createdPolls.indexOf(o1)-createdPolls.indexOf(o2);
-        }else{
-          if(voters2!=voters1){
-            return voters2-voters1;
-          }else if(tempMap[o1]["q"].compareTo(tempMap[o2]["q"])!=0){
-            return tempMap[o1]["q"].compareTo(tempMap[o2]["q"]);
-          }
-          return o1.compareTo(o2);
-        }
-      }
-    });
     return new Stack(
       children: [
-        new CustomScrollView(
-            slivers: [
-              new SliverAppBar(
-                  pinned: false,
-                  floating: true,
-                  title: !inSearch?new Text(!widget.onlyCreated?"Browse":"Created"):new TextField(
-                    textCapitalization: TextCapitalization.sentences,
-                    style: new TextStyle(fontSize:20.0,color: Colors.white),
-                    controller: c,
-                    autofocus: true,
-                    autocorrect: false,
-                    decoration: new InputDecoration(
-                        border: InputBorder.none,
-                        hintText: "Search",
-                        hintStyle: new TextStyle(color:Colors.white30)
-                    ),
-                    focusNode: f,
-                    onChanged: (str){
-                      search = str;
-                    },
-                    onSubmitted: (str){
-                      s.jumpTo(0.0);
-                      setState((){search = str;});
-                    }
+        new NestedScrollView(
+            headerSliverBuilder: (context,innerBoxScrolled)=>[new SliverAppBar(
+              pinned: false,
+              floating: true,
+              forceElevated: innerBoxScrolled,
+              title: !inSearch?new Text(!widget.onlyCreated?"Browse":"Created"):new TextField(
+                  textCapitalization: TextCapitalization.sentences,
+                  style: new TextStyle(fontSize:20.0,color: Colors.white),
+                  controller: c,
+                  autofocus: true,
+                  autocorrect: false,
+                  decoration: new InputDecoration(
+                      border: InputBorder.none,
+                      hintText: "Search",
+                      hintStyle: new TextStyle(color:Colors.white30)
                   ),
-                  centerTitle: false,
-                  expandedHeight: 30.0,
-                  backgroundColor: color,
-                  actions: [
-                    inSearch?new IconButton(
-                      icon: new Icon(Icons.close),
-                      onPressed: (){
-                        if(f.hasFocus){
-                          search = "";
-                          s.jumpTo(0.0);
-                          setState((){c.text = search;});
-                        }else{
-                          search = "";
-                          c.text = "";
-                          s.jumpTo(0.0);
-                          setState((){inSearch = false;});
-                        }
-                      },
-                    ):new IconButton(
-                        icon: new Icon(Icons.search),
-                        onPressed: (){
-                          s.jumpTo(0.0);
-                          setState((){inSearch = true;});
-                        }
-                    ),
-                    new Padding(padding: EdgeInsets.only(right:3.0),child:new Container(
-                        width: 35.0,
-                        child: new PopupMenuButton<String>(
-                            itemBuilder: (BuildContext context)=>widget.onlyCreated?[
-                              new PopupMenuItem<String>(child: const Text("Top"), value: "top"),
-                              new PopupMenuItem<String>(child: const Text("Newest"), value: "newest"),
-                              new PopupMenuItem<String>(child: const Text("Oldest"), value: "oldest")
-                            ]:[
-                              new PopupMenuItem<String>(child: const Text("Trending"), value: "trending"),
-                              new PopupMenuItem<String>(child: const Text("Top"), value: "top"),
-                              new PopupMenuItem<String>(child: const Text("Newest"), value: "newest"),
-                              new PopupMenuItem<String>(child: const Text("Oldest"), value: "oldest")
-                            ],
-                            child: new Icon(Icons.sort),
-                            onSelected: (str){
-                              s.jumpTo(0.0);
-                              setState((){
-                                sorting = str;
-                                s.jumpTo(0.0);
-                              });
-                            }
-                        )
-                    )),
-                  ],
+                  focusNode: f,
+                  onChanged: (str){
+                    search = str;
+                  },
+                  onSubmitted: (str){
+                    s.jumpTo(0.0);
+                    setState((){search = str;});
+                    sortMap(widget.onlyCreated);
+                  }
               ),
-              new SliverPadding(padding: new EdgeInsets.only(right:5.0,left:5.0,top:5.0),sliver:sortedMap.keys.length>0?new SliverStaggeredGrid.countBuilder(
+              centerTitle: false,
+              expandedHeight: 30.0,
+              backgroundColor: color,
+              actions: [
+                inSearch?new IconButton(
+                  icon: new Icon(Icons.close),
+                  onPressed: (){
+                    if(f.hasFocus){
+                      search = "";
+                      s.jumpTo(0.0);
+                      setState((){c.text = search;});
+                      sortMap(widget.onlyCreated);
+                    }else{
+                      search = "";
+                      c.text = "";
+                      s.jumpTo(0.0);
+                      setState((){inSearch = false;});
+                      sortMap(widget.onlyCreated);
+                    }
+                  },
+                ):new IconButton(
+                    icon: new Icon(Icons.search),
+                    onPressed: (){
+                      s.jumpTo(0.0);
+                      setState((){inSearch = true;});
+                    }
+                ),
+                new Padding(padding: EdgeInsets.only(right:3.0),child:new Container(
+                    width: 35.0,
+                    child: new PopupMenuButton<String>(
+                        itemBuilder: (BuildContext context)=>widget.onlyCreated?[
+                          new PopupMenuItem<String>(child: const Text("Top"), value: "top"),
+                          new PopupMenuItem<String>(child: const Text("Newest"), value: "newest"),
+                          new PopupMenuItem<String>(child: const Text("Oldest"), value: "oldest")
+                        ]:[
+                          new PopupMenuItem<String>(child: const Text("Trending"), value: "trending"),
+                          new PopupMenuItem<String>(child: const Text("Top"), value: "top"),
+                          new PopupMenuItem<String>(child: const Text("Newest"), value: "newest"),
+                          new PopupMenuItem<String>(child: const Text("Oldest"), value: "oldest")
+                        ],
+                        child: new Icon(Icons.sort),
+                        onSelected: (str){
+                          s.jumpTo(0.0);
+                          setState((){
+                            sorting = str;
+                            s.jumpTo(0.0);
+                            sortMap(widget.onlyCreated);
+                          });
+                        }
+                    )
+                )),
+              ],
+            )],
+            body:new RefreshIndicator(
+              child: new Padding(padding: new EdgeInsets.only(top:5.0,right:5.0,left:5.0),child:sortedMap.keys.length>0?new StaggeredGridView.countBuilder(
                 crossAxisCount: (MediaQuery.of(context).size.width/500.0).ceil(),
                 mainAxisSpacing: 0.0,
                 crossAxisSpacing: 0.0,
                 itemCount: sortedMap.keys.length,
-                itemBuilder: (BuildContext context, int i)=>new Poll(sortedMap.keys.toList()[i],false) ,
+                itemBuilder: (BuildContext context, int i)=>new Poll(sortedMap.keys.toList()[i],false),
                 staggeredTileBuilder:(i)=>new StaggeredTile.fit(1),
-              ):new SliverList(
-                delegate: new SliverChildListDelegate([new Padding(padding:EdgeInsets.only(top:7.0,left:MediaQuery.of(context).size.width*.12,right:MediaQuery.of(context).size.width*.12),child:new Center(child:new FittedBox(fit: BoxFit.scaleDown,child:new Text("Your search did not match any polls",style: new TextStyle(fontSize:1000.0,color:textColor)))))])
-              )),
-              //new SliverList(delegate: new SliverChildBuilderDelegate((context,i)=>new Padding(padding:EdgeInsets.only(top:i==0?5.0:0.0),child:new Poll(sortedMap.keys.toList()[i])), childCount: sortedMap.length))
-            ],
+                padding: EdgeInsets.zero
+              ):new Column(children:[new Padding(padding:EdgeInsets.only(top:7.0,left:MediaQuery.of(context).size.width*.12,right:MediaQuery.of(context).size.width*.12),child:new FittedBox(fit: BoxFit.scaleDown,child:new Text("Your search did not match any polls",style: new TextStyle(fontSize:1000.0,color:textColor))))])),
+              onRefresh: (){
+                loadingData = true;
+                Completer<Null> completer = new Completer<Null>();
+                new Timer(new Duration(milliseconds:450),(){
+                  setState((){sortMap(widget.onlyCreated);});
+                  loadingData = false;
+                  completer.complete();
+                });
+                return completer.future;
+              },
+              color: indicatorColor
+            ),
           controller: s
         ),
         new Positioned(
@@ -1319,6 +1360,8 @@ class CreatePollPage extends StatefulWidget{
   CreatePollPageState createState() => new CreatePollPageState();
 }
 
+bool loadingData = false;
+
 class CreatePollPageState extends State<CreatePollPage>{
 
   List<String> choices = [null,null];
@@ -1514,7 +1557,7 @@ class CreatePollPageState extends State<CreatePollPage>{
                             }
                         );
                         return;
-                      }gt
+                      }
                       setState((){imageLoading = true;image = tempImage;});
                       new Timer(new Duration(milliseconds:5),(){
                         createController.jumpTo(createController.position.pixels+MediaQuery.of(context).size.height/3.0);
@@ -1539,7 +1582,7 @@ class CreatePollPageState extends State<CreatePollPage>{
                     height = null;
                     width = null;
                   });
-                }):new CircularProgressIndicator():new Icon(Icons.add,color:settings[0]?Colors.white:Colors.black))))),
+                }):new Padding(padding:EdgeInsets.all(7.0),child:new CircularProgressIndicator()):new Icon(Icons.add,color:settings[0]?Colors.white:Colors.black))))),
                 new Container(height:20.0),
                 new Padding(padding:EdgeInsets.only(left:MediaQuery.of(context).size.width/2.0-60.0,right:MediaQuery.of(context).size.width/2.0-60.0),child:new MaterialButton(
                   color:settings[0]?Colors.black:Colors.grey,
