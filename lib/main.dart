@@ -195,8 +195,6 @@ bool start = true;
 
 bool hasGotLevel = false;
 
-ValueNotifier<int> indexNotifier = new ValueNotifier<int>(0);
-
 class App extends StatefulWidget{
   @override
   AppState createState() => new AppState();
@@ -421,20 +419,7 @@ class AppState extends State<App>{
                           return;
                         }
                         if(index!=i){
-                          if(i==0||i==3){
-                            ViewState.f.unfocus();
-                            ViewState.search = "";
-                            ViewState.sorting = i==0?"trending":"newest";
-                            ViewState.inSearch = false;
-                            ViewState.hasSearched = false;
-                            ViewState.c = new TextEditingController();
-                            shouldSearchTimer = null;
-                            if(s.hasClients){
-                              s.jumpTo(0.0);
-                            }
-                          }
                           setState((){index = i;});
-                          indexNotifier.value = index;
                         }else if(((index==0&&i==0)||(index==3&&i==3))&&hasLoaded){
                           s.animateTo(0.0,curve: Curves.easeOut, duration: const Duration(milliseconds: 300));
                         }else if(index==1){
@@ -642,18 +627,17 @@ Timer shouldSearchTimer;
 
 class View extends StatefulWidget{
   final bool onlyCreated;
-  View(this.onlyCreated);
+  View(this.onlyCreated):super(key:new ObjectKey(onlyCreated));
   @override
   ViewState createState() => new ViewState();
 }
 
 class ViewState extends State<View>{
 
-  static String sorting = "trending";
-
   @override
   void initState(){
     super.initState();
+    sorting = widget.onlyCreated?"newest":"trending";
     c.addListener((){
       if(shouldSearchTimer!=null){
         shouldSearchTimer.cancel();
@@ -661,42 +645,21 @@ class ViewState extends State<View>{
       shouldSearchTimer = new Timer(new Duration(milliseconds:500),(){
         s.jumpTo(0.0);
         setState((){});
-        sortMap(widget.onlyCreated);
+        sortMap();
       });
     });
-    indexNotifier.addListener((){
-      if([0,3].contains(AppState.index)){
-        sortMap(AppState.index==3);
-      }
-      if(!c.hasListeners){ // ignore: invalid_use_of_protected_member
-        c.addListener((){
-          if(shouldSearchTimer!=null){
-            shouldSearchTimer.cancel();
-          }
-          shouldSearchTimer = new Timer(new Duration(milliseconds:500),(){
-            s.jumpTo(0.0);
-            setState((){});
-            sortMap(widget.onlyCreated);
-          });
-        });
-      }
-    });
   }
 
-  @override
-  void dispose(){
-    super.dispose();
-    indexNotifier = new ValueNotifier<int>(AppState.index);
-  }
+  String sorting;
 
-  void sortMap(bool onlyCreated){
+  void sortMap(){
     Map<String,dynamic> tempMap = new Map<String,dynamic>()..addAll(data)..removeWhere((key,value){
-      return (onlyCreated&&!createdPolls.contains(key))||(!(key.toUpperCase().contains(search.toUpperCase())||((value as Map<String,dynamic>)["q"] as String).toUpperCase().contains(search.toUpperCase()))||((!onlyCreated&&currentUserLevel!=1)&&((((value as Map<String,dynamic>)["b"])[2]==0)||((value as Map<String,dynamic>)["b"])[0]==1||((value as Map<String,dynamic>)["b"])[1]==1)));
+      return (widget.onlyCreated&&!createdPolls.contains(key))||(!(key.toUpperCase().contains(search.toUpperCase())||((value as Map<String,dynamic>)["q"] as String).toUpperCase().contains(search.toUpperCase()))||((!widget.onlyCreated&&currentUserLevel!=1)&&((((value as Map<String,dynamic>)["b"])[2]==0)||((value as Map<String,dynamic>)["b"])[0]==1||((value as Map<String,dynamic>)["b"])[1]==1)));
     });
     sortedMap = SplayTreeMap.from(tempMap,(o1,o2){
       int voters1 = tempMap[o1]["a"].reduce((n1,n2)=>n1+n2);
       int voters2 = tempMap[o2]["a"].reduce((n1,n2)=>n1+n2);
-      if(!onlyCreated){
+      if(!widget.onlyCreated){
         if(sorting=="trending"){
           double currentTime = (new DateTime.now().millisecondsSinceEpoch/1000.0);
           double timeChange1 = (currentTime-(tempMap[o1]["t"]!=null?tempMap[o1]["t"]:currentTime/2.0));
@@ -736,15 +699,15 @@ class ViewState extends State<View>{
     });
   }
 
-  static String search = "";
+  String search = "";
 
-  static bool inSearch = false;
+  bool inSearch = false;
 
-  static bool hasSearched = false;
+  bool hasSearched = false;
 
-  static FocusNode f = new FocusNode();
+  FocusNode f = new FocusNode();
 
-  static TextEditingController c = new TextEditingController();
+  TextEditingController c = new TextEditingController();
 
   Map<String,dynamic> sortedMap;
 
@@ -788,7 +751,7 @@ class ViewState extends State<View>{
         ]
       );
     }else if(sortedMap==null){
-      sortMap(widget.onlyCreated);
+      sortMap();
     }
     return new Stack(
       children: [
@@ -815,7 +778,7 @@ class ViewState extends State<View>{
                   onSubmitted: (str){
                     s.jumpTo(0.0);
                     setState((){search = str;});
-                    sortMap(widget.onlyCreated);
+                    sortMap();
                   }
               ),
               centerTitle: false,
@@ -829,13 +792,13 @@ class ViewState extends State<View>{
                       search = "";
                       s.jumpTo(0.0);
                       setState((){c.text = search;});
-                      sortMap(widget.onlyCreated);
+                      sortMap();
                     }else{
                       search = "";
                       c.text = "";
                       s.jumpTo(0.0);
                       setState((){inSearch = false;});
-                      sortMap(widget.onlyCreated);
+                      sortMap();
                     }
                   },
                 ):new IconButton(
@@ -864,7 +827,7 @@ class ViewState extends State<View>{
                           setState((){
                             sorting = str;
                             s.jumpTo(0.0);
-                            sortMap(widget.onlyCreated);
+                            sortMap();
                           });
                         }
                     )
@@ -880,12 +843,12 @@ class ViewState extends State<View>{
                 itemBuilder: (BuildContext context, int i)=>new Poll(sortedMap.keys.toList()[i],false),
                 staggeredTileBuilder:(i)=>new StaggeredTile.fit(1),
                 padding: EdgeInsets.zero
-              ):new Column(children:[new Padding(padding:EdgeInsets.only(top:7.0,left:MediaQuery.of(context).size.width*.12,right:MediaQuery.of(context).size.width*.12),child:new FittedBox(fit: BoxFit.scaleDown,child:new Text("Your search did not match any polls",style: new TextStyle(fontSize:1000.0,color:textColor))))])),
+              ):new Center(child:new Text("Your search did not match any polls",textAlign:TextAlign.center,style: new TextStyle(fontSize:15.0*min(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height)/320,color:textColor)))),
               onRefresh: (){
                 loadingData = true;
                 Completer<Null> completer = new Completer<Null>();
                 new Timer(new Duration(milliseconds:450),(){
-                  setState((){sortMap(widget.onlyCreated);});
+                  setState((){sortMap();});
                   loadingData = false;
                   completer.complete();
                 });
@@ -1766,7 +1729,30 @@ class OpenPollPageState extends State<OpenPollPage>{
             new RaisedButton(
               color:settings[0]?Colors.black:Colors.grey,
               child:new Text("Open poll",style:new TextStyle(color:textColor)),
-              onPressed:(){
+              onPressed:() async{
+                try{
+                  await InternetAddress.lookup("google.com");
+                }on SocketException catch(_){
+                  showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (context){
+                        return new AlertDialog(
+                            title: new Text("Error"),
+                            content: new Text("Please check your internet connection"),
+                            actions: [
+                              new FlatButton(
+                                  child: new Text("OK"),
+                                  onPressed: (){
+                                    Navigator.of(context).pop();
+                                  }
+                              )
+                            ]
+                        );
+                      }
+                  );
+                  return;
+                }
                 if(input==null||input.length<4){
                   Scaffold.of(context).removeCurrentSnackBar();
                   Scaffold.of(context).showSnackBar(new SnackBar(duration:new Duration(milliseconds:300),content:new Text("Invalid code")));
@@ -1783,7 +1769,7 @@ class OpenPollPageState extends State<OpenPollPage>{
                       return new PollView(temp);
                     },
                     transitionDuration: new Duration(milliseconds: 300),
-                    transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+                    transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child){
                       return new FadeTransition(
                           opacity: animation,
                           child: child

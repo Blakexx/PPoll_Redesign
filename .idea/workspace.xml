@@ -24,8 +24,8 @@
       <file leaf-file-name="main.dart" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/lib/main.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="206">
-              <caret line="425" column="30" lean-forward="true" selection-start-line="425" selection-start-column="30" selection-end-line="425" selection-end-column="30" />
+            <state relative-caret-position="150">
+              <caret line="421" column="51" lean-forward="false" selection-start-line="421" selection-start-column="51" selection-end-line="421" selection-end-column="51" />
               <folding>
                 <element signature="e#0#39#0" expanded="true" />
               </folding>
@@ -97,24 +97,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>animatedcon</find>
-      <find>createpollPa</find>
-      <find>PollSta</find>
-      <find>CreateP</find>
-      <find>new Checkbox</find>
-      <find>indicatorColor =</find>
-      <find>indicatorColor.w</find>
-      <find>&quot;Open Poll</find>
-      <find>color:settings[0]?Colors.black:Colors.grey,</find>
-      <find>open pol</find>
-      <find>Grid</find>
-      <find>Multip`</find>
-      <find>Success</find>
-      <find>Nav</find>
-      <find>Navigator.push</find>
-      <find>new AlertDialog</find>
-      <find>AlertDialog</find>
-      <find>CreatePollPag</find>
       <find>widget.only</find>
       <find>sortMap</find>
       <find>c.addList</find>
@@ -127,6 +109,24 @@
       <find>checkbox</find>
       <find>circula</find>
       <find>new Timer(new Duration(mil</find>
+      <find>s.jumpTo(0.0)</find>
+      <find>refresh</find>
+      <find>animateTo</find>
+      <find>Vote</find>
+      <find>Poll Code</find>
+      <find>Please C</find>
+      <find>OpenPoll</find>
+      <find>Your Search did</find>
+      <find>ref</find>
+      <find>jumpTo</find>
+      <find>s.jumpTo</find>
+      <find>ViewPage</find>
+      <find>viewPage</find>
+      <find>ViewState</find>
+      <find>:super</find>
+      <find>ScrollCont</find>
+      <find>ViewSt</find>
+      <find>indexNot</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -176,7 +176,10 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scratches" />
       <pane id="PackagesPane" />
+      <pane id="AndroidView" />
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -209,9 +212,6 @@
         </subPane>
         <option name="show-excluded-files" value="false" />
       </pane>
-      <pane id="Scratches" />
-      <pane id="AndroidView" />
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -731,8 +731,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/main.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="206">
-          <caret line="425" column="30" lean-forward="true" selection-start-line="425" selection-start-column="30" selection-end-line="425" selection-end-column="30" />
+        <state relative-caret-position="150">
+          <caret line="421" column="51" lean-forward="false" selection-start-line="421" selection-start-column="51" selection-end-line="421" selection-end-column="51" />
           <folding>
             <element signature="e#0#39#0" expanded="true" />
           </folding>
