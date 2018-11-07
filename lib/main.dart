@@ -634,6 +634,20 @@ class View extends StatefulWidget{
 
 class ViewState extends State<View>{
 
+  String sorting;
+
+  String search = "";
+
+  bool inSearch = false;
+
+  bool hasSearched = false;
+
+  FocusNode f = new FocusNode();
+
+  TextEditingController c = new TextEditingController();
+
+  Map<String,dynamic> sortedMap;
+
   @override
   void initState(){
     super.initState();
@@ -649,8 +663,6 @@ class ViewState extends State<View>{
       });
     });
   }
-
-  String sorting;
 
   void sortMap(){
     Map<String,dynamic> tempMap = new Map<String,dynamic>()..addAll(data)..removeWhere((key,value){
@@ -698,18 +710,6 @@ class ViewState extends State<View>{
       }
     });
   }
-
-  String search = "";
-
-  bool inSearch = false;
-
-  bool hasSearched = false;
-
-  FocusNode f = new FocusNode();
-
-  TextEditingController c = new TextEditingController();
-
-  Map<String,dynamic> sortedMap;
 
   @override
   Widget build(BuildContext context){
@@ -1551,6 +1551,27 @@ class CreatePollPageState extends State<CreatePollPage>{
                   color:settings[0]?Colors.black:Colors.grey,
                   child:new Text("Submit"),
                   onPressed:() async{
+                    if(!hasLoaded){
+                      showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context){
+                            return new AlertDialog(
+                                title: new Text("Error"),
+                                content: new Text("You must wait for the browse page to load before you create polls."),
+                                actions: [
+                                  new FlatButton(
+                                      child: new Text("OK"),
+                                      onPressed: (){
+                                        Navigator.of(context).pop();
+                                      }
+                                  )
+                                ]
+                            );
+                          }
+                      );
+                      return;
+                    }
                     try{
                       await InternetAddress.lookup("google.com");
                     }on SocketException catch(_){
@@ -1730,6 +1751,27 @@ class OpenPollPageState extends State<OpenPollPage>{
               color:settings[0]?Colors.black:Colors.grey,
               child:new Text("Open poll",style:new TextStyle(color:textColor)),
               onPressed:() async{
+                if(!hasLoaded){
+                  showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (context){
+                        return new AlertDialog(
+                            title: new Text("Error"),
+                            content: new Text("You must wait for the browse page to load before you view polls."),
+                            actions: [
+                              new FlatButton(
+                                  child: new Text("OK"),
+                                  onPressed: (){
+                                    Navigator.of(context).pop();
+                                  }
+                              )
+                            ]
+                        );
+                      }
+                  );
+                  return;
+                }
                 try{
                   await InternetAddress.lookup("google.com");
                 }on SocketException catch(_){
