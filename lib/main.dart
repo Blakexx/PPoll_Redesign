@@ -218,7 +218,7 @@ class AppState extends State<App>{
       try{
         final result = await InternetAddress.lookup("google.com");
         if(result.isNotEmpty && result[0].rawAddress.isNotEmpty){
-          data = json.decode(((await http.get(Uri.encodeFull(database+"/data.json?auth="+secretKey))).body));
+          data = json.decode(utf8.decode((await http.get(Uri.encodeFull(database+"/data.json?auth="+secretKey))).bodyBytes));
           client.openUrl("GET", Uri.parse(database+"/data.json?auth="+secretKey)).then((req) async{
             req.headers.set("Accept", "text/event-stream");
             req.followRedirects = true;
@@ -227,7 +227,13 @@ class AppState extends State<App>{
                 if(!hasLoaded){
                   setState((){hasLoaded = true;});
                 }
-                response.map((bytes)=>new String.fromCharCodes(bytes)).listen((text){
+                response.listen((bytes){
+                  String text;
+                  try{
+                    text = utf8.decode(bytes);
+                  }catch(e){
+                    return;
+                  }
                   if(text.split(":").length>1&&text.split(":")[1].contains("keep-alive")){
                     print("Keep-alive ${watch.elapsedMilliseconds}");
                     watch.reset();
@@ -1547,9 +1553,9 @@ class CreatePollPageState extends State<CreatePollPage>{
                   });
                 }):new Padding(padding:EdgeInsets.all(7.0),child:new CircularProgressIndicator()):new Icon(Icons.add,color:settings[0]?Colors.white:Colors.black))))),
                 new Container(height:20.0),
-                new Padding(padding:EdgeInsets.only(left:MediaQuery.of(context).size.width/2.0-60.0,right:MediaQuery.of(context).size.width/2.0-60.0),child:new MaterialButton(
+                new Padding(padding:EdgeInsets.only(left:MediaQuery.of(context).size.width/20.0,right:MediaQuery.of(context).size.width/20.0),child:new MaterialButton(
                   color:settings[0]?Colors.black:Colors.grey,
-                  child:new Text("Submit"),
+                  child:new Text("SUBMIT",style:new TextStyle(letterSpacing:.5)),
                   onPressed:() async{
                     if(!hasLoaded){
                       showDialog(
@@ -1749,7 +1755,7 @@ class OpenPollPageState extends State<OpenPollPage>{
             )),
             new RaisedButton(
               color:settings[0]?Colors.black:Colors.grey,
-              child:new Text("Open poll",style:new TextStyle(color:textColor)),
+              child:new Text("OPEN POLL",style:new TextStyle(color:textColor)),
               onPressed:() async{
                 if(!hasLoaded){
                   showDialog(
