@@ -26,6 +26,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/gestures.dart';
 import 'package:share/share.dart';
+import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 
 bool light;
 
@@ -76,6 +77,8 @@ int permsCount = 0;
 String openedPoll;
 
 Color indicatorColor;
+
+int unLoadedPolls = 0;
 
 void main() async{
   if(Platform.isAndroid){
@@ -246,6 +249,7 @@ class AppState extends State<App>{
                       return;
                     }
                     List<dynamic> path = returned["path"].split("/");
+                    unLoadedPolls+=(path!=null&&path.length==2)&&(returned["data"]["b"][2]==1)?1:0;
                     dynamic finalPath = path[path.length-1];
                     dynamic temp = data;
                     String code = path!=null&&path.length>1?path[1].toString():null;
@@ -421,6 +425,7 @@ class AppState extends State<App>{
                         ),
                       ],
                       onTap:(i){
+                        unLoadedPolls = 0;
                         if(loadingData){
                           return;
                         }
@@ -654,6 +659,8 @@ class ViewState extends State<View>{
 
   Map<String,dynamic> sortedMap;
 
+  bool loadingNewPolls = false;
+
   @override
   void initState(){
     super.initState();
@@ -752,7 +759,7 @@ class ViewState extends State<View>{
                   )
               ))
             ],
-            bottom: new PreferredSize(preferredSize: new Size(double.infinity,3.0),child: new Container(height:3.0,child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor))))
+            bottom:new PreferredSize(preferredSize: new Size(double.infinity,3.0),child: new Container(height:3.0,child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor))))
           )
         ]
       );
@@ -761,109 +768,111 @@ class ViewState extends State<View>{
     }
     return new Stack(
       children: [
-        new NestedScrollView(
-            headerSliverBuilder: (context,innerBoxScrolled)=>[new SliverAppBar(
-              pinned: false,
-              floating: true,
-              forceElevated: innerBoxScrolled,
-              title: !inSearch?new Text(!widget.onlyCreated?"Browse":"Created"):new TextField(
-                  textCapitalization: TextCapitalization.sentences,
-                  style: new TextStyle(fontSize:20.0,color: Colors.white),
-                  controller: c,
-                  autofocus: true,
-                  autocorrect: false,
-                  decoration: new InputDecoration(
-                      border: InputBorder.none,
-                      hintText: "Search",
-                      hintStyle: new TextStyle(color:Colors.white30)
-                  ),
-                  focusNode: f,
-                  onChanged: (str){
-                    search = str;
-                  },
-                  onSubmitted: (str){
-                    s.jumpTo(0.0);
-                    setState((){search = str;});
-                    sortMap();
-                  }
-              ),
-              centerTitle: false,
-              expandedHeight: 30.0,
-              backgroundColor: color,
-              actions: [
-                inSearch?new IconButton(
-                  icon: new Icon(Icons.close),
-                  onPressed: (){
-                    if(f.hasFocus){
-                      search = "";
+        new SafeArea(bottom:false,child:new CustomScrollView(
+            slivers: [
+              new SliverAppBar(
+                pinned: false,
+                floating: true,
+                title:!inSearch?new Text(!widget.onlyCreated?"Browse":"Created"):new TextField(
+                    textCapitalization: TextCapitalization.sentences,
+                    style: new TextStyle(fontSize:20.0,color: Colors.white),
+                    controller: c,
+                    autofocus: true,
+                    autocorrect: false,
+                    decoration: new InputDecoration(
+                        border: InputBorder.none,
+                        hintText: "Search",
+                        hintStyle: new TextStyle(color:Colors.white30)
+                    ),
+                    focusNode: f,
+                    onChanged: (str){
+                      search = str;
+                    },
+                    onSubmitted:(str){
                       s.jumpTo(0.0);
-                      setState((){c.text = search;});
+                      setState((){search = str;});
                       sortMap();
-                    }else{
-                      search = "";
-                      c.text = "";
-                      s.jumpTo(0.0);
-                      setState((){inSearch = false;});
-                      sortMap();
-                    }
-                  },
-                ):new IconButton(
-                    icon: new Icon(Icons.search),
-                    onPressed: (){
-                      s.jumpTo(0.0);
-                      setState((){inSearch = true;});
                     }
                 ),
-                new Padding(padding: EdgeInsets.only(right:3.0),child:new Container(
-                    width: 35.0,
-                    child: new PopupMenuButton<String>(
-                        itemBuilder: (BuildContext context)=>widget.onlyCreated?[
-                          new PopupMenuItem<String>(child: const Text("Top"), value: "top"),
-                          new PopupMenuItem<String>(child: const Text("Newest"), value: "newest"),
-                          new PopupMenuItem<String>(child: const Text("Oldest"), value: "oldest")
-                        ]:[
-                          new PopupMenuItem<String>(child: const Text("Trending"), value: "trending"),
-                          new PopupMenuItem<String>(child: const Text("Top"), value: "top"),
-                          new PopupMenuItem<String>(child: const Text("Newest"), value: "newest"),
-                          new PopupMenuItem<String>(child: const Text("Oldest"), value: "oldest")
-                        ],
-                        child: new Icon(Icons.sort),
-                        onSelected: (str){
-                          s.jumpTo(0.0);
-                          setState((){
-                            sorting = str;
+                centerTitle: false,
+                expandedHeight: 30.0,
+                backgroundColor: color,
+                actions: [
+                  inSearch?new IconButton(
+                    icon: new Icon(Icons.close),
+                    onPressed: (){
+                      if(f.hasFocus){
+                        search = "";
+                        s.jumpTo(0.0);
+                        setState((){c.text = search;});
+                        sortMap();
+                      }else{
+                        search = "";
+                        c.text = "";
+                        s.jumpTo(0.0);
+                        setState((){inSearch = false;});
+                        sortMap();
+                      }
+                    },
+                  ):new IconButton(
+                      icon: new Icon(Icons.search),
+                      onPressed: (){
+                        s.jumpTo(0.0);
+                        setState((){inSearch = true;});
+                      }
+                  ),
+                  new Padding(padding: EdgeInsets.only(right:3.0),child:new Container(
+                      width: 35.0,
+                      child: new PopupMenuButton<String>(
+                          itemBuilder: (BuildContext context)=>widget.onlyCreated?[
+                            new PopupMenuItem<String>(child: const Text("Top"), value: "top"),
+                            new PopupMenuItem<String>(child: const Text("Newest"), value: "newest"),
+                            new PopupMenuItem<String>(child: const Text("Oldest"), value: "oldest")
+                          ]:[
+                            new PopupMenuItem<String>(child: const Text("Trending"), value: "trending"),
+                            new PopupMenuItem<String>(child: const Text("Top"), value: "top"),
+                            new PopupMenuItem<String>(child: const Text("Newest"), value: "newest"),
+                            new PopupMenuItem<String>(child: const Text("Oldest"), value: "oldest")
+                          ],
+                          child: new Icon(Icons.sort),
+                          onSelected: (str){
                             s.jumpTo(0.0);
-                            sortMap();
-                          });
-                        }
-                    )
-                )),
-              ],
-            )],
-            body:new RefreshIndicator(
-              child: new Padding(padding: new EdgeInsets.only(top:5.0,right:5.0,left:5.0),child:sortedMap.keys.length>0?new StaggeredGridView.countBuilder(
-                crossAxisCount: (MediaQuery.of(context).size.width/500.0).ceil(),
-                mainAxisSpacing: 0.0,
-                crossAxisSpacing: 0.0,
-                itemCount: sortedMap.keys.length,
-                itemBuilder: (BuildContext context, int i)=>new Poll(sortedMap.keys.toList()[i],false),
-                staggeredTileBuilder:(i)=>new StaggeredTile.fit(1),
-                padding: EdgeInsets.zero
-              ):new Center(child:new Text("Your search did not match any polls",textAlign:TextAlign.center,style: new TextStyle(fontSize:15.0*min(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height)/320,color:textColor)))),
-              onRefresh: (){
-                loadingData = true;
-                Completer<Null> completer = new Completer<Null>();
-                new Timer(new Duration(milliseconds:450),(){
-                  setState((){sortMap();});
-                  loadingData = false;
-                  completer.complete();
-                });
-                return completer.future;
-              },
-              color: indicatorColor
-            ),
-          controller: s
-        ),
+                            setState((){
+                              sorting = str;
+                              s.jumpTo(0.0);
+                              sortMap();
+                            });
+                          }
+                      )
+                  )),
+                ]
+              ),
+              new SliverStickyHeader(
+                header:unLoadedPolls!=0?!loadingNewPolls?new GestureDetector(onTap:() async{
+                  await s.animateTo(0.0,curve: Curves.easeOut, duration: const Duration(milliseconds: 300));
+                  setState((){loadingNewPolls = true;});
+                  new Timer(new Duration(milliseconds:350),(){
+                    setState((){
+                      loadingNewPolls = false;
+                      sortMap();
+                      unLoadedPolls=0;
+                    });
+                  });
+                },child:new Container(height:30.0,color:indicatorColor,child:new Row(mainAxisAlignment:MainAxisAlignment.center,children:[new Text("Show $unLoadedPolls new Poll${unLoadedPolls==1?"":"s"} ",style:new TextStyle(fontSize:12.5,color:Colors.white)),new Icon(Icons.refresh,size:12.5,color:Colors.white)]))):new Container(height:3.0,child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor))):new Container(),
+                sliver:new SliverPadding(padding: new EdgeInsets.only(right:5.0,left:5.0,top:5.0),sliver:sortedMap.keys.length>0?new SliverStaggeredGrid.countBuilder(
+                  crossAxisCount: (MediaQuery.of(context).size.width/500.0).ceil(),
+                  mainAxisSpacing: 0.0,
+                  crossAxisSpacing: 0.0,
+                  itemCount: sortedMap.keys.length,
+                  itemBuilder: (BuildContext context, int i)=>new Poll(sortedMap.keys.toList()[i],false),
+                  staggeredTileBuilder:(i)=>new StaggeredTile.fit(1),
+                ):new SliverList(
+                    delegate: new SliverChildListDelegate([new Center(child:new Text("Your search did not match any polls",textAlign:TextAlign.center,style: new TextStyle(fontSize:15.0*min(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height)/320,color:textColor)))])
+                ))
+              ),
+            ],
+            controller: s
+        )),
         new Positioned(
             left:0.0,top:0.0,
             child:new Container(height:MediaQuery.of(context).padding.top,width:MediaQuery.of(context).size.width,color:color)
@@ -1011,7 +1020,7 @@ class PollState extends State<Poll>{
                       height = snapshot.data.height*1.0;
                       width = snapshot.data.width*1.0;
                     }
-                    return new GestureDetector(onTap:(){Navigator.push(context,new PageRouteBuilder(opaque:false,pageBuilder:(context,a1,a2)=>new ImageView(child:new Center(child:new PhotoView(imageProvider:image.image,minScale: min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height), maxScale:4.0*min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height))),name:widget.id)));},child:new SizedBox(
+                    return new GestureDetector(onTap:(){Navigator.push(context,new PageRouteBuilder(opaque:false,pageBuilder:(context,a1,a2)=>new ImageView(child:new Center(child:new PhotoView(imageProvider:image.image,minScale:min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height),maxScale:4.0*min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height))),name:widget.id)));},child:new SizedBox(
                         width: double.infinity,
                         height: max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0*((MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?1:3*((MediaQuery.of(context).size.width/500.0).ceil())/4)),
                         child: new Image(image:image.image,fit:BoxFit.cover)

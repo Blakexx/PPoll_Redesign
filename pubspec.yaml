@@ -32,6 +32,7 @@ dependencies:
   flutter_staggered_grid_view:
   url_launcher:
   share:
+  flutter_sticky_header:
   permission_handler:
   dynamic_theme:
       git:
