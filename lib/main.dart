@@ -1415,12 +1415,12 @@ class CreatePollPageState extends State<CreatePollPage>{
                             if(removing){
                               return new GestureDetector(
                                 onTap: (){
-                                  createController.jumpTo(max(0.0,createController.position.pixels-MediaQuery.of(context).size.height/3.0));
                                   setState((){
                                     image = null;
                                     height = null;
                                     width = null;
                                   });
+                                  createController.jumpTo(max(0.0,createController.position.pixels-(10+MediaQuery.of(context).size.height/3.0)));
                                 },
                                 child:new Container(color:Colors.grey[400],child:new SizedBox(
                                   width: double.infinity,
@@ -1546,9 +1546,7 @@ class CreatePollPageState extends State<CreatePollPage>{
                         return;
                       }
                       setState((){imageLoading = true;image = tempImage;});
-                      new Timer(new Duration(milliseconds:5),(){
-                        createController.jumpTo(createController.position.pixels+MediaQuery.of(context).size.height/3.0);
-                      });
+                      createController.jumpTo(createController.position.pixels+10+MediaQuery.of(context).size.height/3.0);
                       new Image.file(tempImage).image.resolve(new ImageConfiguration()).addListener((ImageInfo info, bool b){
                         completer.complete(info.image);
                         height = info.image.height*1.0;
@@ -1563,7 +1561,7 @@ class CreatePollPageState extends State<CreatePollPage>{
                     }
                   }
                 },padding:EdgeInsets.zero,child:new ListTile(leading:new Text(image!=null?"Image selected":"Add an image",style:new TextStyle(color:textColor)),trailing:new Padding(padding:EdgeInsets.only(right:10.0),child:new SizedBox(height:40.0,width:40.0,child:image!=null?!imageLoading?!removing?new Image.file(image,fit:BoxFit.cover):new IconButton(color:settings[0]?Colors.white:Colors.black,icon: new Icon(Icons.delete),onPressed:(){
-                  createController.jumpTo(max(0.0,createController.position.pixels-MediaQuery.of(context).size.height/3.0));
+                  createController.jumpTo(max(0.0,createController.position.pixels-(10+MediaQuery.of(context).size.height/3.0)));
                   setState((){
                     image = null;
                     height = null;
