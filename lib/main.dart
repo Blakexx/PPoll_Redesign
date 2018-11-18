@@ -661,6 +661,8 @@ class ViewState extends State<View>{
 
   bool loadingNewPolls = false;
 
+  bool lastHasLoaded = hasLoaded;
+
   @override
   void initState(){
     super.initState();
@@ -727,6 +729,7 @@ class ViewState extends State<View>{
   @override
   Widget build(BuildContext context){
     if(!hasLoaded){
+      lastHasLoaded = false;
       return new CustomScrollView(
         slivers: [
           new SliverAppBar(
@@ -765,7 +768,13 @@ class ViewState extends State<View>{
       );
     }else if(sortedMap==null){
       sortMap();
+    }else if(!lastHasLoaded&&unLoadedPolls>0){
+      setState((){
+        sortMap();
+        unLoadedPolls=0;
+      });
     }
+    lastHasLoaded = true;
     return new Stack(
       children: [
         new SafeArea(bottom:false,child:new CustomScrollView(
