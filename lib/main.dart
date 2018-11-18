@@ -249,7 +249,7 @@ class AppState extends State<App>{
                       return;
                     }
                     List<dynamic> path = returned["path"].split("/");
-                    unLoadedPolls+=(path!=null&&path.length==2)&&(returned["data"]["b"][2]==1)?1:0;
+                    unLoadedPolls+=(path!=null&&path.length==2)&&(returned["data"]["b"][2]==1)&&index==0?1:0;
                     dynamic finalPath = path[path.length-1];
                     dynamic temp = data;
                     String code = path!=null&&path.length>1?path[1].toString():null;
@@ -848,7 +848,7 @@ class ViewState extends State<View>{
                 ]
               ),
               new SliverStickyHeader(
-                header:unLoadedPolls!=0?!loadingNewPolls?new GestureDetector(onTap:() async{
+                header:unLoadedPolls!=0&&!widget.onlyCreated?!loadingNewPolls?new GestureDetector(onTap:() async{
                   await s.animateTo(0.0,curve: Curves.easeOut, duration: const Duration(milliseconds: 300));
                   setState((){loadingNewPolls = true;});
                   new Timer(new Duration(milliseconds:350),(){
