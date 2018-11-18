@@ -1383,7 +1383,7 @@ class CreatePollPageState extends State<CreatePollPage>{
             child: new ListView(
               controller: createController,
               children:[
-                new Card(
+                new Padding(padding:EdgeInsets.only(top:5.0,left:5.0,right:5.0),child:new Card(
                   color: !settings[0]?new Color.fromRGBO(250, 250, 250, 1.0):new Color.fromRGBO(32,33,36,1.0),
                   child:new Column(
                     children:[
@@ -1512,7 +1512,7 @@ class CreatePollPageState extends State<CreatePollPage>{
                       new Container(height:7.0)
                     ]
                   )
-                ),
+                )),
                 new Container(height:5.0),
                 new MaterialButton(color:settings[0]?new Color.fromRGBO(32,33,36,1.0):new Color.fromRGBO(253,253,253,1.0),onPressed:(){setState((){multiSelect=!multiSelect;public=false;});},padding:EdgeInsets.zero,child:new ListTile(leading:new Text("Multiple selections",style:new TextStyle(color:textColor)),trailing:new Switch(value:multiSelect,onChanged:(b){setState((){multiSelect=b;public=false;});}))),
                 new MaterialButton(color:settings[0]?new Color.fromRGBO(32,33,36,1.0):new Color.fromRGBO(253,253,253,1.0),onPressed:(){setState((){public=!public;multiSelect=false;});},padding:EdgeInsets.zero,child:new ListTile(leading:new Text("Publicly searchable",style:new TextStyle(color:textColor)),trailing:new Switch(value:public,onChanged:(b){setState((){public=b;multiSelect=false;});}))),
