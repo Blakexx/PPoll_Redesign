@@ -867,7 +867,7 @@ class ViewState extends State<View>{
                       unLoadedPolls=0;
                     });
                   });
-                },child:new Container(height:30.0,color:indicatorColor,child:new Row(mainAxisAlignment:MainAxisAlignment.center,children:[new Text("Show $unLoadedPolls new Poll${unLoadedPolls==1?"":"s"} ",style:new TextStyle(fontSize:12.5,color:Colors.white)),new Icon(Icons.refresh,size:15.0,color:Colors.white)]))):new Container(height:3.0,child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor))):new Container(),
+                },child:new Container(height:30.0,color:indicatorColor,child:new Row(mainAxisAlignment:MainAxisAlignment.center,children:[new Text("Show $unLoadedPolls new Poll${unLoadedPolls==1?"":"s"} ",style:new TextStyle(fontSize:12.5,color:Colors.white)),new Icon(Icons.refresh,size:15.0,color:Colors.white)]))):new Container(height:3.0,child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor))):new Container(height:0.0,width:0.0),
                 sliver:new SliverPadding(padding: new EdgeInsets.only(right:5.0,left:5.0,top:5.0),sliver:sortedMap.keys.length>0?new SliverStaggeredGrid.countBuilder(
                   crossAxisCount: (MediaQuery.of(context).size.width/500.0).ceil(),
                   mainAxisSpacing: 0.0,
@@ -875,8 +875,8 @@ class ViewState extends State<View>{
                   itemCount: sortedMap.keys.length,
                   itemBuilder: (BuildContext context, int i)=>new Poll(sortedMap.keys.toList()[i],false),
                   staggeredTileBuilder:(i)=>new StaggeredTile.fit(1),
-                ):new SliverList(
-                    delegate: new SliverChildListDelegate([new Center(child:new Text("Your search did not match any polls",textAlign:TextAlign.center,style: new TextStyle(fontSize:15.0*min(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height)/320,color:textColor)))])
+                ):new SliverStickyHeader(
+                    header:new Container(child:new Center(child:new Text("Your search did not match any polls",textAlign:TextAlign.center,style: new TextStyle(fontSize:15.0*min(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height)/320,color:textColor))))
                 ))
               ),
             ],
@@ -1138,7 +1138,7 @@ class PollState extends State<Poll>{
                           ]
                       ),
                       new Container(height:6.0),
-                      hasVoted?new Row(crossAxisAlignment: CrossAxisAlignment.center,children:[new Expanded(child:new Padding(padding: EdgeInsets.only(top:7.0,left:48.0,bottom:5.0),child: new Container(height:(MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?5.0:5.0/(3*((MediaQuery.of(context).size.width/500.0).ceil())/4),child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation((!multiSelect?used==c:used.contains(data[widget.id]["c"].indexOf(c)))?indicatorColor:settings[0]?Colors.white54:Colors.grey[600]),backgroundColor:settings[0]?Colors.white24:Colors.black26,value:percent)))),new Padding(padding:EdgeInsets.only(right:8.0),child:new Container(height:15.0,width:42.0,child:new FittedBox(fit:BoxFit.fitHeight,alignment: Alignment.centerRight,child:new Text((100*percent).toStringAsFixed(percent>=.9995?0:percent<.01?2:1)+"%",style:new TextStyle(color:(used!=null&&((multiSelect&&used.contains(c))||(!multiSelect&&used==c)))?indicatorColor:textColor.withOpacity(0.8))))))]):new Container()
+                      hasVoted?new Row(crossAxisAlignment: CrossAxisAlignment.center,children:[new Expanded(child:new Padding(padding: EdgeInsets.only(top:7.5-((MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?5.0:5.0/(3*((MediaQuery.of(context).size.width/500.0).ceil())/4))/2,left:48.0,bottom:5.0),child: new Container(height:(MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?5.0:5.0/(3*((MediaQuery.of(context).size.width/500.0).ceil())/4),child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation((!multiSelect?used==c:used.contains(data[widget.id]["c"].indexOf(c)))?indicatorColor:settings[0]?Colors.white54:Colors.grey[600]),backgroundColor:settings[0]?Colors.white24:Colors.black26,value:percent)))),new Padding(padding:EdgeInsets.only(right:8.0),child:new Container(height:15.0,width:42.0,child:new FittedBox(fit:BoxFit.fitHeight,alignment: Alignment.centerRight,child:new Text((100*percent).toStringAsFixed(percent>=.9995?0:percent<.01?2:1)+"%",style:new TextStyle(color:(used!=null&&((multiSelect&&used.contains(c))||(!multiSelect&&used==c)))?indicatorColor:textColor.withOpacity(0.8))))))]):new Container()
                     ])):data[widget.id]["c"].indexOf(c)==5?/*new Container(color:Colors.red,child:new Text("...",style:new TextStyle(fontSize:20.0,fontWeight: FontWeight.bold)))*/new Icon(Icons.more_horiz):new Container();
                   }).toList().cast<Widget>()
               ),
