@@ -782,7 +782,7 @@ class ViewState extends State<View>{
               new SliverAppBar(
                 pinned: false,
                 floating: true,
-                title:!inSearch?new Text(!widget.onlyCreated?"Browse":"Created"):new Container(color:Colors.red,child:new TextField(
+                title:!inSearch?new Text(!widget.onlyCreated?"Browse":"Created"):new TextField(
                     textCapitalization: TextCapitalization.sentences,
                     style: new TextStyle(fontSize:20.0,color: Colors.white),
                     controller: c,
@@ -802,7 +802,7 @@ class ViewState extends State<View>{
                       setState((){search = str;});
                       sortMap();
                     }
-                )),
+                ),
                 centerTitle: false,
                 expandedHeight: 30.0,
                 backgroundColor: color,
@@ -1755,7 +1755,7 @@ class OpenPollPageState extends State<OpenPollPage>{
                   children:[
                     new Container(width:usedParam*3/4,child:new FittedBox(fit:BoxFit.fitWidth,child:new Text("PPoll"))),
                     new Container(height:7.5),
-                    new Container(constraints:BoxConstraints.loose(new Size(usedParam*3/4,200.0)),child:new TextField(
+                    new Container(constraints:BoxConstraints.loose(new Size(usedParam*3/4,48.0)),child:new TextField(
                       controller:openController,
                       focusNode: f,
                       inputFormatters: [new UpperCaseTextFormatter()],
@@ -1868,7 +1868,7 @@ class OpenPollPageState extends State<OpenPollPage>{
 class UpperCaseTextFormatter extends TextInputFormatter{
   @override
   TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue){
-    return newValue.text.length>4?oldValue.copyWith(text: oldValue.text.toUpperCase().replaceAll(" ", "")):newValue.copyWith(text: newValue.text.toUpperCase().replaceAll(" ", ""));
+    return newValue.text.length>4?oldValue.copyWith(text:oldValue.text.toUpperCase().replaceAll(new RegExp("[^A-Z0-9]"), "")):newValue.copyWith(text:newValue.text.toUpperCase().replaceAll(new RegExp("[^A-Z0-9]"), ""));
   }
 }
 
@@ -1877,7 +1877,7 @@ class MaxInputFormatter extends TextInputFormatter{
   MaxInputFormatter(this.max);
   @override
   TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue){
-    return newValue.text.length>max?oldValue.copyWith(text: oldValue.text):newValue.copyWith(text: newValue.text);
+    return newValue.text.length>max?oldValue.copyWith(text:oldValue.text):newValue.copyWith(text:newValue.text);
   }
 }
 
