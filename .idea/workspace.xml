@@ -24,8 +24,8 @@
       <file leaf-file-name="main.dart" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/lib/main.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="440">
-              <caret line="471" column="27" lean-forward="true" selection-start-line="471" selection-start-column="27" selection-end-line="471" selection-end-column="27" />
+            <state relative-caret-position="57">
+              <caret line="1756" column="46" lean-forward="false" selection-start-line="1756" selection-start-column="46" selection-end-line="1756" selection-end-column="46" />
               <folding>
                 <element signature="e#0#39#0" expanded="true" />
               </folding>
@@ -97,17 +97,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>stickyhe</find>
-      <find>unLoadedPolls+=</find>
-      <find>unLoadedPolls==0</find>
-      <find>unLoadedPolls=0</find>
-      <find>hasLoaded = false</find>
-      <find>unLoadedPolls</find>
-      <find>createController.jum</find>
-      <find>createCon</find>
-      <find>new CustomSc</find>
-      <find>CreatePol</find>
-      <find>new Card</find>
       <find>ViewStat</find>
       <find>your search did</find>
       <find>jumpTo(0.0</find>
@@ -127,6 +116,17 @@
       <find>createcontroller.jumpT</find>
       <find>Multiple S</find>
       <find>showDialog</find>
+      <find>/width</find>
+      <find>width =</find>
+      <find>Option</find>
+      <find>Question</find>
+      <find>&quot;</find>
+      <find>&quot;SUBMIT</find>
+      <find>Poll Code</find>
+      <find>Poll Co</find>
+      <find>new Stack</find>
+      <find>&quot;OPEN POL</find>
+      <find>OPEN POLL</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -368,7 +368,7 @@
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3286445" sideWeight="0.52932763" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Dart Analysis" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32992327" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3286445" sideWeight="0.4706724" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3286445" sideWeight="0.4706724" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32992327" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32992327" sideWeight="0.47567955" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Flutter Outline" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3297568" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -684,8 +684,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/main.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="440">
-          <caret line="471" column="27" lean-forward="true" selection-start-line="471" selection-start-column="27" selection-end-line="471" selection-end-column="27" />
+        <state relative-caret-position="57">
+          <caret line="1756" column="46" lean-forward="false" selection-start-line="1756" selection-start-column="46" selection-end-line="1756" selection-end-column="46" />
           <folding>
             <element signature="e#0#39#0" expanded="true" />
           </folding>

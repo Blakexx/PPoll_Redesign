@@ -1570,8 +1570,8 @@ class CreatePollPageState extends State<CreatePollPage>{
                 }):new Padding(padding:EdgeInsets.all(7.0),child:new CircularProgressIndicator()):new Icon(Icons.add,color:settings[0]?Colors.white:Colors.black))))),
                 new Container(height:20.0),
                 new Padding(padding:EdgeInsets.only(left:MediaQuery.of(context).size.width/20.0,right:MediaQuery.of(context).size.width/20.0),child:new MaterialButton(
-                  color:settings[0]?Colors.black:Colors.grey,
-                  child:new Text("SUBMIT",style:new TextStyle(letterSpacing:.5)),
+                  color:color,
+                  child:new Text("SUBMIT",style:new TextStyle(color:Colors.white,letterSpacing:.5)),
                   onPressed:() async{
                     if(!hasLoaded){
                       showDialog(
@@ -1744,108 +1744,123 @@ class OpenPollPageState extends State<OpenPollPage>{
   String input;
   @override
   Widget build(BuildContext context){
+    double usedParam = min(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height);
     return new Scaffold(
       resizeToAvoidBottomPadding: false,
-      appBar:new AppBar(title:new Text("Vote"),backgroundColor: color),
-      body:new Container(color:!settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),child:new Center(
-        child:new Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children:[
-            new Padding(padding:EdgeInsets.only(left:MediaQuery.of(context).size.width/2.0-60.0,right:MediaQuery.of(context).size.width/2.0-60.0),child:new TextField(
-              controller:openController,
-              focusNode: f,
-              inputFormatters: [new UpperCaseTextFormatter()],
-              onChanged:(s){
-                input=s;
-              },
-              onSubmitted:(s){
-                input=s;
-              },
-              textAlign:TextAlign.center,
-              style:new TextStyle(
-                color:textColor,
-              ),
-              decoration: new InputDecoration(
-                hintText: "Poll Code"
-              ),
-            )),
-            new RaisedButton(
-              color:settings[0]?Colors.black:Colors.grey,
-              child:new Text("OPEN POLL",style:new TextStyle(color:textColor)),
-              onPressed:() async{
-                if(!hasLoaded){
-                  showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (context){
-                        return new AlertDialog(
-                            title: new Text("Error",style:new TextStyle(fontWeight:FontWeight.bold)),
-                            content: new Text("You must wait for the browse page to load before you view polls."),
-                            actions: [
-                              new FlatButton(
-                                  child: new Text("OK"),
-                                  onPressed: (){
-                                    Navigator.of(context).pop();
-                                  }
-                              )
-                            ]
-                        );
-                      }
-                  );
-                  return;
-                }
-                try{
-                  await InternetAddress.lookup("google.com");
-                }on SocketException catch(_){
-                  showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (context){
-                        return new AlertDialog(
-                            title: new Text("Error",style:new TextStyle(fontWeight:FontWeight.bold)),
-                            content: new Text("Please check your internet connection"),
-                            actions: [
-                              new FlatButton(
-                                  child: new Text("OK"),
-                                  onPressed: (){
-                                    Navigator.of(context).pop();
-                                  }
-                              )
-                            ]
-                        );
-                      }
-                  );
-                  return;
-                }
-                if(input==null||input.length<4){
-                  Scaffold.of(context).removeCurrentSnackBar();
-                  Scaffold.of(context).showSnackBar(new SnackBar(duration:new Duration(milliseconds:300),content:new Text("Invalid code")));
-                }else if(data[input]==null){
-                  Scaffold.of(context).removeCurrentSnackBar();
-                  Scaffold.of(context).showSnackBar(new SnackBar(duration:new Duration(milliseconds:300),content:new Text("Poll not found")));
-                }else{
-                  String temp = input;
-                  openController = new TextEditingController();
-                  f = new FocusNode();
-                  setState((){input = null;});
-                  Navigator.push(context,new PageRouteBuilder(
-                    pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation){
-                      return new PollView(temp);
-                    },
-                    transitionDuration: new Duration(milliseconds: 300),
-                    transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child){
-                      return new FadeTransition(
-                          opacity: animation,
-                          child: child
-                      );
-                    },
-                  ));
-                }
-              }
-            )
-          ]
-        )
-      ))
+      body:new Stack(
+        children:[
+          new Container(color:!settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),child:new Center(
+              child:new Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children:[
+                    new Container(width:usedParam*3/4,child:new FittedBox(fit:BoxFit.fitWidth,child:new Text("PPoll"))),
+                    new Container(height:7.5),
+                    new Container(constraints:BoxConstraints.loose(new Size(usedParam*3/4,200.0)),child:new TextField(
+                      controller:openController,
+                      focusNode: f,
+                      inputFormatters: [new UpperCaseTextFormatter()],
+                      onChanged:(s){
+                        input=s;
+                      },
+                      onSubmitted:(s){
+                        input=s;
+                      },
+                      textAlign:TextAlign.center,
+                      style:new TextStyle(
+                          color:textColor,
+                          fontSize:20.0
+                      ),
+                      decoration: new InputDecoration(
+                          hintText: "Poll Code",
+                          border: InputBorder.none,
+                          fillColor: !settings[0]?Colors.grey[400]:Colors.grey[600],
+                          filled:true
+                      ),
+                    )),
+                    new Container(height:7.5),
+                    new Container(width:usedParam*3/4,height:48.0,child:new RaisedButton(
+                        color:color,
+                        child:new Text("Open Poll",style:new TextStyle(fontSize:20.0,color:Colors.white)),
+                        onPressed:() async{
+                          if(!hasLoaded){
+                            showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (context){
+                                  return new AlertDialog(
+                                      title: new Text("Error",style:new TextStyle(fontWeight:FontWeight.bold)),
+                                      content: new Text("You must wait for the browse page to load before you view polls."),
+                                      actions: [
+                                        new FlatButton(
+                                            child: new Text("OK"),
+                                            onPressed: (){
+                                              Navigator.of(context).pop();
+                                            }
+                                        )
+                                      ]
+                                  );
+                                }
+                            );
+                            return;
+                          }
+                          try{
+                            await InternetAddress.lookup("google.com");
+                          }on SocketException catch(_){
+                            showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (context){
+                                  return new AlertDialog(
+                                      title: new Text("Error",style:new TextStyle(fontWeight:FontWeight.bold)),
+                                      content: new Text("Please check your internet connection"),
+                                      actions: [
+                                        new FlatButton(
+                                            child: new Text("OK"),
+                                            onPressed: (){
+                                              Navigator.of(context).pop();
+                                            }
+                                        )
+                                      ]
+                                  );
+                                }
+                            );
+                            return;
+                          }
+                          if(input==null||input.length<4){
+                            Scaffold.of(context).removeCurrentSnackBar();
+                            Scaffold.of(context).showSnackBar(new SnackBar(duration:new Duration(milliseconds:300),content:new Text("Invalid code")));
+                          }else if(data[input]==null){
+                            Scaffold.of(context).removeCurrentSnackBar();
+                            Scaffold.of(context).showSnackBar(new SnackBar(duration:new Duration(milliseconds:300),content:new Text("Poll not found")));
+                          }else{
+                            String temp = input;
+                            openController = new TextEditingController();
+                            f = new FocusNode();
+                            setState((){input = null;});
+                            Navigator.push(context,new PageRouteBuilder(
+                              pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation){
+                                return new PollView(temp);
+                              },
+                              transitionDuration: new Duration(milliseconds: 300),
+                              transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child){
+                                return new FadeTransition(
+                                    opacity: animation,
+                                    child: child
+                                );
+                              },
+                            ));
+                          }
+                        }
+                    ))
+                  ]
+              )
+          )),
+          new Positioned(
+              left:0.0,top:0.0,
+              child:new Container(height:MediaQuery.of(context).padding.top,width:MediaQuery.of(context).size.width,color:color)
+          )
+        ]
+      )
     );
   }
 }
