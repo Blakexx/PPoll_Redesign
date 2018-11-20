@@ -452,7 +452,7 @@ class AppState extends State<App>{
                                   currentUserLevel = 0;
                                 });
                                 if(actualUserLevel is String){
-                                  showDialog(context:context,barrierDismissible: false,builder:(context)=>new AlertDialog(title:new Text("You have been banned from PPoll",textAlign:TextAlign.center),content:new Text("Reason: $actualUserLevel",textAlign: TextAlign.start)));
+                                  showDialog(context:context,barrierDismissible: false,builder:(context)=>new AlertDialog(title:new Text("You have been banned from PPoll",style:new TextStyle(fontWeight:FontWeight.bold),textAlign:TextAlign.center),content:new Text("Reason: $actualUserLevel",textAlign: TextAlign.start)));
                                 }
                               });
                             }
@@ -474,7 +474,7 @@ class AppState extends State<App>{
                             lastMessage = s;
                             messages.writeData(lastMessage);
                             if(lastMessage!=null){
-                              showDialog(context:context,builder:(context)=>new AlertDialog(actions: [new FlatButton(child: new Text("OK"),onPressed:(){Navigator.of(context).pop();})],title:new Text("Alert",textAlign: TextAlign.center),content:new Text(lastMessage)));
+                              showDialog(context:context,builder:(context)=>new AlertDialog(actions: [new FlatButton(child: new Text("OK"),onPressed:(){Navigator.of(context).pop();})],title:new Text("Alert",style:new TextStyle(fontWeight:FontWeight.bold),textAlign: TextAlign.center),content:new Text(lastMessage)));
                             }
                           }
                         });
@@ -782,7 +782,7 @@ class ViewState extends State<View>{
               new SliverAppBar(
                 pinned: false,
                 floating: true,
-                title:!inSearch?new Text(!widget.onlyCreated?"Browse":"Created"):new TextField(
+                title:!inSearch?new Text(!widget.onlyCreated?"Browse":"Created"):new Container(color:Colors.red,child:new TextField(
                     textCapitalization: TextCapitalization.sentences,
                     style: new TextStyle(fontSize:20.0,color: Colors.white),
                     controller: c,
@@ -802,7 +802,7 @@ class ViewState extends State<View>{
                       setState((){search = str;});
                       sortMap();
                     }
-                ),
+                )),
                 centerTitle: false,
                 expandedHeight: 30.0,
                 backgroundColor: color,
@@ -876,7 +876,7 @@ class ViewState extends State<View>{
                   itemBuilder: (BuildContext context, int i)=>new Poll(sortedMap.keys.toList()[i],false),
                   staggeredTileBuilder:(i)=>new StaggeredTile.fit(1),
                 ):new SliverStickyHeader(
-                    header:new Container(child:new Center(child:new Text("Your search did not match any polls",textAlign:TextAlign.center,style: new TextStyle(fontSize:15.0*min(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height)/320,color:textColor))))
+                    header:new Padding(padding:EdgeInsets.only(top:10.0),child:new Center(child:new Text("Your search did not match any polls",textAlign:TextAlign.center,style: new TextStyle(fontSize:15.0*min(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height)/320,color:textColor))))
                 ))
               ),
             ],
@@ -1530,7 +1530,7 @@ class CreatePollPageState extends State<CreatePollPage>{
                             barrierDismissible: true,
                             builder: (context){
                               return new AlertDialog(
-                                  title:new Text("Error"),
+                                  title:new Text("Error",style:new TextStyle(fontWeight:FontWeight.bold)),
                                   content:new Text(basename(tempImage.path)==null?"Invalid file path":"Invalid file type"),
                                   actions: [
                                     new FlatButton(
@@ -1579,7 +1579,7 @@ class CreatePollPageState extends State<CreatePollPage>{
                           barrierDismissible: false,
                           builder: (context){
                             return new AlertDialog(
-                                title: new Text("Error"),
+                                title: new Text("Error",style:new TextStyle(fontWeight:FontWeight.bold)),
                                 content: new Text("You must wait for the browse page to load before you create polls."),
                                 actions: [
                                   new FlatButton(
@@ -1602,7 +1602,7 @@ class CreatePollPageState extends State<CreatePollPage>{
                           barrierDismissible: false,
                           builder: (context){
                             return new AlertDialog(
-                                title: new Text("Error"),
+                                title: new Text("Error",style:new TextStyle(fontWeight:FontWeight.bold)),
                                 content: new Text("Please check your internet connection"),
                                 actions: [
                                   new FlatButton(
@@ -1646,7 +1646,7 @@ class CreatePollPageState extends State<CreatePollPage>{
                             barrierDismissible: false,
                             builder: (context){
                               return new AlertDialog(
-                                  title: new Text("Error"),
+                                  title: new Text("Error",style:new TextStyle(fontWeight:FontWeight.bold)),
                                   content: new Text("Something went wrong"),
                                   actions: [
                                     new FlatButton(
@@ -1684,7 +1684,7 @@ class CreatePollPageState extends State<CreatePollPage>{
                       questionController = new TextEditingController();
                       controllers = new List<TextEditingController>()..addAll([new TextEditingController(),new TextEditingController()]);
                       setState((){});
-                      Navigator.push(context,new MaterialPageRoute(builder: (context) => new PollView(code)));
+                      Navigator.push(context,new MaterialPageRoute(builder: (context)=>new PollView(code)));
                     }else{
                       String errorMessage = "";
                       if((question==null||choices.contains(null)||question==""||choices.contains(""))&&choices.toSet().length!=choices.length){
@@ -1709,7 +1709,7 @@ class CreatePollPageState extends State<CreatePollPage>{
                           barrierDismissible: true,
                           builder: (context){
                             return new AlertDialog(
-                                title:new Text("Error"),
+                                title:new Text("Error",style:new TextStyle(fontWeight:FontWeight.bold)),
                                 content:new Text(errorMessage),
                                 actions: [
                                   new FlatButton(
@@ -1779,7 +1779,7 @@ class OpenPollPageState extends State<OpenPollPage>{
                       barrierDismissible: false,
                       builder: (context){
                         return new AlertDialog(
-                            title: new Text("Error"),
+                            title: new Text("Error",style:new TextStyle(fontWeight:FontWeight.bold)),
                             content: new Text("You must wait for the browse page to load before you view polls."),
                             actions: [
                               new FlatButton(
@@ -1802,7 +1802,7 @@ class OpenPollPageState extends State<OpenPollPage>{
                       barrierDismissible: false,
                       builder: (context){
                         return new AlertDialog(
-                            title: new Text("Error"),
+                            title: new Text("Error",style:new TextStyle(fontWeight:FontWeight.bold)),
                             content: new Text("Please check your internet connection"),
                             actions: [
                               new FlatButton(
