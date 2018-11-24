@@ -1637,7 +1637,6 @@ class CreatePollPageState extends State<CreatePollPage>{
                             );
                           }
                       );
-                      //Test
                       String code;
                       await http.get(Uri.encodeFull(functionsLink+"/create?text={\"key\":"+json.encode(secretKey)+",\"a\":"+json.encode(new List<int>(choices.length).map((i)=>0).toList())+",\"c\":"+json.encode(choices)+",\"q\":"+json.encode(question)+",\"u\":"+json.encode(userId)+",\"b\":"+json.encode([multiSelect?1:0,0,public?1:0,image!=null?1:0])+"}").replaceAll("#","%23").replaceAll("&","%26")).then((r){
                         code = json.decode(r.body);
