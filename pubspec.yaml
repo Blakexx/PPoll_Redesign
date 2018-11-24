@@ -23,6 +23,7 @@ dependencies:
   charts_flutter:
   flutter_circular_chart:
   image_picker:
+  collection:
   mime:
   photo_view:
   connectivity:

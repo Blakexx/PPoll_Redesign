@@ -27,6 +27,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/gestures.dart';
 import 'package:share/share.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
+import 'package:collection/collection.dart';
 
 bool light;
 
@@ -179,6 +180,7 @@ void main() async{
     });
   }
   lastMessage = (await messages.readData());
+  userId = "asUNJM1u62adnHzc";
   runApp(new App());
 }
 
@@ -249,11 +251,21 @@ class AppState extends State<App>{
                       return;
                     }
                     List<dynamic> path = returned["path"].split("/");
-                    unLoadedPolls+=(path!=null&&path.length==2)&&(returned["data"]["b"][2]==1)&&index==0?1:0;
+                    unLoadedPolls+=(path!=null&&path.length==2)&&(returned["data"]["b"][2]==1||currentUserLevel==1)&&index==0?1:0;
+                    if(path!=null&&path.length==2&&returned["data"]["u"]==userId){
+                      createdPolls.add(path[1]);
+                      if(index==3){
+                        unLoadedPolls++;
+                      }
+                    }
                     dynamic finalPath = path[path.length-1];
                     dynamic temp = data;
                     String code = path!=null&&path.length>1?path[1].toString():null;
+                    dynamic before;
                     path.sublist(1,path.length-1).forEach((o){
+                      if(path.indexOf(o)==path.length-2){
+                        before = temp;
+                      }
                       try{
                         int i = int.parse(o);
                         if(temp[i]==null){
@@ -272,7 +284,8 @@ class AppState extends State<App>{
                             temp.remove(i);
                           }else{
                             if(temp==null){
-                              temp = {};
+                              before[path[path.length-2]] = {};
+                              temp = before[path[path.length-2]];
                             }
                             temp[i] = returned["data"];
                           }
@@ -281,7 +294,8 @@ class AppState extends State<App>{
                             temp.remove(finalPath);
                           }else{
                             if(temp==null){
-                              temp = {};
+                              before[path[path.length-2]] = {};
+                              temp = before[path[path.length-2]];
                             }
                             temp[finalPath] = returned["data"];
                           }
@@ -294,7 +308,8 @@ class AppState extends State<App>{
                           temp.remove(i);
                         }else{
                           if(temp==null){
-                            temp = {};
+                            before[path[path.length-2]] = {};
+                            temp = before[path[path.length-2]];
                           }
                           temp[i] = returned["data"];
                         }
@@ -303,7 +318,8 @@ class AppState extends State<App>{
                           temp.remove(finalPath);
                         }else{
                           if(temp==null){
-                            temp = {};
+                            before[path[path.length-2]] = {};
+                            temp = before[path[path.length-2]];
                           }
                           temp[finalPath] = returned["data"];
                         }
@@ -857,7 +873,7 @@ class ViewState extends State<View>{
                 ]
               ),
               new SliverStickyHeader(
-                header:unLoadedPolls!=0&&!widget.onlyCreated?!loadingNewPolls?new GestureDetector(onTap:() async{
+                header:unLoadedPolls!=0?!loadingNewPolls?new GestureDetector(onTap:() async{
                   await s.animateTo(0.0,curve: Curves.easeOut, duration: const Duration(milliseconds: 300));
                   setState((){loadingNewPolls = true;});
                   new Timer(new Duration(milliseconds:350),(){
@@ -903,8 +919,6 @@ class Poll extends StatefulWidget{
 
 class PollState extends State<Poll>{
 
-  bool hasVoted;
-
   bool hasImage;
 
   Image image;
@@ -915,11 +929,12 @@ class PollState extends State<Poll>{
 
   bool multiSelect;
 
+  bool get hasVoted => data[widget.id]["i"]!=null&&data[widget.id]["i"][userId]!=null&&(pids.length==0||lastChoice!=null);
+
   @override
   void initState(){
     super.initState();
     multiSelect = data[widget.id]["b"][0]==1;
-    hasVoted = data[widget.id]["i"]!=null&&data[widget.id]["i"][userId]!=null;
     if(hasVoted){
       if(multiSelect&&data[widget.id]["i"]!=null&&data[widget.id]["i"][userId]!=null&&data[widget.id]["i"][userId].contains(-1)){
         choice = new Set.from([]);
@@ -993,15 +1008,6 @@ class PollState extends State<Poll>{
     }
     await http.put(Uri.encodeFull(database+"/data/${widget.id}/i/$userId.json?auth=$secretKey"),body: json.encode(!multiSelect?data[widget.id]["c"].indexOf(choice):(data[widget.id]["i"][userId].length>0?data[widget.id]["i"][userId]:[-1])));
     await http.get(Uri.encodeFull(functionsLink+"/vote?text={\"poll\":\"${widget.id}\",\"choice\":${data[widget.id]["c"].indexOf(c)},\"changed\":${!multiSelect?lastChoice!=null?data[widget.id]["c"].indexOf(lastChoice):null:!b},\"multiSelect\":$multiSelect,\"key\":\"$secretKey\"}"));
-    if(!hasVoted){
-      try{
-        setState((){
-          hasVoted = true;
-        });
-      }catch(e){
-        hasVoted = true;
-      }
-    }
     try{
       setState((){pids.remove(pid);});
     }catch(e){
@@ -1014,6 +1020,15 @@ class PollState extends State<Poll>{
 
   @override
   Widget build(BuildContext context){
+    if(pids.length==0&&hasVoted&&(!multiSelect?(data[widget.id]["c"].indexOf(choice)!=data[widget.id]["i"][userId]):(!IterableEquality().equals(choice.toList(),data[widget.id]["i"][userId])))){
+      if(!multiSelect){
+        lastChoice = choice;
+        choice = data[widget.id]["c"][data[widget.id]["i"][userId]];
+      }else{
+        lastChoice = choice;
+        choice = new Set.from(data[widget.id]["i"][userId]);
+      }
+    }
     Widget returnedWidget = new Column(
         children:[
           new Column(
@@ -1201,7 +1216,6 @@ class PollViewState extends State<PollView>{
         return new Future(()=>false);
       }
       if(widget.state!=null){
-        widget.state.hasVoted = data[widget.id]["i"]!=null&&data[widget.id]["i"][userId]!=null;
         widget.state.lastChoice = null;
         widget.state.choice = widget.state.multiSelect?(data[widget.id]["i"]!=null&&data[widget.id]["i"][userId]!=null?new Set.from(data[widget.id]["i"][userId]):new Set.from([])):(data[widget.id]["i"]!=null&&(data[widget.id]["i"][userId]!=null)?data[widget.id]["c"][data[widget.id]["i"][userId]]:null);
       }
@@ -1668,7 +1682,6 @@ class CreatePollPageState extends State<CreatePollPage>{
                       if(image!=null){
                         await http.post(Uri.encodeFull(cloudUploadDatabase+"/o?uploadType=media&name="+code),headers:{"content-type":lookupMimeType(basename(image.path))},body:await image.readAsBytes());
                       }
-                      createdPolls.add(code);
                       Navigator.of(context).pop();
                       createController.jumpTo(0.0);
                       choices = [null,null];
