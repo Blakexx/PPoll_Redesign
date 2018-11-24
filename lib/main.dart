@@ -1571,7 +1571,8 @@ class CreatePollPageState extends State<CreatePollPage>{
                 new Container(height:20.0),
                 new Padding(padding:EdgeInsets.only(left:MediaQuery.of(context).size.width/20.0,right:MediaQuery.of(context).size.width/20.0),child:new MaterialButton(
                   color:color,
-                  child:new Text("SUBMIT",style:new TextStyle(color:Colors.white,letterSpacing:.5)),
+                  height:40.0,
+                  child:new Text("SUBMIT",style:new TextStyle(fontSize:14.0,color:Colors.white,letterSpacing:.5)),
                   onPressed:() async{
                     if(!hasLoaded){
                       showDialog(
