@@ -180,7 +180,6 @@ void main() async{
     });
   }
   lastMessage = (await messages.readData());
-  userId = "asUNJM1u62adnHzc";
   runApp(new App());
 }
 
