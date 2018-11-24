@@ -24,8 +24,8 @@
       <file leaf-file-name="main.dart" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/lib/main.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="205">
-              <caret line="1574" column="73" lean-forward="false" selection-start-line="1574" selection-start-column="73" selection-end-line="1574" selection-end-column="73" />
+            <state relative-caret-position="324">
+              <caret line="1639" column="34" lean-forward="false" selection-start-line="1639" selection-start-column="34" selection-end-line="1639" selection-end-column="34" />
               <folding>
                 <element signature="e#0#39#0" expanded="true" />
               </folding>
@@ -97,8 +97,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>jumpTo(0.0</find>
-      <find>StickyH</find>
       <find>s.jumpTo(0.0)</find>
       <find>jump</find>
       <find>your sea</find>
@@ -127,6 +125,8 @@
       <find>Colors.red</find>
       <find>.replaceAll</find>
       <find>&quot;SUBMIT</find>
+      <find>&quot;Question</find>
+      <find>something</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -684,8 +684,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/main.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="205">
-          <caret line="1574" column="73" lean-forward="false" selection-start-line="1574" selection-start-column="73" selection-end-line="1574" selection-end-column="73" />
+        <state relative-caret-position="324">
+          <caret line="1639" column="34" lean-forward="false" selection-start-line="1639" selection-start-column="34" selection-end-line="1639" selection-end-column="34" />
           <folding>
             <element signature="e#0#39#0" expanded="true" />
           </folding>
