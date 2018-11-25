@@ -24,6 +24,7 @@ dependencies:
   flutter_circular_chart:
   image_picker:
   collection:
+  http:
   mime:
   photo_view:
   connectivity:

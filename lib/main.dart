@@ -1841,10 +1841,10 @@ class OpenPollPageState extends State<OpenPollPage>{
                           }
                           if(input==null||input.length<4){
                             Scaffold.of(context).removeCurrentSnackBar();
-                            Scaffold.of(context).showSnackBar(new SnackBar(duration:new Duration(milliseconds:300),content:new Text("Invalid code")));
+                            Scaffold.of(context).showSnackBar(new SnackBar(duration:new Duration(milliseconds:450),content:new Text("Invalid code")));
                           }else if(data[input]==null){
                             Scaffold.of(context).removeCurrentSnackBar();
-                            Scaffold.of(context).showSnackBar(new SnackBar(duration:new Duration(milliseconds:300),content:new Text("Poll not found")));
+                            Scaffold.of(context).showSnackBar(new SnackBar(duration:new Duration(milliseconds:450),content:new Text("Poll not found")));
                           }else{
                             String temp = input;
                             openController = new TextEditingController();
