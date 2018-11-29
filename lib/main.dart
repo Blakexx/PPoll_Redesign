@@ -884,7 +884,7 @@ class ViewState extends State<View>{
                     });
                   });
                 },child:new Container(height:30.0,color:indicatorColor,child:new Row(mainAxisAlignment:MainAxisAlignment.center,children:[new Text("Show $unLoadedPolls new Poll${unLoadedPolls==1?"":"s"} ",style:new TextStyle(fontSize:12.5,color:Colors.white)),new Icon(Icons.refresh,size:15.0,color:Colors.white)]))):new Container(height:3.0,child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor))):new Container(height:0.0,width:0.0),
-                sliver:new SliverPadding(padding: new EdgeInsets.only(right:5.0,left:5.0,top:5.0),sliver:sortedMap.keys.length>0?new SliverStaggeredGrid.countBuilder(
+                sliver:new SliverPadding(padding: new EdgeInsets.only(right:5.0,left:5.0,top:5.0),sliver:sortedMap.keys.length>0||search==null||search.length==0?new SliverStaggeredGrid.countBuilder(
                   crossAxisCount: (MediaQuery.of(context).size.width/500.0).ceil(),
                   mainAxisSpacing: 0.0,
                   crossAxisSpacing: 0.0,
@@ -1008,8 +1008,12 @@ class PollState extends State<Poll>{
       data[widget.id]["i"][userId].removeWhere((i)=>i==-1);
     }
     */
-    await http.put(Uri.encodeFull(database+"/data/${widget.id}/i/$userId.json?auth=$secretKey"),body: json.encode(!multiSelect?data[widget.id]["c"].indexOf(choice):(data[widget.id]["i"][userId].length>0?data[widget.id]["i"][userId]:[-1])));
+    if(multiSelect){
+      choice = choice.toList()..removeWhere((i)=>i==-1);
+    }
+    await http.put(Uri.encodeFull(database+"/data/${widget.id}/i/$userId.json?auth=$secretKey"),body: json.encode(!multiSelect?data[widget.id]["c"].indexOf(choice):(choice.length>0?choice:[-1])));
     await http.get(Uri.encodeFull(functionsLink+"/vote?text={\"poll\":\"${widget.id}\",\"choice\":${data[widget.id]["c"].indexOf(c)},\"changed\":${!multiSelect?lastChoice!=null?data[widget.id]["c"].indexOf(lastChoice):null:!b},\"multiSelect\":$multiSelect,\"key\":\"$secretKey\"}"));
+    choice = new Set.from(choice);
     try{
       setState((){pids.remove(pid);});
     }catch(e){
