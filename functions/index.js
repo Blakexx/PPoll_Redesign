@@ -62,7 +62,7 @@ exports.create = functions.https.onRequest((req,res)=>{
                 created.push(code);
                 admin.database().ref("users/"+map["u"]+"/1").set(created);
                 admin.database().ref("data/"+code).set(returned);
-                return res.send(JSON.stringify(code));
+                return res.send(JSON.stringify([code,returned]));
             });
         });
     }else{

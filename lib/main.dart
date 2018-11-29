@@ -125,7 +125,8 @@ void main() async{
     settings.addAll(new List<dynamic>(numSettings-settings.length).map((n)=>false));
     await settingsData.writeData(settings);
   }
-  indicatorColor = !settings[0]?new Color.fromRGBO(33,150,243,1.0):new Color.fromRGBO(100,255,218,1.0);
+  //indicatorColor = !settings[0]?new Color.fromRGBO(33,150,243,1.0):new Color.fromRGBO(100,255,218,1.0);
+  indicatorColor = new Color.fromRGBO(33,150,243,1.0);
   textColor = !settings[0]?new Color.fromRGBO(34, 34, 34,1.0):Colors.white;
   color = !settings[0]?new Color.fromRGBO(52,52,52,1.0):new Color.fromRGBO(22,22,22,1.0);
   if(Platform.isIOS){
@@ -515,7 +516,7 @@ class AppState extends State<App>{
                                       children: settings.asMap().keys.map((i)=>new Padding(padding:EdgeInsets.only(bottom:12.0),child:new GestureDetector(onTap:(){
                                         bool b = !settings[0];
                                         if(i==0){
-                                          indicatorColor = !b?new Color.fromRGBO(33,150,243,1.0):new Color.fromRGBO(100,255,218,1.0);
+                                          //indicatorColor = !b?new Color.fromRGBO(33,150,243,1.0):new Color.fromRGBO(100,255,218,1.0);
                                           textColor = !b?new Color.fromRGBO(34,34, 34,1.0):new Color.fromRGBO(238,238,238,1.0);
                                           color = !b?new Color.fromRGBO(52,52,52,1.0):new Color.fromRGBO(22,22,22,1.0);
                                         }
@@ -1001,10 +1002,12 @@ class PollState extends State<Poll>{
     if(data[widget.id]["i"]==null){
       data[widget.id]["i"]={};
     }
+    /*
     data[widget.id]["i"][userId]=!multiSelect?data[widget.id]["c"].indexOf(choice):choice.toList();
     if(multiSelect){
       data[widget.id]["i"][userId].removeWhere((i)=>i==-1);
     }
+    */
     await http.put(Uri.encodeFull(database+"/data/${widget.id}/i/$userId.json?auth=$secretKey"),body: json.encode(!multiSelect?data[widget.id]["c"].indexOf(choice):(data[widget.id]["i"][userId].length>0?data[widget.id]["i"][userId]:[-1])));
     await http.get(Uri.encodeFull(functionsLink+"/vote?text={\"poll\":\"${widget.id}\",\"choice\":${data[widget.id]["c"].indexOf(c)},\"changed\":${!multiSelect?lastChoice!=null?data[widget.id]["c"].indexOf(lastChoice):null:!b},\"multiSelect\":$multiSelect,\"key\":\"$secretKey\"}"));
     try{
@@ -1652,7 +1655,9 @@ class CreatePollPageState extends State<CreatePollPage>{
                       );
                       String code;
                       await http.get(Uri.encodeFull(functionsLink+"/create?text={\"key\":"+json.encode(secretKey)+",\"a\":"+json.encode(new List<int>(choices.length).map((i)=>0).toList())+",\"c\":"+json.encode(choices)+",\"q\":"+json.encode(question)+",\"u\":"+json.encode(userId)+",\"b\":"+json.encode([multiSelect?1:0,0,public?1:0,image!=null?1:0])+"}").replaceAll("#","%23").replaceAll("&","%26")).then((r){
-                        code = json.decode(r.body);
+                        List l = json.decode(r.body);
+                        code = l[0];
+                        data[code] = l[1];
                       }).catchError((e){
                         Navigator.of(context).pop();
                         showDialog(

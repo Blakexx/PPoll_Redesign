@@ -17,13 +17,25 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0.0</string>
+	<string>1.0.2</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>3</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>PPoll does not require your music.</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>PPoll does not require your calendar.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>PPoll does not require your contacts.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>PPoll does not require your motion data.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>You must grant access to your photo library in order to select an image.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>PPoll does not require speech recognition.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
