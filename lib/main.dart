@@ -1013,7 +1013,9 @@ class PollState extends State<Poll>{
     }
     await http.put(Uri.encodeFull(database+"/data/${widget.id}/i/$userId.json?auth=$secretKey"),body: json.encode(!multiSelect?data[widget.id]["c"].indexOf(choice):(choice.length>0?choice:[-1])));
     await http.get(Uri.encodeFull(functionsLink+"/vote?text={\"poll\":\"${widget.id}\",\"choice\":${data[widget.id]["c"].indexOf(c)},\"changed\":${!multiSelect?lastChoice!=null?data[widget.id]["c"].indexOf(lastChoice):null:!b},\"multiSelect\":$multiSelect,\"key\":\"$secretKey\"}"));
-    choice = new Set.from(choice);
+    if(multiSelect){
+      choice = new Set.from(choice);
+    }
     try{
       setState((){pids.remove(pid);});
     }catch(e){
