@@ -35,7 +35,7 @@ dependencies:
   url_launcher:
   share:
   flutter_sticky_header:
-  permission_handler:
+  permission_handler: 2.1.0
   dynamic_theme:
       git:
         url: git://github.com/Norbert515/dynamic_theme.git
