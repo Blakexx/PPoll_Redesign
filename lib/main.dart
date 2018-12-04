@@ -181,6 +181,7 @@ void main() async{
     });
   }
   lastMessage = (await messages.readData());
+  userId = "asUNJM1u62adnHzc";
   runApp(new App());
 }
 
@@ -1012,7 +1013,7 @@ class PollState extends State<Poll>{
       choice = choice.toList()..removeWhere((i)=>i==-1);
     }
     await http.put(Uri.encodeFull(database+"/data/${widget.id}/i/$userId.json?auth=$secretKey"),body: json.encode(!multiSelect?data[widget.id]["c"].indexOf(choice):(choice.length>0?choice:[-1])));
-    await http.get(Uri.encodeFull(functionsLink+"/vote?text={\"poll\":\"${widget.id}\",\"choice\":${data[widget.id]["c"].indexOf(c)},\"changed\":${!multiSelect?lastChoice!=null?data[widget.id]["c"].indexOf(lastChoice):null:!b},\"multiSelect\":$multiSelect,\"key\":\"$secretKey\"}"));
+    //await http.get(Uri.encodeFull(functionsLink+"/vote?text={\"poll\":\"${widget.id}\",\"choice\":${data[widget.id]["c"].indexOf(c)},\"changed\":${!multiSelect?lastChoice!=null?data[widget.id]["c"].indexOf(lastChoice):null:!b},\"multiSelect\":$multiSelect,\"key\":\"$secretKey\"}"));
     if(multiSelect){
       choice = new Set.from(choice);
     }
@@ -1037,13 +1038,25 @@ class PollState extends State<Poll>{
         choice = new Set.from(data[widget.id]["i"][userId]);
       }
     }
+    List<int> correctList = new List.from(data[widget.id]["a"]);
+    if(data[widget.id]["i"]!=null){
+      for(String s in data[widget.id]["i"].keys){
+        if(multiSelect&&!data[widget.id]["i"][s].contains(-1)){
+          data[widget.id]["i"][s].forEach((i){
+            correctList[i]++;
+          });
+        }else if(!multiSelect){
+          correctList[data[widget.id]["i"][s]]++;
+        }
+      }
+    }
     Widget returnedWidget = new Column(
         children:[
           new Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               new Padding(padding:EdgeInsets.only(top:10.0,left:11.0,right:11.0),child:new Text(data[widget.id]["q"],style: new TextStyle(color:textColor,fontSize: 15.0,letterSpacing:.2,fontWeight: FontWeight.w600,fontFamily: "Futura"),maxLines: !widget.viewPage?2:100,overflow: TextOverflow.ellipsis)),
-              new Padding(padding:EdgeInsets.only(top:5.0,left:11.0,bottom:5.0),child:new Text(widget.id+(data[widget.id]["t"]!=null?" • ${timeago.format(new DateTime.fromMillisecondsSinceEpoch(data[widget.id]["t"]*1000))}":"")+" • ${data[widget.id]["a"].reduce((n1,n2)=>n1+n2)} vote"+((data[widget.id]["a"].reduce((n1,n2)=>n1+n2)==1)?"":"s"),style: new TextStyle(fontSize: 12.0,color:textColor.withOpacity(.8)))),
+              new Padding(padding:EdgeInsets.only(top:5.0,left:11.0,bottom:5.0),child:new Text(widget.id+(data[widget.id]["t"]!=null?" • ${timeago.format(new DateTime.fromMillisecondsSinceEpoch(data[widget.id]["t"]*1000))}":"")+" • ${correctList.reduce((n1,n2)=>n1+n2)} vote"+((correctList.reduce((n1,n2)=>n1+n2)==1)?"":"s"),style: new TextStyle(fontSize: 12.0,color:textColor.withOpacity(.8)))),
               image!=null?new Padding(padding:EdgeInsets.only(top:5.0,bottom:5.0),child:new FutureBuilder<ui.Image>(
                 future: completer.future,
                 builder: (BuildContext context, AsyncSnapshot<ui.Image> snapshot){
@@ -1066,7 +1079,7 @@ class PollState extends State<Poll>{
               new Column(
                   children: data[widget.id]["c"].map((c){
                     dynamic used = pids.length>0?lastChoice:choice;
-                    double percent = ((data[widget.id]["a"].reduce((n1,n2)=>n1+n2))!=0?data[widget.id]["a"][data[widget.id]["c"].indexOf(c)]/(data[widget.id]["a"].reduce((n1,n2)=>n1+n2)):0.0);
+                    double percent = ((correctList.reduce((n1,n2)=>n1+n2))!=0?correctList[data[widget.id]["c"].indexOf(c)]/(correctList.reduce((n1,n2)=>n1+n2)):0.0);
                     return widget.viewPage||(hasVoted||(data[widget.id]["c"].indexOf(c)<5))?new MaterialButton(onPressed: () async{
                       if(multiSelect||c!=choice){
                         if(widget.viewPage){
@@ -1175,7 +1188,7 @@ class PollState extends State<Poll>{
       return new Container(color:!settings[0]?new Color.fromRGBO(250, 250, 250, 1.0):new Color.fromRGBO(32,33,36,1.0),child:returnedWidget);
     }else{
       returnedWidget = new Card(color:!settings[0]?new Color.fromRGBO(250, 250, 250, 1.0):new Color.fromRGBO(32,33,36,1.0),child:new Hero(tag:widget.id,child:new Material(type:MaterialType.transparency,child:returnedWidget)));
-      if(!(hasVoted||data[widget.id]["a"].length<6)){
+      if(!(hasVoted||correctList.length<6)){
         returnedWidget = new AbsorbPointer(child:returnedWidget);
       }
       returnedWidget = new GestureDetector(onTap: (){
@@ -1422,8 +1435,10 @@ class CreatePollPageState extends State<CreatePollPage>{
                         },
                         decoration: new InputDecoration(
                             hintText: "Question",
-                            border: InputBorder.none,
                             hintStyle: new TextStyle(color:textColor.withOpacity(0.8)),
+                            border: new OutlineInputBorder(),
+                            filled: true,
+                            contentPadding: EdgeInsets.only(top:12.0,bottom:12.0,left:8.0,right:8.0)
                         ),
                         controller: questionController,
                         inputFormatters: [new MaxInputFormatter(200)],
@@ -1491,7 +1506,7 @@ class CreatePollPageState extends State<CreatePollPage>{
                                 }
                               }),
                               new Expanded(
-                                  child: new TextField(
+                                  child: new Padding(padding:EdgeInsets.only(right:11.0),child:new TextField(
                                     textCapitalization: TextCapitalization.sentences,
                                     style: new TextStyle(color:textColor,fontSize:14.0),
                                     onChanged: (s){
@@ -1502,12 +1517,11 @@ class CreatePollPageState extends State<CreatePollPage>{
                                     },
                                     decoration: new InputDecoration(
                                       hintText: "Option ${i+1}",
-                                      border: InputBorder.none,
                                       hintStyle: new TextStyle(color:textColor.withOpacity(0.7)),
                                     ),
                                     controller: controllers[i],
                                     inputFormatters: [new MaxInputFormatter(100)]
-                                  ),
+                                  )),
                               ),
                               new Container(width:5.0)
                             ]
