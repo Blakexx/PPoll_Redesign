@@ -704,7 +704,7 @@ class ViewState extends State<View>{
       int voters2 = tempMap[o2]["a"].reduce((n1,n2)=>n1+n2);
       if(tempMap[o1]["i"]!=null){
         for(String s in tempMap[o1]["i"].keys){
-          if(tempMap[o1]["b"][1]==1&&!tempMap[o1]["i"][s].contains(-1)){
+          if(tempMap[o1]["b"][0]==1&&!tempMap[o1]["i"][s].contains(-1)){
             voters1+=tempMap[o1]["i"][s].length;
           }else if(tempMap[o1]["b"][1]==0){
             voters1++;
@@ -713,7 +713,7 @@ class ViewState extends State<View>{
       }
       if(tempMap[o2]["i"]!=null){
         for(String s in tempMap[o2]["i"].keys){
-          if(tempMap[o2]["b"][1]==1&&!tempMap[o2]["i"][s].contains(-1)){
+          if(tempMap[o2]["b"][0]==1&&!tempMap[o2]["i"][s].contains(-1)){
             voters2+=tempMap[o2]["i"][s].length;
           }else if(tempMap[o2]["b"][1]==0){
             voters2++;
