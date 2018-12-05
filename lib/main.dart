@@ -81,6 +81,14 @@ Color indicatorColor;
 
 int unLoadedPolls = 0;
 
+bool isCorrectVersion;
+
+String version = "2.0.0";
+
+bool displayedVersionMessage = false;
+
+bool displayedBannedMessage = false;
+
 void main() async{
   if(Platform.isAndroid){
     int count = 0;
@@ -180,6 +188,10 @@ void main() async{
       }
     });
   }
+  doWhenHasConnection(() async{
+    String actualVersion = json.decode((await http.get(Uri.encodeFull("$database/${Platform.isIOS?"iosVersion":"androidVersion"}.json?auth=$secretKey"))).body);
+    isCorrectVersion = actualVersion==version;
+  });
   lastMessage = (await messages.readData());
   runApp(new App());
 }
@@ -216,7 +228,7 @@ class AppState extends State<App>{
       if(r!=current){
         return;
       }
-      if(userId==null||createdPolls==null){
+      if(userId==null||createdPolls==null||isCorrectVersion==null){
         new Timer(new Duration(seconds:1),waitForConnection);
         return;
       }
@@ -248,6 +260,9 @@ class AppState extends State<App>{
                     try{
                       returned = json.decode(text.substring(text.indexOf("{"),text.lastIndexOf("}")+1));
                     }catch(e){
+                      return;
+                    }
+                    if(returned["path"]==null){
                       return;
                     }
                     List<dynamic> path = returned["path"].split("/");
@@ -456,7 +471,7 @@ class AppState extends State<App>{
                   ),
                   body: new Builder(
                     builder: (context){
-                      if(actualUserLevel==null&&!hasGotLevel){
+                      if(!displayedBannedMessage&&actualUserLevel==null&&!hasGotLevel){
                         hasGotLevel = true;
                         tryToGetId() async{
                           try{
@@ -468,7 +483,8 @@ class AppState extends State<App>{
                                   currentUserLevel = 0;
                                 });
                                 if(actualUserLevel is String){
-                                  showDialog(context:context,barrierDismissible: false,builder:(context)=>new AlertDialog(title:new Text("You have been banned from PPoll",style:new TextStyle(fontWeight:FontWeight.bold),textAlign:TextAlign.center),content:new Text("Reason: $actualUserLevel",textAlign: TextAlign.start)));
+                                  new Future.delayed(Duration.zero,()=>showDialog(context:context,barrierDismissible: false,builder:(context)=>new AlertDialog(title:new Text("You have been banned from PPoll",style:new TextStyle(fontWeight:FontWeight.bold),textAlign:TextAlign.center),content:new Text("Reason: $actualUserLevel",textAlign: TextAlign.start))));
+                                  displayedBannedMessage = true;
                                 }
                               });
                             }
@@ -479,7 +495,7 @@ class AppState extends State<App>{
                         }
                         tryToGetId();
                       }
-                      if(start&&hasLoaded&&agreesToPolicy){
+                      if(isCorrectVersion==true&&(actualUserLevel!=null&&!(actualUserLevel is String))&&start&&agreesToPolicy){
                         start = false;
                         http.get(Uri.encodeFull("$database/message.json?auth=$secretKey")).then((r){
                           String s = json.decode(r.body);
@@ -490,10 +506,14 @@ class AppState extends State<App>{
                             lastMessage = s;
                             messages.writeData(lastMessage);
                             if(lastMessage!=null){
-                              showDialog(context:context,builder:(context)=>new AlertDialog(actions: [new FlatButton(child: new Text("OK"),onPressed:(){Navigator.of(context).pop();})],title:new Text("Alert",style:new TextStyle(fontWeight:FontWeight.bold),textAlign: TextAlign.center),content:new Text(lastMessage)));
+                              new Future.delayed(Duration.zero,()=>showDialog(context:context,builder:(context)=>new AlertDialog(actions: [new FlatButton(child: new Text("OK"),onPressed:(){Navigator.of(context).pop();})],title:new Text("Alert",style:new TextStyle(fontWeight:FontWeight.bold),textAlign: TextAlign.center),content:new Text(lastMessage))));
                             }
                           }
                         });
+                      }
+                      if(!displayedVersionMessage&&isCorrectVersion==false&&(actualUserLevel!=null&&!(actualUserLevel is String))){
+                        new Future.delayed(Duration.zero,()=>showDialog(context:context,barrierDismissible: false,builder:(context)=>new AlertDialog(title:new Text("Outdated Version",style:new TextStyle(fontWeight:FontWeight.bold),textAlign:TextAlign.center),content:new Text("Please update to continue",textAlign: TextAlign.start))));
+                        displayedVersionMessage = true;
                       }
                       return index==0?new Container(
                           color: !settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),
