@@ -49,7 +49,7 @@ dynamic actualUserLevel;
 
 dynamic currentUserLevel;
 
-int numSettings = 1;
+int numSettings = 2;
 
 String userId;
 
@@ -88,6 +88,7 @@ String version = "2.0.0";
 bool displayedVersionMessage = false;
 
 bool displayedBannedMessage = false;
+
 
 void main() async{
   if(Platform.isAndroid){
@@ -131,6 +132,7 @@ void main() async{
     await settingsData.writeData(settings);
   }else if(settings.length<numSettings){
     settings.addAll(new List<dynamic>(numSettings-settings.length).map((n)=>false));
+    settings[1] = "After Vote";
     await settingsData.writeData(settings);
   }
   //indicatorColor = !settings[0]?new Color.fromRGBO(33,150,243,1.0):new Color.fromRGBO(100,255,218,1.0);
@@ -189,8 +191,8 @@ void main() async{
     });
   }
   doWhenHasConnection(() async{
-    String actualVersion = json.decode((await http.get(Uri.encodeFull("$database/${Platform.isIOS?"iosVersion":"androidVersion"}.json?auth=$secretKey"))).body);
-    isCorrectVersion = actualVersion==version;
+    String minVersion = json.decode((await http.get(Uri.encodeFull("$database/${Platform.isIOS?"iosVersion":"androidVersion"}.json?auth=$secretKey"))).body);
+    isCorrectVersion = int.parse(minVersion.replaceAll(".",""))<=int.parse(version.replaceAll(".",""));
   });
   lastMessage = (await messages.readData());
   runApp(new App());
@@ -234,7 +236,7 @@ class AppState extends State<App>{
       }
       try{
         final result = await InternetAddress.lookup("google.com");
-        if(result.isNotEmpty && result[0].rawAddress.isNotEmpty){
+        if(result.isNotEmpty&&result[0].rawAddress.isNotEmpty){
           data = json.decode(utf8.decode((await http.get(Uri.encodeFull(database+"/data.json?auth="+secretKey))).bodyBytes));
           client.openUrl("GET", Uri.parse(database+"/data.json?auth="+secretKey)).then((req) async{
             req.headers.set("Accept", "text/event-stream");
@@ -530,10 +532,13 @@ class AppState extends State<App>{
                       ):new Scaffold(appBar:new AppBar(title:new Text("Settings"),backgroundColor: color),body:new Container(
                           color: !settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),
                           child: new Center(
-                              child: new Column(
+                              child: new ListView(
                                 children: [
                                   new Padding(padding: EdgeInsets.only(top:12.0),child: new Column(
                                       children: settings.asMap().keys.map((i)=>new Padding(padding:EdgeInsets.only(bottom:12.0),child:new GestureDetector(onTap:(){
+                                        if(i==1){
+                                          return;
+                                        }
                                         bool b = !settings[0];
                                         if(i==0){
                                           //indicatorColor = !b?new Color.fromRGBO(33,150,243,1.0):new Color.fromRGBO(100,255,218,1.0);
@@ -543,16 +548,24 @@ class AppState extends State<App>{
                                         setState((){settings[i]=b;});
                                         settingsData.writeData(settings);
                                       },child:new Container(color:settings[0]?Colors.black:new Color.fromRGBO(253,253,253,1.0),child:new ListTile(
-                                        leading: new Icon(i==0?Icons.brightness_2:Icons.settings),
-                                        title: new Text(i==0?"Dark mode":"Placeholder"),
-                                        trailing: new Switch(value:settings[i],onChanged:(b){
+                                        leading: new Icon(i==0?Icons.brightness_2:i==1?Icons.more_vert:Icons.settings),
+                                        title: new Text(i==0?"Dark mode":i==1?"Expand large polls":"Placeholder"),
+                                        trailing: i!=1?new Switch(value:settings[i],onChanged:(b){
                                           if(i==0){
                                             textColor = !b?new Color.fromRGBO(34,34, 34,1.0):new Color.fromRGBO(238,238,238,1.0);
                                             color = !b?new Color.fromRGBO(52,52,52,1.0):new Color.fromRGBO(22,22,22,1.0);
                                           }
                                           setState((){settings[i]=b;});
                                           settingsData.writeData(settings);
-                                        })
+                                        }):new DropdownButtonHideUnderline(
+                                          child: DropdownButton<String>(
+                                            items: ["Always","After Vote","Never"].map((key)=>new DropdownMenuItem<String>(value: key, child: new Text("$key"))).toList(),
+                                            onChanged: (s){
+                                              setState((){settings[1] = s;});
+                                            },
+                                            value: settings[1]
+                                          )
+                                        )
                                       ))))).toList()
                                   )),
                                   actualUserLevel==1?new GestureDetector(onTap:(){
@@ -1117,7 +1130,7 @@ class PollState extends State<Poll>{
                   children: data[widget.id]["c"].map((c){
                     dynamic used = pids.length>0?lastChoice:choice;
                     double percent = ((correctList.reduce((n1,n2)=>n1+n2))!=0?correctList[data[widget.id]["c"].indexOf(c)]/(correctList.reduce((n1,n2)=>n1+n2)):0.0);
-                    return widget.viewPage||(hasVoted||(data[widget.id]["c"].indexOf(c)<5))?new MaterialButton(onPressed: () async{
+                    return widget.viewPage||((hasVoted&&settings[1]!="Never")||(data[widget.id]["c"].indexOf(c)<5||settings[1]=="Always"))?new MaterialButton(onPressed: () async{
                       if(multiSelect||c!=choice){
                         if(widget.viewPage){
                           PollViewState.canLeaveView = false;
@@ -1225,7 +1238,7 @@ class PollState extends State<Poll>{
       return new Container(color:!settings[0]?new Color.fromRGBO(250, 250, 250, 1.0):new Color.fromRGBO(32,33,36,1.0),child:returnedWidget);
     }else{
       returnedWidget = new Card(color:!settings[0]?new Color.fromRGBO(250, 250, 250, 1.0):new Color.fromRGBO(32,33,36,1.0),child:new Hero(tag:widget.id,child:new Material(type:MaterialType.transparency,child:returnedWidget)));
-      if(!(hasVoted||correctList.length<6)){
+      if(((!hasVoted||settings[1]=="Never")&&correctList.length>5)&&settings[1]!="Always"){
         returnedWidget = new AbsorbPointer(child:returnedWidget);
       }
       returnedWidget = new GestureDetector(onTap: (){
