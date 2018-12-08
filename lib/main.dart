@@ -1923,7 +1923,7 @@ class OpenPollPageState extends State<OpenPollPage>{
                             Scaffold.of(context).showSnackBar(new SnackBar(duration:new Duration(milliseconds:450),content:new Text("Poll not found")));
                           }else if(data[input]["p"]==1&&settings[2]&&(data[input]["u"]==null||data[input]["u"]!=userId)){
                             Scaffold.of(context).removeCurrentSnackBar();
-                            Scaffold.of(context).showSnackBar(new SnackBar(duration:new Duration(milliseconds:450),content:new Text("Poll is unsafe")));
+                            Scaffold.of(context).showSnackBar(new SnackBar(duration:new Duration(milliseconds:450),content:new Text("Unsafe Poll")));
                           }else{
                             String temp = input;
                             openController = new TextEditingController();
