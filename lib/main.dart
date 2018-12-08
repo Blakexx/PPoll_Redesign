@@ -7,10 +7,8 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
-import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:flutter/widgets.dart';
 import 'dart:collection';
-import 'package:flutter_circular_chart/flutter_circular_chart.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'key.dart';
 import 'package:flutter/rendering.dart';
@@ -88,7 +86,6 @@ String version = "2.0.0";
 bool displayedVersionMessage = false;
 
 bool displayedBannedMessage = false;
-
 
 void main() async{
   if(Platform.isAndroid){
