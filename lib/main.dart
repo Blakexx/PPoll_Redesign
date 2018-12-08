@@ -268,7 +268,7 @@ class AppState extends State<App>{
                       return;
                     }
                     List<dynamic> path = returned["path"].split("/");
-                    unLoadedPolls+=(path!=null&&path.length==2)&&(returned["data"]["b"][2]==1||currentUserLevel==1)&&index==0?1:0;
+                    unLoadedPolls+=(((path!=null&&path.length==2)&&(returned["data"]["b"][2]==1||currentUserLevel==1)&&index==0)&&(!settings[2]||(settings[2]&&returned["data"]["p"]==0))?1:0);
                     if(path!=null&&path.length==2&&returned["data"]["u"]==userId){
                       createdPolls.add(path[1]);
                       if(index==3){
@@ -562,6 +562,7 @@ class AppState extends State<App>{
                                             items: ["Always","After Vote","Never"].map((key)=>new DropdownMenuItem<String>(value: key, child: new Text("$key"))).toList(),
                                             onChanged: (s){
                                               setState((){settings[1] = s;});
+                                              settingsData.writeData(settings);
                                             },
                                             value: settings[1]
                                           )
@@ -1920,7 +1921,7 @@ class OpenPollPageState extends State<OpenPollPage>{
                           }else if(data[input]==null){
                             Scaffold.of(context).removeCurrentSnackBar();
                             Scaffold.of(context).showSnackBar(new SnackBar(duration:new Duration(milliseconds:450),content:new Text("Poll not found")));
-                          }else if(data[input]["p"]==1&&settings[2]){
+                          }else if(data[input]["p"]==1&&settings[2]&&(data[input]["u"]==null||data[input]["u"]!=userId)){
                             Scaffold.of(context).removeCurrentSnackBar();
                             Scaffold.of(context).showSnackBar(new SnackBar(duration:new Duration(milliseconds:450),content:new Text("Poll is unsafe")));
                           }else{
