@@ -49,7 +49,7 @@ dynamic actualUserLevel;
 
 dynamic currentUserLevel;
 
-int numSettings = 2;
+int numSettings = 3;
 
 String userId;
 
@@ -539,7 +539,7 @@ class AppState extends State<App>{
                                         if(i==1){
                                           return;
                                         }
-                                        bool b = !settings[0];
+                                        bool b = !settings[i];
                                         if(i==0){
                                           //indicatorColor = !b?new Color.fromRGBO(33,150,243,1.0):new Color.fromRGBO(100,255,218,1.0);
                                           textColor = !b?new Color.fromRGBO(34,34, 34,1.0):new Color.fromRGBO(238,238,238,1.0);
@@ -548,8 +548,8 @@ class AppState extends State<App>{
                                         setState((){settings[i]=b;});
                                         settingsData.writeData(settings);
                                       },child:new Container(color:settings[0]?Colors.black:new Color.fromRGBO(253,253,253,1.0),child:new ListTile(
-                                        leading: new Icon(i==0?Icons.brightness_2:i==1?Icons.more_vert:Icons.settings),
-                                        title: new Text(i==0?"Dark mode":i==1?"Expand large polls":"Placeholder"),
+                                        leading: new Icon(i==0?Icons.brightness_2:i==1?Icons.more_vert:i==2?Icons.visibility:Icons.settings),
+                                        title: new Text(i==0?"Dark mode":i==1?"Expand large polls":i==2?"Safe mode":"Placeholder"),
                                         trailing: i!=1?new Switch(value:settings[i],onChanged:(b){
                                           if(i==0){
                                             textColor = !b?new Color.fromRGBO(34,34, 34,1.0):new Color.fromRGBO(238,238,238,1.0);
@@ -730,7 +730,7 @@ class ViewState extends State<View>{
 
   void sortMap(){
     Map<String,dynamic> tempMap = new Map<String,dynamic>()..addAll(data)..removeWhere((key,value){
-      return (widget.onlyCreated&&!createdPolls.contains(key))||(!(key.toUpperCase().contains(search.toUpperCase())||((value as Map<String,dynamic>)["q"] as String).toUpperCase().contains(search.toUpperCase()))||((!widget.onlyCreated&&currentUserLevel!=1)&&((((value as Map<String,dynamic>)["b"])[2]==0)||((value as Map<String,dynamic>)["b"])[0]==1||((value as Map<String,dynamic>)["b"])[1]==1)));
+      return ((widget.onlyCreated&&!createdPolls.contains(key))||(!(key.toUpperCase().contains(search.toUpperCase())||((value as Map<String,dynamic>)["q"] as String).toUpperCase().contains(search.toUpperCase()))||((!widget.onlyCreated&&currentUserLevel!=1)&&((((value as Map<String,dynamic>)["b"])[2]==0)||((value as Map<String,dynamic>)["b"])[0]==1||((value as Map<String,dynamic>)["b"])[1]==1))))||(settings[2]&&data[key]["p"]!=null&&data[key]["p"]==1&&!widget.onlyCreated);
     });
     sortedMap = SplayTreeMap.from(tempMap,(o1,o2){
       int voters1 = tempMap[o1]["a"].reduce((n1,n2)=>n1+n2);
@@ -1920,6 +1920,9 @@ class OpenPollPageState extends State<OpenPollPage>{
                           }else if(data[input]==null){
                             Scaffold.of(context).removeCurrentSnackBar();
                             Scaffold.of(context).showSnackBar(new SnackBar(duration:new Duration(milliseconds:450),content:new Text("Poll not found")));
+                          }else if(data[input]["p"]==1&&settings[2]){
+                            Scaffold.of(context).removeCurrentSnackBar();
+                            Scaffold.of(context).showSnackBar(new SnackBar(duration:new Duration(milliseconds:450),content:new Text("Poll is unsafe")));
                           }else{
                             String temp = input;
                             openController = new TextEditingController();

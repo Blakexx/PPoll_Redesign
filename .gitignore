@@ -11,3 +11,5 @@ build/
 lib/key.dart
 
 functions/key.js
+
+functions/profanity.js
