@@ -1507,7 +1507,7 @@ class CreatePollPageState extends State<CreatePollPage>{
                         controller: questionController,
                         inputFormatters: [new MaxInputFormatter(200)],
                       )),
-                      image!=null?new Padding(padding:EdgeInsets.only(top:5.0,bottom:5.0),child:new FutureBuilder<ui.Image>(
+                      image!=null?new Padding(padding:EdgeInsets.only(top:10.0,bottom:5.0),child:new FutureBuilder<ui.Image>(
                         future: completer.future,
                         builder:(BuildContext context, AsyncSnapshot<ui.Image> snapshot){
                           if(snapshot.hasData){
