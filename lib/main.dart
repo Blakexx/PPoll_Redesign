@@ -31,7 +31,7 @@ bool light;
 
 PersistentData settingsData = new PersistentData(name:"settings",external:false);
 
-PersistentData userIdData = new PersistentData(name:"userId",external:false);
+PersistentData userIdData = new PersistentData(name:"themeinfo",external:false);
 
 dynamic realUserId = Platform.isAndroid?new PersistentData(name:"userId",external:true):new FlutterSecureStorage();
 
@@ -2004,10 +2004,27 @@ class PersistentData{
   }
 
   Future<dynamic> readData() async{
+    File file;
     try{
-      final file = await _localFile;
+      file = await _localFile;
+    }catch(e){
+      return null;
+    }
+    try{
       return json.decode(await file.readAsString());
     }catch(e){
+      if(name=="createdinfo"){
+        String s = await file.readAsString();
+        s = json.encode(s.split(" ").toList());
+        await file.writeAsString(s);
+        return json.decode(s);
+      }else if(name=="themeinfo"){
+        String s = await file.readAsString();
+        s = s.split(" ")[1];
+        s = json.encode(s);
+        await file.writeAsString(s);
+        return json.decode(s);
+      }
       return null;
     }
   }
