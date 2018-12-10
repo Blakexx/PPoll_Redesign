@@ -33,7 +33,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "platypus.ppoll"
+        applicationId "land.platypus.ppoll"
         minSdkVersion 18
         targetSdkVersion 27
         versionCode flutterVersionCode.toInteger()
