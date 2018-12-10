@@ -87,6 +87,12 @@ bool displayedVersionMessage = false;
 
 bool displayedBannedMessage = false;
 
+Map<int,List> tutorialMessages = {
+  1:[false,"This is the create page. You can enter in all of your poll options and click submit to create a new poll. Then, the app will generare a 4 character code which you can use to open or share the poll. If you make the poll publicly searchable it will appear on the Browse page."],
+  2:[false,"This is the vote page. You can use the four character codes found under the question of every poll the open them here."],
+  4:[false,"This is the settings page. You can customize your app here. In dark mode, the app switches to a darker theme which prevents eye strain. In safe mode, the app attempts to filter polls with questionable content out of the browse page."]
+};
+
 void main() async{
   if(Platform.isAndroid){
     int count = 0;
@@ -139,6 +145,9 @@ void main() async{
   if(Platform.isIOS){
     userId = await realUserId.read(key: "PPollUserID");
     if(userId==null){
+      for(int i in tutorialMessages.keys){
+        tutorialMessages[i][0] = true;
+      }
       userId = await userIdData.readData();
       if(userId!=null){
         await realUserId.write(key: "PPollUserID", value: userId);
@@ -147,6 +156,9 @@ void main() async{
   }else{
     userId = await realUserId.readData();
     if(userId==null){
+      for(int i in tutorialMessages.keys){
+        tutorialMessages[i][0] = true;
+      }
       userId = await userIdData.readData();
       if(userId!=null){
         await realUserId.writeData(userId);
@@ -470,6 +482,10 @@ class AppState extends State<App>{
                   ),
                   body: new Builder(
                     builder: (context){
+                      if(tutorialMessages[index]!=null && tutorialMessages[index][0]){
+                        tutorialMessages[index][0] = false;
+                        new Future.delayed(Duration.zero,()=>showDialog(context:context,builder:(context)=>new AlertDialog(actions: [new FlatButton(child: new Text("OK"),onPressed:(){Navigator.of(context).pop();})],title:new Text("Tutorial",style:new TextStyle(fontWeight:FontWeight.bold),textAlign: TextAlign.center),content:new Text(tutorialMessages[index][1]))));
+                      }
                       if(!displayedBannedMessage&&actualUserLevel==null&&!hasGotLevel){
                         hasGotLevel = true;
                         tryToGetId() async{
