@@ -1,4 +1,4 @@
-package land.platypus.ppollrevamp;
+package land.platypus.ppoll;
 
 import android.os.Bundle;
 import io.flutter.app.FlutterActivity;
