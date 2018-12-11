@@ -2013,6 +2013,9 @@ class PersistentData{
     try{
       return json.decode(await file.readAsString());
     }catch(e){
+      if(e is FileSystemException){
+        return null;
+      }
       if(name=="createdinfo"){
         String s = await file.readAsString();
         s = json.encode(s.split(" ").toList());

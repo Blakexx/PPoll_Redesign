@@ -25,7 +25,7 @@ dependencies:
   http:
   mime:
   photo_view:
-  connectivity:
+  connectivity: 0.3.2
   timeago:
   flutter_secure_storage:
   flutter_launcher_icons:
