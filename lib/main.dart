@@ -26,7 +26,7 @@ import 'package:flutter/gestures.dart';
 import 'package:share/share.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:collection/collection.dart';
-//
+
 bool light;
 
 PersistentData settingsData = new PersistentData(name:"settings",external:false);
