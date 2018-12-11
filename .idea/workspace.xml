@@ -4,7 +4,9 @@
     <option name="TOOL_WINDOW_CONFIGURED_FILTER" value="Show only selected application" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8a20a442-8abe-47f1-8bb0-a802a434ec9a" name="Default" comment="" />
+    <list default="true" id="8a20a442-8abe-47f1-8bb0-a802a434ec9a" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/ios/Runner.xcodeproj/project.pbxproj" afterPath="$PROJECT_DIR$/ios/Runner.xcodeproj/project.pbxproj" />
+    </list>
     <ignored path="$PROJECT_DIR$/.dart_tool/" />
     <ignored path="$PROJECT_DIR$/.idea/" />
     <ignored path="$PROJECT_DIR$/.pub/" />
@@ -200,6 +202,7 @@
     <property name="project.structure.proportion" value="0.0" />
     <property name="project.structure.side.proportion" value="0.0" />
     <property name="SearchEverywhereHistoryKey" value="&#9;FILE&#9;file:///Users/BlakeBottum/AndroidStudioProjects/PPoll_Redesign/pubspec.yaml" />
+    <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
