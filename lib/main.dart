@@ -90,7 +90,7 @@ bool displayedBannedMessage = false;
 Map<int,List> tutorialMessages = {
   1:[false,"This is the create page. You can enter in all of your poll options and click submit to create a new poll. Then, the app will generare a 4 character code which you can use to open or share the poll. If you make the poll publicly searchable it will appear on the Browse page."],
   2:[false,"This is the vote page. You can use the four character codes found under the question of every poll the open them here."],
-  4:[false,"This is the settings page. You can customize your app here. In dark mode, the app switches to a darker theme which prevents eye strain. In safe mode, the app attempts to filter polls with questionable content out of the browse page."]
+  4:[false,"This is the settings page. You can customize your app here. In dark mode, the app switches to a darker theme which prevents eye strain. In safe mode, the app attempts to filter polls with inappropriate content out of the browse page."]
 };
 
 void main() async{
