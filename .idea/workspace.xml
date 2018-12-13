@@ -24,8 +24,8 @@
       <file leaf-file-name="main.dart" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/lib/main.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="185">
-              <caret line="768" column="40" lean-forward="false" selection-start-line="768" selection-start-column="40" selection-end-line="768" selection-end-column="40" />
+            <state relative-caret-position="320">
+              <caret line="1432" column="78" lean-forward="false" selection-start-line="1432" selection-start-column="78" selection-end-line="1432" selection-end-column="78" />
               <folding>
                 <element signature="e#0#39#0" expanded="true" />
               </folding>
@@ -46,7 +46,7 @@
       <file leaf-file-name="build.gradle" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/android/app/build.gradle">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="15">
+            <state relative-caret-position="315">
               <caret line="21" column="0" lean-forward="false" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
               <folding />
             </state>
@@ -97,36 +97,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>json.encode(s)</find>
-      <find>||tr</find>
-      <find>widget.onlyCrea</find>
-      <find>question</find>
-      <find>[&quot;i&quot;]</find>
-      <find>lastRemoved</find>
-      <find>index=</find>
-      <find>ViewState</find>
-      <find>.value =</find>
-      <find>removedNotifier.add</find>
-      <find>removedNotif</find>
-      <find>removedNotifier.value</find>
-      <find>print(</find>
-      <find>showDialog</find>
-      <find>Icons.share</find>
-      <find>actualuserLevel==</find>
-      <find>actualuser</find>
-      <find>[&quot;u&quot;]==userId</find>
-      <find>if(s!=choice</find>
-      <find>correctList</find>
-      <find>sortMap</find>
-      <find>.</find>
-      <find>vote(</find>
-      <find>data[widget.id][&quot;c&quot;][data[widget.id]</find>
-      <find>choice =</find>
-      <find>data[widget.id][&quot;c&quot;][data[widget.id][&quot;i&quot;][userId]]</find>
-      <find>PollState</find>
-      <find>indexOf(choice</find>
       <find>new Circula</find>
       <find>.removeLis</find>
+      <find>PollViewState</find>
+      <find>delete</find>
+      <find>removedNotifier.value=</find>
+      <find>removedNotifier.value =</find>
+      <find>removedNotifier.value</find>
+      <find>Are you sure</find>
+      <find>.value.spl</find>
+      <find>print(&quot;Test</find>
+      <find>pr</find>
+      <find>[&quot;a&quot;]</find>
+      <find>.addList</find>
+      <find>print(&quot;Game</find>
+      <find>[&quot;i&quot;]</find>
+      <find>index</find>
+      <find>int index</find>
+      <find>dispose</find>
+      <find>[&quot;i</find>
+      <find>.addLis</find>
+      <find>.removeLi</find>
+      <find>print</find>
+      <find>new Linear</find>
+      <find>bottom:</find>
+      <find>new Text(widget</find>
+      <find>new LinearPR</find>
+      <find>new Text(widget.id</find>
+      <find>widget.id</find>
+      <find>showSnack</find>
+      <find>.pop</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -181,6 +181,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -234,10 +235,9 @@
         </subPane>
         <option name="show-excluded-files" value="false" />
       </pane>
-      <pane id="Scope" />
       <pane id="AndroidView" />
-      <pane id="Scratches" />
       <pane id="PackagesPane" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -395,8 +395,8 @@
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32992327" sideWeight="0.53576535" order="9" side_tool="true" content_ui="tabs" />
       <window_info id="Dart Analysis" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32992327" sideWeight="0.5" order="13" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32992327" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3286445" sideWeight="0.4620887" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32992327" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32992327" sideWeight="0.46423462" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="Flutter Outline" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3297568" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Logcat" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32992327" sideWeight="0.5" order="12" side_tool="false" content_ui="tabs" />
@@ -407,8 +407,8 @@
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Device File Explorer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="true" content_ui="tabs" />
       <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39897698" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Flutter Inspector" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -463,14 +463,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/pubspec.yaml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="435">
-          <caret line="29" column="30" lean-forward="false" selection-start-line="29" selection-start-column="30" selection-end-line="29" selection-end-column="30" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/lib/main.dart">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -740,7 +732,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/android/app/build.gradle">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="15">
+        <state relative-caret-position="315">
           <caret line="21" column="0" lean-forward="false" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
           <folding />
         </state>
@@ -754,10 +746,18 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$USER_HOME$/Documents/flutter/packages/flutter/lib/src/widgets/framework.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="165">
+          <caret line="3546" column="4" lean-forward="false" selection-start-line="3546" selection-start-column="4" selection-end-line="3546" selection-end-column="4" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/lib/main.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="185">
-          <caret line="768" column="40" lean-forward="false" selection-start-line="768" selection-start-column="40" selection-end-line="768" selection-end-column="40" />
+        <state relative-caret-position="320">
+          <caret line="1432" column="78" lean-forward="false" selection-start-line="1432" selection-start-column="78" selection-end-line="1432" selection-end-column="78" />
           <folding>
             <element signature="e#0#39#0" expanded="true" />
           </folding>

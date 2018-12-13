@@ -744,7 +744,7 @@ class ViewState extends State<View>{
     super.initState();
     sorting = widget.onlyCreated?"newest":"trending";
     onRemoved = (){
-      if(removedNotifier.value!=null&&data!=null){
+      if(removedNotifier.value!=null&&data!=null&&sortedMap.keys.contains(removedNotifier.value.split("/")[1])){
         setState((){
           sortedMap.remove(removedNotifier.value.split("/")[1]);
         });
@@ -1349,20 +1349,46 @@ class PollView extends StatefulWidget{
 class PollViewState extends State<PollView>{
   static bool canLeaveView = true;
   bool canDelete;
+  VoidCallback onDelete;
+  bool isDeleted = false;
   @override
   void initState(){
     super.initState();
     canDelete = currentUserLevel==1||data[widget.id]["u"]==userId||createdPolls.contains(widget.id);
     openedPoll=widget.id;
+    onDelete = (){
+      if(removedNotifier.value.split("/")[1]==widget.id){
+        setState((){
+          isDeleted = true;
+        });
+      }
+    };
+    removedNotifier.addListener(onDelete);
+  }
+  @override
+  void dispose(){
+    super.dispose();
+    removedNotifier.removeListener(onDelete);
   }
   @override
   Widget build(BuildContext context){
     if(!hasLoaded){
-      Navigator.of(context).pop();
+      new Future.delayed(Duration.zero,(){
+        Navigator.of(context).pop();
+      });
+    }
+    if(isDeleted&&!canDelete){
+      new Future.delayed(Duration.zero,(){
+        openedPoll = null;
+        Navigator.of(context).pop();
+      });
     }
     return new WillPopScope(onWillPop:(){
       if(!canLeaveView){
         return new Future(()=>false);
+      }
+      if(isDeleted){
+        return new Future(()=>true);
       }
       if(widget.state!=null){
         widget.state.lastChoice = null;
@@ -1390,7 +1416,7 @@ class PollViewState extends State<PollView>{
                                     builder: (context){
                                       return new AlertDialog(
                                           title:new Text("Are you sure?",style:new TextStyle(fontWeight:FontWeight.bold)),
-                                          content:new Text("You cannot undo this"),
+                                          content:new Text("Your poll will be permanently deleted."),
                                           actions: [
                                             new FlatButton(
                                                 child: new Text("No"),
@@ -1401,9 +1427,10 @@ class PollViewState extends State<PollView>{
                                             new FlatButton(
                                                 child: new Text("Yes"),
                                                 onPressed: () async{
-                                                  Navigator.of(context).pop();
-                                                  Navigator.of(context).pop();
                                                   await http.put(Uri.encodeFull(database+"/data/"+widget.id+".json?auth="+secretKey),body:"{}");
+                                                  openedPoll = null;
+                                                  Navigator.of(context).pop();
+                                                  Navigator.of(context).pop();
                                                 }
                                             )
                                           ]
@@ -1415,7 +1442,9 @@ class PollViewState extends State<PollView>{
                             new IconButton(
                                 icon: new Icon(Icons.share),
                                 onPressed: (){
-                                  Share.share("Vote on \""+data[widget.id]["q"]+"\" (Code: ${widget.id}) using PPoll. Download now at https://platypuslabs.llc/downloadppoll");
+                                  if(!isDeleted){
+                                    Share.share("Vote on \""+data[widget.id]["q"]+"\" (Code: ${widget.id}) using PPoll. Download now at https://platypuslabs.llc/downloadppoll");
+                                  }
                                 }
                             )
                           ],
@@ -1424,10 +1453,11 @@ class PollViewState extends State<PollView>{
                           floating: true,
                           centerTitle: false,
                           expandedHeight: 30.0,
-                          title: new Text(widget.id)
+                          title: new Text(!isDeleted?widget.id:"Poll removed"),
+                          bottom: isDeleted?new PreferredSize(preferredSize: new Size(double.infinity,3.0),child: new Container(height:3.0,child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor)))):new PreferredSize(preferredSize:new Size(0.0,0.0),child: new Container())
                       ),
                       new SliverList(
-                          delegate: new SliverChildBuilderDelegate((context,i)=>new Hero(tag:widget.id,child:new Material(child:widget.state!=null?new Poll(widget.id,true,widget.state.image,widget.state.height,widget.state.width):new Poll(widget.id,true))),childCount:1)
+                          delegate: new SliverChildBuilderDelegate((context,i)=>new Hero(tag:widget.id,child:!isDeleted?new Material(child:widget.state!=null?new Poll(widget.id,true,widget.state.image,widget.state.height,widget.state.width):new Poll(widget.id,true)):new Container()),childCount:1)
                       )
                     ]
                 ),
