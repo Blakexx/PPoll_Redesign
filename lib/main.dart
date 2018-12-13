@@ -1316,9 +1316,11 @@ class PollView extends StatefulWidget{
 
 class PollViewState extends State<PollView>{
   static bool canLeaveView = true;
+  bool canDelete;
   @override
   void initState(){
     super.initState();
+    canDelete = currentUserLevel==1||data[widget.id]["u"]==userId||createdPolls.contains(widget.id);
     openedPoll=widget.id;
   }
   @override
@@ -1347,7 +1349,7 @@ class PollViewState extends State<PollView>{
                     slivers: [
                       new SliverAppBar(
                           actions: [
-                            currentUserLevel==1||data[widget.id]["u"]==userId?new IconButton(
+                            canDelete?new IconButton(
                               icon:new Icon(Icons.delete),
                               onPressed:(){
                                 showDialog(

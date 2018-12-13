@@ -24,8 +24,8 @@
       <file leaf-file-name="main.dart" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/lib/main.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="185">
-              <caret line="1349" column="44" lean-forward="false" selection-start-line="1349" selection-start-column="44" selection-end-line="1349" selection-end-column="44" />
+            <state relative-caret-position="76">
+              <caret line="1323" column="25" lean-forward="false" selection-start-line="1323" selection-start-column="25" selection-end-line="1323" selection-end-column="25" />
               <folding>
                 <element signature="e#0#39#0" expanded="true" />
               </folding>
@@ -97,7 +97,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>persistentD</find>
       <find>Persist</find>
       <find>&quot;[&quot;</find>
       <find>Persis</find>
@@ -127,6 +126,7 @@
       <find>sortMap</find>
       <find>actualuserLevel==</find>
       <find>actualuser</find>
+      <find>[&quot;u&quot;]==userId</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -756,8 +756,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/main.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="185">
-          <caret line="1349" column="44" lean-forward="false" selection-start-line="1349" selection-start-column="44" selection-end-line="1349" selection-end-column="44" />
+        <state relative-caret-position="76">
+          <caret line="1323" column="25" lean-forward="false" selection-start-line="1323" selection-start-column="25" selection-end-line="1323" selection-end-column="25" />
           <folding>
             <element signature="e#0#39#0" expanded="true" />
           </folding>
