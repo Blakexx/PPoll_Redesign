@@ -24,8 +24,8 @@
       <file leaf-file-name="main.dart" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/lib/main.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="201">
-              <caret line="1367" column="39" lean-forward="false" selection-start-line="1367" selection-start-column="39" selection-end-line="1367" selection-end-column="39" />
+            <state relative-caret-position="185">
+              <caret line="768" column="40" lean-forward="false" selection-start-line="768" selection-start-column="40" selection-end-line="768" selection-end-column="40" />
               <folding>
                 <element signature="e#0#39#0" expanded="true" />
               </folding>
@@ -97,9 +97,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>==null</find>
-      <find>==&quot;theme</find>
-      <find>print</find>
       <find>json.encode(s)</find>
       <find>||tr</find>
       <find>widget.onlyCrea</find>
@@ -113,7 +110,6 @@
       <find>removedNotif</find>
       <find>removedNotifier.value</find>
       <find>print(</find>
-      <find>PollState</find>
       <find>showDialog</find>
       <find>Icons.share</find>
       <find>actualuserLevel==</find>
@@ -127,6 +123,10 @@
       <find>data[widget.id][&quot;c&quot;][data[widget.id]</find>
       <find>choice =</find>
       <find>data[widget.id][&quot;c&quot;][data[widget.id][&quot;i&quot;][userId]]</find>
+      <find>PollState</find>
+      <find>indexOf(choice</find>
+      <find>new Circula</find>
+      <find>.removeLis</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -756,8 +756,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/main.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="201">
-          <caret line="1367" column="39" lean-forward="false" selection-start-line="1367" selection-start-column="39" selection-end-line="1367" selection-end-column="39" />
+        <state relative-caret-position="185">
+          <caret line="768" column="40" lean-forward="false" selection-start-line="768" selection-start-column="40" selection-end-line="768" selection-end-column="40" />
           <folding>
             <element signature="e#0#39#0" expanded="true" />
           </folding>

@@ -1220,7 +1220,7 @@ class PollState extends State<Poll>{
                     },padding:EdgeInsets.only(top:12.0,bottom:12.0),child:new Column(children: [
                       new Row(
                           children: [
-                            !multiSelect?pids.length>0&&choice==c?new Container(width:2*kRadialReactionRadius+8.0,height:kRadialReactionRadius,child:new Center(child:new Container(height:16.0,width:16.0,child: new CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor),strokeWidth: 2.0)))):new Container(height:kRadialReactionRadius,child:new Radio(
+                            !multiSelect?(pids.length>0)&&((choice==c)||(lastChoice==c&&choice==null))?new Container(width:2*kRadialReactionRadius+8.0,height:kRadialReactionRadius,child:new Center(child:new Container(height:16.0,width:16.0,child: new CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor),strokeWidth: 2.0)))):new Container(height:kRadialReactionRadius,child:new Radio(
                               activeColor: indicatorColor,
                               value: c,
                               groupValue: choice,
