@@ -780,7 +780,7 @@ class ViewState extends State<View>{
         for(String s in tempMap[o1]["i"].keys){
           if(tempMap[o1]["b"][0]==1&&!tempMap[o1]["i"][s].contains(-1)){
             voters1+=tempMap[o1]["i"][s].length;
-          }else if(tempMap[o1]["b"][1]==0){
+          }else if(tempMap[o1]["b"][1]==0&&tempMap[o1]["i"][s]!=-1){
             voters1++;
           }
         }
@@ -789,7 +789,7 @@ class ViewState extends State<View>{
         for(String s in tempMap[o2]["i"].keys){
           if(tempMap[o2]["b"][0]==1&&!tempMap[o2]["i"][s].contains(-1)){
             voters2+=tempMap[o2]["i"][s].length;
-          }else if(tempMap[o2]["b"][1]==0){
+          }else if(tempMap[o2]["b"][1]==0&&tempMap[o2]["i"][s]!=-1){
             voters2++;
           }
         }
@@ -1021,7 +1021,7 @@ class PollState extends State<Poll>{
 
   bool multiSelect;
 
-  bool get hasVoted => data[widget.id]["i"]!=null&&data[widget.id]["i"][userId]!=null&&(pids.length==0||lastChoice!=null);
+  bool get hasVoted => data[widget.id]["i"]!=null&&data[widget.id]["i"][userId]!=null&&(pids.length==0||lastChoice!=null||data[widget.id]["i"][userId]==-1);
 
   @override
   void initState(){
@@ -1031,7 +1031,7 @@ class PollState extends State<Poll>{
       if(multiSelect&&data[widget.id]["i"]!=null&&data[widget.id]["i"][userId]!=null&&data[widget.id]["i"][userId].contains(-1)){
         choice = new Set.from([]);
       }else{
-        choice = !multiSelect?data[widget.id]["c"][data[widget.id]["i"][userId]]:new Set.from(data[widget.id]["i"][userId]);
+        choice = !multiSelect?data[widget.id]["i"][userId]!=-1?data[widget.id]["c"][data[widget.id]["i"][userId]]:null:new Set.from(data[widget.id]["i"][userId]);
       }
     }else if(multiSelect){
       choice = new Set.from([]);
@@ -1122,8 +1122,8 @@ class PollState extends State<Poll>{
   Widget build(BuildContext context){
     if(pids.length==0&&hasVoted&&(!multiSelect?(data[widget.id]["c"].indexOf(choice)!=data[widget.id]["i"][userId]):(!IterableEquality().equals(choice.toList(),data[widget.id]["i"][userId])))){
       if(!multiSelect){
-        lastChoice = choice;
-        choice = data[widget.id]["c"][data[widget.id]["i"][userId]];
+        lastChoice = data[widget.id]["i"][userId]!=-1?choice:null;
+        choice = data[widget.id]["i"][userId]!=-1?data[widget.id]["c"][data[widget.id]["i"][userId]]:null;
       }else{
         lastChoice = choice;
         choice = new Set.from(data[widget.id]["i"][userId]);
@@ -1140,7 +1140,9 @@ class PollState extends State<Poll>{
             correctList[i]++;
           });
         }else if(!multiSelect){
-          correctList[data[widget.id]["i"][s]]++;
+          if(data[widget.id]["i"][s]!=-1){
+            correctList[data[widget.id]["i"][s]]++;
+          }
         }
       }
     }
@@ -1199,6 +1201,21 @@ class PollState extends State<Poll>{
                           });
                         }
                         waitForVote();
+                      }else if(!multiSelect&&c==choice&&pids.length==0){
+                        if(widget.viewPage){
+                          PollViewState.canLeaveView = false;
+                        }
+                        String pid;
+                        do{
+                          pid = "";
+                          Random r = new Random();
+                          List<String> nums = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
+                          for(int i = 0;i<8;i++){
+                            pid+=(r.nextInt(2)==0?nums[r.nextInt(36)]:nums[r.nextInt(36)].toLowerCase());
+                          }
+                        }while(pids.contains(pid));
+                        pids.add(pid);
+                        vote(null,context,pid);
                       }
                     },padding:EdgeInsets.only(top:12.0,bottom:12.0),child:new Column(children: [
                       new Row(
@@ -1232,6 +1249,21 @@ class PollState extends State<Poll>{
                                     });
                                   }
                                   waitForVote();
+                                }else if(s==choice&&pids.length==0){
+                                  if(widget.viewPage){
+                                    PollViewState.canLeaveView = false;
+                                  }
+                                  String pid;
+                                  do{
+                                    pid = "";
+                                    Random r = new Random();
+                                    List<String> nums = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
+                                    for(int i = 0;i<8;i++){
+                                      pid+=(r.nextInt(2)==0?nums[r.nextInt(36)]:nums[r.nextInt(36)].toLowerCase());
+                                    }
+                                  }while(pids.contains(pid));
+                                  pids.add(pid);
+                                  vote(null,context,pid);
                                 }
                               },
                             )):new Container(height:18.0,child:new Checkbox(
@@ -1334,7 +1366,7 @@ class PollViewState extends State<PollView>{
       }
       if(widget.state!=null){
         widget.state.lastChoice = null;
-        widget.state.choice = widget.state.multiSelect?(data[widget.id]["i"]!=null&&data[widget.id]["i"][userId]!=null?new Set.from(data[widget.id]["i"][userId]):new Set.from([])):(data[widget.id]["i"]!=null&&(data[widget.id]["i"][userId]!=null)?data[widget.id]["c"][data[widget.id]["i"][userId]]:null);
+        widget.state.choice = widget.state.multiSelect?(data[widget.id]["i"]!=null&&data[widget.id]["i"][userId]!=null?new Set.from(data[widget.id]["i"][userId]):new Set.from([])):(data[widget.id]["i"]!=null&&(data[widget.id]["i"][userId]!=null)?data[widget.id]["i"][userId]!=-1?data[widget.id]["c"][data[widget.id]["i"][userId]]:null:null);
       }
       return new Future((){
         openedPoll=null;
