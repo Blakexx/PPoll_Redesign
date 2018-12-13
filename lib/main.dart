@@ -87,6 +87,8 @@ bool displayedVersionMessage = false;
 
 bool displayedBannedMessage = false;
 
+ValueNotifier<String> removedNotifier = new ValueNotifier<String>(null);
+
 Map<int,List> tutorialMessages = {
   1:[false,"This is the create page. You can enter in all of your poll options and click submit to create a new poll. Then, the app will generare a 4 character code which you can use to open or share the poll. If you make the poll publicly searchable it will appear on the Browse page."],
   2:[false,"This is the vote page. You can use the four character codes found under the question of every poll the open them here."],
@@ -277,11 +279,13 @@ class AppState extends State<App>{
                       return;
                     }
                     List<dynamic> path = returned["path"].split("/");
-                    unLoadedPolls+=(((path!=null&&path.length==2)&&(returned["data"]["b"][2]==1||currentUserLevel==1)&&index==0)&&(!settings[2]||(settings[2]&&returned["data"]["p"]==0))?1:0);
-                    if(path!=null&&path.length==2&&returned["data"]["u"]==userId){
-                      createdPolls.add(path[1]);
-                      if(index==3){
-                        unLoadedPolls++;
+                    if(returned["data"]!=null){
+                      unLoadedPolls+=(((path!=null&&path.length==2)&&(returned["data"]["b"][2]==1||currentUserLevel==1)&&index==0)&&(!settings[2]||(settings[2]&&returned["data"]["p"]==0))?1:0);
+                      if(path!=null&&path.length==2&&returned["data"]["u"]==userId){
+                        createdPolls.add(path[1]);
+                        if(index==3){
+                          unLoadedPolls++;
+                        }
                       }
                     }
                     dynamic finalPath = path[path.length-1];
@@ -308,6 +312,9 @@ class AppState extends State<App>{
                           int i = int.parse(finalPath);
                           if(returned["data"]==null){
                             temp.remove(i);
+                            if(path!=null&&path.length==2){
+                              removedNotifier.value = returned["path"];
+                            }
                           }else{
                             if(temp==null){
                               before[path[path.length-2]] = {};
@@ -318,6 +325,9 @@ class AppState extends State<App>{
                         }catch(e){
                           if(returned["data"]==null){
                             temp.remove(finalPath);
+                            if(path!=null&&path.length==2){
+                              removedNotifier.value = returned["path"];
+                            }
                           }else{
                             if(temp==null){
                               before[path[path.length-2]] = {};
@@ -473,6 +483,7 @@ class AppState extends State<App>{
                         }
                         if(index!=i){
                           setState((){index = i;});
+                          removedNotifier.value = null;
                         }else if(((index==0&&i==0)||(index==3&&i==3))&&hasLoaded){
                           s.animateTo(0.0,curve: Curves.easeOut, duration: const Duration(milliseconds: 300));
                         }else if(index==1){
@@ -726,10 +737,19 @@ class ViewState extends State<View>{
 
   bool lastHasLoaded = hasLoaded;
 
+  VoidCallback onRemoved;
+
   @override
   void initState(){
     super.initState();
     sorting = widget.onlyCreated?"newest":"trending";
+    onRemoved = (){
+      if(removedNotifier.value!=null&&data!=null){
+        setState((){
+          sortedMap.remove(removedNotifier.value.split("/")[1]);
+        });
+      }
+    };
     c.addListener((){
       if(shouldSearchTimer!=null){
         shouldSearchTimer.cancel();
@@ -740,6 +760,13 @@ class ViewState extends State<View>{
         sortMap();
       });
     });
+    removedNotifier.addListener(onRemoved);
+  }
+
+  @override
+  void dispose(){
+    super.dispose();
+    removedNotifier.removeListener(onRemoved);
   }
 
   void sortMap(){
@@ -1101,6 +1128,9 @@ class PollState extends State<Poll>{
         lastChoice = choice;
         choice = new Set.from(data[widget.id]["i"][userId]);
       }
+    }else if(pids.length==0&&!hasVoted&&choice!=null){
+      lastChoice = null;
+      choice = null;
     }
     List<int> correctList = new List.from(data[widget.id]["a"]);
     if(data[widget.id]["i"]!=null){
@@ -1316,12 +1346,45 @@ class PollViewState extends State<PollView>{
                 new CustomScrollView(
                     slivers: [
                       new SliverAppBar(
-                          actions: [new IconButton(
-                            icon: new Icon(Icons.share),
-                            onPressed: (){
-                              Share.share("Vote on \""+data[widget.id]["q"]+"\" (Code: ${widget.id}) using PPoll. Download now at https://platypuslabs.llc/downloadppoll");
-                            }
-                          )],
+                          actions: [
+                            currentUserLevel==1||data[widget.id]["u"]==userId?new IconButton(
+                              icon:new Icon(Icons.delete),
+                              onPressed:(){
+                                showDialog(
+                                    context: context,
+                                    barrierDismissible: true,
+                                    builder: (context){
+                                      return new AlertDialog(
+                                          title:new Text("Are you sure?",style:new TextStyle(fontWeight:FontWeight.bold)),
+                                          content:new Text("You cannot undo this"),
+                                          actions: [
+                                            new FlatButton(
+                                                child: new Text("No"),
+                                                onPressed: (){
+                                                  Navigator.of(context).pop();
+                                                }
+                                            ),
+                                            new FlatButton(
+                                                child: new Text("Yes"),
+                                                onPressed: () async{
+                                                  Navigator.of(context).pop();
+                                                  Navigator.of(context).pop();
+                                                  await http.put(Uri.encodeFull(database+"/data/"+widget.id+".json?auth="+secretKey),body:"{}");
+                                                }
+                                            )
+                                          ]
+                                      );
+                                    }
+                                );
+                              }
+                            ):new Container(),
+                            new IconButton(
+                                icon: new Icon(Icons.share),
+                                onPressed: (){
+                                  Share.share("Vote on \""+data[widget.id]["q"]+"\" (Code: ${widget.id}) using PPoll. Download now at https://platypuslabs.llc/downloadppoll");
+                                }
+                            )
+                          ],
                           pinned: false,
                           backgroundColor:color,
                           floating: true,
