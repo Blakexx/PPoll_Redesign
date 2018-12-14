@@ -81,7 +81,7 @@ int unLoadedPolls = 0;
 
 bool isCorrectVersion;
 
-String version = "2.0.0";
+String version = "2.0.1";
 
 bool displayedVersionMessage = false;
 
