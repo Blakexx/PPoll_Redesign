@@ -574,7 +574,7 @@ class AppState extends State<App>{
                                       },child:new Container(color:settings[0]?Colors.black:new Color.fromRGBO(253,253,253,1.0),child:new ListTile(
                                         leading: new Icon(i==0?Icons.brightness_2:i==1?Icons.more_vert:i==2?Icons.visibility:Icons.settings),
                                         title: new Text(i==0?"Dark mode":i==1?"Expand large polls":i==2?"Safe mode":"Placeholder"),
-                                        trailing: i!=1?new Switch(value:settings[i],onChanged:(b){
+                                        trailing: i!=1?new Switch(value:settings[i],activeColor:indicatorColor,onChanged:(b){
                                           if(i==0){
                                             textColor = !b?new Color.fromRGBO(34,34, 34,1.0):new Color.fromRGBO(238,238,238,1.0);
                                             color = !b?new Color.fromRGBO(52,52,52,1.0):new Color.fromRGBO(22,22,22,1.0);
@@ -598,7 +598,7 @@ class AppState extends State<App>{
                                   },child:new Container(color:settings[0]?Colors.black:new Color.fromRGBO(253,253,253,1.0),child:new ListTile(
                                     leading: new Icon(Icons.stars),
                                     title: new Text("Admin"),
-                                    trailing: new Switch(value: currentUserLevel==1, onChanged: (b){
+                                    trailing: new Switch(value: currentUserLevel==1,activeColor:indicatorColor,onChanged: (b){
                                       setState((){currentUserLevel = b?1:0;});
                                     })
                                   ))):new Container()
@@ -1743,8 +1743,8 @@ class CreatePollPageState extends State<CreatePollPage>{
                   )
                 )),
                 new Container(height:5.0),
-                new MaterialButton(color:settings[0]?new Color.fromRGBO(32,33,36,1.0):new Color.fromRGBO(253,253,253,1.0),onPressed:(){setState((){multiSelect=!multiSelect;public=false;});},padding:EdgeInsets.zero,child:new ListTile(leading:new Text("Multiple selections",style:new TextStyle(color:textColor)),trailing:new Switch(value:multiSelect,onChanged:(b){setState((){multiSelect=b;public=false;});}))),
-                new MaterialButton(color:settings[0]?new Color.fromRGBO(32,33,36,1.0):new Color.fromRGBO(253,253,253,1.0),onPressed:(){setState((){public=!public;multiSelect=false;});},padding:EdgeInsets.zero,child:new ListTile(leading:new Text("Publicly searchable",style:new TextStyle(color:textColor)),trailing:new Switch(value:public,onChanged:(b){setState((){public=b;multiSelect=false;});}))),
+                new MaterialButton(color:settings[0]?new Color.fromRGBO(32,33,36,1.0):new Color.fromRGBO(253,253,253,1.0),onPressed:(){setState((){multiSelect=!multiSelect;public=false;});},padding:EdgeInsets.zero,child:new ListTile(leading:new Text("Multiple selections",style:new TextStyle(color:textColor)),trailing:new Switch(value:multiSelect,activeColor:indicatorColor,onChanged:(b){setState((){multiSelect=b;public=false;});}))),
+                new MaterialButton(color:settings[0]?new Color.fromRGBO(32,33,36,1.0):new Color.fromRGBO(253,253,253,1.0),onPressed:(){setState((){public=!public;multiSelect=false;});},padding:EdgeInsets.zero,child:new ListTile(leading:new Text("Publicly searchable",style:new TextStyle(color:textColor)),trailing:new Switch(value:public,activeColor:indicatorColor,onChanged:(b){setState((){public=b;multiSelect=false;});}))),
                 new MaterialButton(color:settings[0]?new Color.fromRGBO(32,33,36,1.0):new Color.fromRGBO(253,253,253,1.0),onPressed:() async{
                   if(image!=null&&width!=null){
                     Navigator.push(context,new PageRouteBuilder(opaque:false,pageBuilder: (context,a1,a2)=>new ImageView(child:new Center(child:new PhotoView(imageProvider:new Image.file(image).image,minScale: min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height),maxScale:4.0*min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height))),name:"Image")));
