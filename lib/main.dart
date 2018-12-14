@@ -1136,7 +1136,7 @@ class PollState extends State<Poll>{
         lastChoice = choice;
         choice = new Set.from(data[widget.id]["i"][userId]);
       }
-    }else if(pids.length==0&&!hasVoted&&choice!=null){
+    }else if(!multiSelect&&pids.length==0&&!hasVoted&&choice!=null){
       lastChoice = null;
       choice = null;
     }
@@ -1257,7 +1257,7 @@ class PollState extends State<Poll>{
                                     });
                                   }
                                   waitForVote();
-                                }else if(s==choice&&pids.length==0){
+                                }else if(!multiSelect&&s==choice&&pids.length==0){
                                   if(widget.viewPage){
                                     PollViewState.canLeaveView = false;
                                   }
