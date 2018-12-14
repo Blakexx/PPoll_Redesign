@@ -77,7 +77,7 @@ String openedPoll;
 
 Color indicatorColor;
 
-int unLoadedPolls = 0;
+List<String> unLoadedPolls = new List<String>();
 
 bool isCorrectVersion;
 
@@ -280,11 +280,13 @@ class AppState extends State<App>{
                     }
                     List<dynamic> path = returned["path"].split("/");
                     if(returned["data"]!=null){
-                      unLoadedPolls+=(((path!=null&&path.length==2)&&(returned["data"]["b"][2]==1||currentUserLevel==1)&&index==0)&&(!settings[2]||(settings[2]&&returned["data"]["p"]==0))?1:0);
-                      if(path!=null&&path.length==2&&returned["data"]["u"]==userId){
+                      if(((path!=null&&path.length==2)&&(returned["data"]["b"][2]==1||currentUserLevel==1)&&index==0)&&(!settings[2]||(settings[2]&&returned["data"]["p"]==0))){
+                        unLoadedPolls.add(path[1]);
+                      }
+                      if(path!=null&&path.length==2&&returned["data"]!=null&&returned["data"]["u"]==userId){
                         createdPolls.add(path[1]);
                         if(index==3){
-                          unLoadedPolls++;
+                          unLoadedPolls.add(path[1]);
                         }
                       }
                     }
@@ -313,7 +315,10 @@ class AppState extends State<App>{
                           if(returned["data"]==null){
                             temp.remove(i);
                             if(path!=null&&path.length==2){
-                              removedNotifier.value = returned["path"];
+                              if(index==0||(index==3&&createdPolls.contains(path[1]))){
+                                unLoadedPolls.remove(path[1]);
+                              }
+                              removedNotifier.value = path[1];
                             }
                           }else{
                             if(temp==null){
@@ -326,7 +331,10 @@ class AppState extends State<App>{
                           if(returned["data"]==null){
                             temp.remove(finalPath);
                             if(path!=null&&path.length==2){
-                              removedNotifier.value = returned["path"];
+                              if(index==0||(index==3&&createdPolls.contains(path[1]))){
+                                unLoadedPolls.remove(path[1]);
+                              }
+                              removedNotifier.value = path[1];
                             }
                           }else{
                             if(temp==null){
@@ -477,7 +485,7 @@ class AppState extends State<App>{
                         ),
                       ],
                       onTap:(i){
-                        unLoadedPolls = 0;
+                        unLoadedPolls = new List<String>();
                         if(loadingData){
                           return;
                         }
@@ -744,9 +752,9 @@ class ViewState extends State<View>{
     super.initState();
     sorting = widget.onlyCreated?"newest":"trending";
     onRemoved = (){
-      if(removedNotifier.value!=null&&data!=null&&sortedMap.keys.contains(removedNotifier.value.split("/")[1])){
+      if(removedNotifier.value!=null&&data!=null&&sortedMap.keys.contains(removedNotifier.value)){
         setState((){
-          sortedMap.remove(removedNotifier.value.split("/")[1]);
+          sortedMap.remove(removedNotifier.value);
         });
       }
     };
@@ -876,10 +884,10 @@ class ViewState extends State<View>{
       );
     }else if(sortedMap==null){
       sortMap();
-    }else if(!lastHasLoaded&&unLoadedPolls>0){
+    }else if(!lastHasLoaded&&unLoadedPolls.length>0){
       setState((){
         sortMap();
-        unLoadedPolls=0;
+        unLoadedPolls=new List<String>();
       });
     }
     lastHasLoaded = true;
@@ -965,17 +973,17 @@ class ViewState extends State<View>{
                 ]
               ),
               new SliverStickyHeader(
-                header:unLoadedPolls!=0?!loadingNewPolls?new GestureDetector(onTap:() async{
+                header:unLoadedPolls.length>0?!loadingNewPolls?new GestureDetector(onTap:() async{
                   await s.animateTo(0.0,curve: Curves.easeOut, duration: const Duration(milliseconds: 300));
                   setState((){loadingNewPolls = true;});
                   new Timer(new Duration(milliseconds:350),(){
                     setState((){
                       loadingNewPolls = false;
                       sortMap();
-                      unLoadedPolls=0;
+                      unLoadedPolls=new List<String>();
                     });
                   });
-                },child:new Container(height:30.0,color:indicatorColor,child:new Row(mainAxisAlignment:MainAxisAlignment.center,children:[new Text("Show $unLoadedPolls new Poll${unLoadedPolls==1?"":"s"} ",style:new TextStyle(fontSize:12.5,color:Colors.white)),new Icon(Icons.refresh,size:15.0,color:Colors.white)]))):new Container(height:3.0,child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor))):new Container(height:0.0,width:0.0),
+                },child:new Container(height:30.0,color:indicatorColor,child:new Row(mainAxisAlignment:MainAxisAlignment.center,children:[new Text("Show ${unLoadedPolls.length} new Poll${unLoadedPolls.length==1?"":"s"} ",style:new TextStyle(fontSize:12.5,color:Colors.white)),new Icon(Icons.refresh,size:15.0,color:Colors.white)]))):new Container(height:3.0,child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor))):new Container(height:0.0,width:0.0),
                 sliver:new SliverPadding(padding: new EdgeInsets.only(right:5.0,left:5.0,top:5.0),sliver:sortedMap.keys.length>0||search==null||search.length==0?new SliverStaggeredGrid.countBuilder(
                   crossAxisCount: (MediaQuery.of(context).size.width/500.0).ceil(),
                   mainAxisSpacing: 0.0,
@@ -986,7 +994,7 @@ class ViewState extends State<View>{
                 ):new SliverStickyHeader(
                     header:new Padding(padding:EdgeInsets.only(top:10.0),child:new Center(child:new Text("Your search did not match any polls",textAlign:TextAlign.center,style: new TextStyle(fontSize:15.0*min(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height)/320,color:textColor))))
                 ))
-              ),
+              )
             ],
             controller: s
         )),
@@ -1358,7 +1366,7 @@ class PollViewState extends State<PollView>{
     canDelete = currentUserLevel==1||data[widget.id]["u"]==userId||createdPolls.contains(widget.id);
     openedPoll=widget.id;
     onDelete = (){
-      if(removedNotifier.value.split("/")[1]==widget.id){
+      if(removedNotifier.value==widget.id){
         setState((){
           isDeleted = true;
         });
