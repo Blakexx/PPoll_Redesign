@@ -1351,6 +1351,7 @@ class PollViewState extends State<PollView>{
   bool canDelete;
   VoidCallback onDelete;
   bool isDeleted = false;
+  bool pressedDelete = false;
   @override
   void initState(){
     super.initState();
@@ -1377,7 +1378,7 @@ class PollViewState extends State<PollView>{
         Navigator.of(context).pop();
       });
     }
-    if(isDeleted&&!canDelete){
+    if(isDeleted&&!pressedDelete&&openedPoll==widget.id){
       new Future.delayed(Duration.zero,(){
         openedPoll = null;
         Navigator.of(context).pop();
@@ -1427,10 +1428,11 @@ class PollViewState extends State<PollView>{
                                             new FlatButton(
                                                 child: new Text("Yes"),
                                                 onPressed: () async{
-                                                  await http.put(Uri.encodeFull(database+"/data/"+widget.id+".json?auth="+secretKey),body:"{}");
+                                                  pressedDelete = true;
                                                   openedPoll = null;
                                                   Navigator.of(context).pop();
                                                   Navigator.of(context).pop();
+                                                  await http.put(Uri.encodeFull(database+"/data/"+widget.id+".json?auth="+secretKey),body:"{}");
                                                 }
                                             )
                                           ]

@@ -24,8 +24,8 @@
       <file leaf-file-name="main.dart" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/lib/main.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="320">
-              <caret line="1432" column="78" lean-forward="false" selection-start-line="1432" selection-start-column="78" selection-end-line="1432" selection-end-column="78" />
+            <state relative-caret-position="375">
+              <caret line="1430" column="71" lean-forward="false" selection-start-line="1430" selection-start-column="71" selection-end-line="1430" selection-end-column="71" />
               <folding>
                 <element signature="e#0#39#0" expanded="true" />
               </folding>
@@ -181,6 +181,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="AndroidView" />
       <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
@@ -235,7 +236,6 @@
         </subPane>
         <option name="show-excluded-files" value="false" />
       </pane>
-      <pane id="AndroidView" />
       <pane id="PackagesPane" />
       <pane id="Scope" />
     </panes>
@@ -756,8 +756,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/main.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="320">
-          <caret line="1432" column="78" lean-forward="false" selection-start-line="1432" selection-start-column="78" selection-end-line="1432" selection-end-column="78" />
+        <state relative-caret-position="375">
+          <caret line="1430" column="71" lean-forward="false" selection-start-line="1430" selection-start-column="71" selection-end-line="1430" selection-end-column="71" />
           <folding>
             <element signature="e#0#39#0" expanded="true" />
           </folding>
