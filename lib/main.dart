@@ -720,7 +720,7 @@ Timer shouldSearchTimer;
 
 class View extends StatefulWidget{
   final bool onlyCreated;
-  View(this.onlyCreated):super(key:new ObjectKey(onlyCreated));
+  View(this.onlyCreated):super(key:new ValueKey<bool>(onlyCreated));
   @override
   ViewState createState() => new ViewState();
 }
@@ -1012,7 +1012,7 @@ class Poll extends StatefulWidget{
   final bool viewPage;
   final Image image;
   final double height,width;
-  Poll(this.id,this.viewPage,[this.image,this.height,this.width]):super(key:new ObjectKey(id));
+  Poll(this.id,this.viewPage,[this.image,this.height,this.width]):super(key:new ValueKey<String>(id));
   @override
   PollState createState() => new PollState();
 }
@@ -1440,7 +1440,13 @@ class PollViewState extends State<PollView>{
                                                   openedPoll = null;
                                                   Navigator.of(context).pop();
                                                   Navigator.of(context).pop();
+                                                  if(data[widget.id]["b"].length==4&&data[widget.id]["b"][3]==1){
+                                                    await http.delete(Uri.encodeFull(imageLink+widget.id));
+                                                  }
                                                   await http.put(Uri.encodeFull(database+"/data/"+widget.id+".json?auth="+secretKey),body:"{}");
+                                                  createdPolls.remove(widget.id);
+                                                  createdPolls.removeWhere((s)=>data[s]==null);
+                                                  await http.put(Uri.encodeFull(database+"/users/"+userId+"/1.json?auth="+secretKey),body:json.encode(createdPolls));
                                                 }
                                             )
                                           ]
@@ -1691,7 +1697,7 @@ class CreatePollPageState extends State<CreatePollPage>{
                         },
                       )):new Container(),
                       new Column(
-                        children:choices.asMap().keys.map((i)=>new AnimatedOpacity(opacity:removedIndex==i?0.0:1.0,duration:new Duration(milliseconds:250),child:new Container(key:new ObjectKey(i),height:50.0,child:new Row(
+                        children:choices.asMap().keys.map((i)=>new AnimatedOpacity(opacity:removedIndex==i?0.0:1.0,duration:new Duration(milliseconds:250),child:new Container(key:new ValueKey<int>(i),height:50.0,child:new Row(
                             children: [
                               !removing?!multiSelect?new Radio(groupValue: null,value:i,onChanged:(i){}):new Checkbox(onChanged:(b){},value:false):new IconButton(icon:new Icon(Icons.delete),onPressed:(){
                                 if(choices.length>2&&removedIndex==-1){
