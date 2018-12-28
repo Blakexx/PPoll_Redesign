@@ -1444,9 +1444,12 @@ class PollViewState extends State<PollView>{
                                                     await http.delete(Uri.encodeFull(imageLink+widget.id));
                                                   }
                                                   await http.put(Uri.encodeFull(database+"/data/"+widget.id+".json?auth="+secretKey),body:"{}");
+                                                  int lengthBefore = createdPolls.length;
                                                   createdPolls.remove(widget.id);
                                                   createdPolls.removeWhere((s)=>data[s]==null);
-                                                  await http.put(Uri.encodeFull(database+"/users/"+userId+"/1.json?auth="+secretKey),body:json.encode(createdPolls));
+                                                  if(createdPolls.length!=lengthBefore){
+                                                    await http.put(Uri.encodeFull(database+"/users/"+userId+"/1.json?auth="+secretKey),body:json.encode(createdPolls));
+                                                  }
                                                 }
                                             )
                                           ]
