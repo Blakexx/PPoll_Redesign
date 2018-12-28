@@ -26,8 +26,8 @@
       <file leaf-file-name="main.dart" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/lib/main.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="228">
-              <caret line="1439" column="68" lean-forward="true" selection-start-line="1439" selection-start-column="68" selection-end-line="1439" selection-end-column="68" />
+            <state relative-caret-position="483">
+              <caret line="139" column="31" lean-forward="true" selection-start-line="139" selection-start-column="31" selection-end-line="139" selection-end-column="31" />
             </state>
           </provider>
         </entry>
@@ -258,7 +258,7 @@
       <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.53576535" side_tool="true" weight="0.32992327" />
       <window_info anchor="bottom" id="Flutter Performance" order="7" side_tool="true" />
       <window_info anchor="bottom" id="Dart Analysis" order="13" weight="0.32992327" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.32948717" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.32948717" />
       <window_info anchor="bottom" id="Version Control" order="7" />
       <window_info anchor="bottom" id="Terminal" order="7" weight="0.32948717" />
       <window_info anchor="right" id="Flutter Outline" order="3" weight="0.3297568" />
@@ -554,8 +554,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/main.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="228">
-          <caret line="1439" column="68" lean-forward="true" selection-start-line="1439" selection-start-column="68" selection-end-line="1439" selection-end-column="68" />
+        <state relative-caret-position="483">
+          <caret line="139" column="31" lean-forward="true" selection-start-line="139" selection-start-column="31" selection-end-line="139" selection-end-column="31" />
         </state>
       </provider>
     </entry>

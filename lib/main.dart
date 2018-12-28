@@ -137,7 +137,9 @@ void main() async{
     await settingsData.writeData(settings);
   }else if(settings.length<numSettings){
     settings.addAll(new List<dynamic>(numSettings-settings.length).map((n)=>false));
-    settings[1] = "After Vote";
+    if(settings[1] is bool){
+      settings[1] = "After Vote";
+    }
     await settingsData.writeData(settings);
   }
   //indicatorColor = !settings[0]?new Color.fromRGBO(33,150,243,1.0):new Color.fromRGBO(100,255,218,1.0);
