@@ -81,7 +81,7 @@ List<String> unLoadedPolls = new List<String>();
 
 bool isCorrectVersion;
 
-String version = "2.0.1";
+String version = "2.0.2";
 
 bool displayedVersionMessage = false;
 
@@ -251,6 +251,21 @@ class AppState extends State<App>{
         final result = await InternetAddress.lookup("google.com");
         if(result.isNotEmpty&&result[0].rawAddress.isNotEmpty){
           data = json.decode(utf8.decode((await http.get(Uri.encodeFull(database+"/data.json?auth="+secretKey))).bodyBytes));
+          for(String key in data.keys){
+            if(data[key]["i"]!=null){
+              for(String s in data[key]["i"].keys){
+                if(data[key]["b"][0]==1&&!data[key]["i"][s].contains(-1)){
+                  data[key]["i"][s].forEach((i){
+                    data[key]["a"][i]++;
+                  });
+                }else if(data[key]["b"][0]==0){
+                  if(data[key]["i"][s]!=-1){
+                    data[key]["a"][data[key]["i"][s]]++;
+                  }
+                }
+              }
+            }
+          }
           client.openUrl("GET", Uri.parse(database+"/data.json?auth="+secretKey)).then((req) async{
             req.headers.set("Accept", "text/event-stream");
             req.followRedirects = true;
@@ -343,6 +358,35 @@ class AppState extends State<App>{
                               before[path[path.length-2]] = {};
                               temp = before[path[path.length-2]];
                             }
+                            if(path.length==4&&path[2]=="i"){
+                              if(before["b"][0]==0){
+                                if(temp[finalPath]!=null&&temp[finalPath]!=-1){
+                                  before["a"][temp[finalPath]]--;
+                                }
+                                if(returned["data"]!=-1){
+                                  before["a"][returned["data"]]++;
+                                }
+                              }else{
+                                List<int> previous;
+                                if(temp[finalPath]!=null){
+                                  previous = new List.from(temp[finalPath]);
+                                  previous.removeWhere((i)=>i==-1);
+                                }else{
+                                  previous = new List<int>();
+                                }
+                                List<int> after = new List.from(returned["data"]);
+                                after.removeWhere((i)=>i==-1);
+                                if(after.length>previous.length){
+                                  (after..removeWhere((i)=>previous.contains(i))).forEach((i){
+                                    before["a"][i]++;
+                                  });
+                                }else if(after.length<previous.length){
+                                  (previous..removeWhere((i)=>after.contains(i))).forEach((i){
+                                    before["a"][i]--;
+                                  });
+                                }
+                              }
+                            }
                             temp[finalPath] = returned["data"];
                           }
                         }
@@ -366,6 +410,35 @@ class AppState extends State<App>{
                           if(temp==null){
                             before[path[path.length-2]] = {};
                             temp = before[path[path.length-2]];
+                          }
+                          if(path.length==4&&path[2]=="i"){
+                            if(before["b"][0]==0){
+                              if(temp[finalPath]!=null&&temp[finalPath]!=-1){
+                                before["a"][temp[finalPath]]--;
+                              }
+                              if(returned["data"]!=-1){
+                                before["a"][returned["data"]]++;
+                              }
+                            }else{
+                              List<int> previous;
+                              if(temp[finalPath]!=null){
+                                previous = new List.from(temp[finalPath]);
+                                previous.removeWhere((i)=>i==-1);
+                              }else{
+                                previous = new List<int>();
+                              }
+                              List<int> after = new List.from(returned["data"]);
+                              after.removeWhere((i)=>i==-1);
+                              if(after.length>previous.length){
+                                (after..removeWhere((i)=>previous.contains(i))).forEach((i){
+                                  before["a"][i]++;
+                                });
+                              }else if(after.length<previous.length){
+                                (previous..removeWhere((i)=>after.contains(i))).forEach((i){
+                                  before["a"][i]--;
+                                });
+                              }
+                            }
                           }
                           temp[finalPath] = returned["data"];
                         }
@@ -786,24 +859,6 @@ class ViewState extends State<View>{
     sortedMap = SplayTreeMap.from(tempMap,(o1,o2){
       int voters1 = tempMap[o1]["a"].reduce((n1,n2)=>n1+n2);
       int voters2 = tempMap[o2]["a"].reduce((n1,n2)=>n1+n2);
-      if(tempMap[o1]["i"]!=null){
-        for(String s in tempMap[o1]["i"].keys){
-          if(tempMap[o1]["b"][0]==1&&!tempMap[o1]["i"][s].contains(-1)){
-            voters1+=tempMap[o1]["i"][s].length;
-          }else if(tempMap[o1]["b"][1]==0&&tempMap[o1]["i"][s]!=-1){
-            voters1++;
-          }
-        }
-      }
-      if(tempMap[o2]["i"]!=null){
-        for(String s in tempMap[o2]["i"].keys){
-          if(tempMap[o2]["b"][0]==1&&!tempMap[o2]["i"][s].contains(-1)){
-            voters2+=tempMap[o2]["i"][s].length;
-          }else if(tempMap[o2]["b"][1]==0&&tempMap[o2]["i"][s]!=-1){
-            voters2++;
-          }
-        }
-      }
       if(!widget.onlyCreated){
         if(sorting=="trending"){
           double currentTime = (new DateTime.now().millisecondsSinceEpoch/1000.0);
@@ -1142,27 +1197,15 @@ class PollState extends State<Poll>{
       lastChoice = null;
       choice = null;
     }
-    List<int> correctList = new List.from(data[widget.id]["a"]);
-    if(data[widget.id]["i"]!=null){
-      for(String s in data[widget.id]["i"].keys){
-        if(multiSelect&&!data[widget.id]["i"][s].contains(-1)){
-          data[widget.id]["i"][s].forEach((i){
-            correctList[i]++;
-          });
-        }else if(!multiSelect){
-          if(data[widget.id]["i"][s]!=-1){
-            correctList[data[widget.id]["i"][s]]++;
-          }
-        }
-      }
-    }
+    List correctList = data[widget.id]["a"];
+    int totalVotes = correctList.reduce((n1,n2)=>n1+n2);
     Widget returnedWidget = new Column(
         children:[
           new Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               new Padding(padding:EdgeInsets.only(top:10.0,left:11.0,right:11.0),child:new Text(data[widget.id]["q"],style: new TextStyle(color:textColor,fontSize: 15.0,letterSpacing:.2,fontWeight: FontWeight.w600,fontFamily: "Futura"),maxLines: !widget.viewPage?2:100,overflow: TextOverflow.ellipsis)),
-              new Padding(padding:EdgeInsets.only(top:5.0,left:11.0,bottom:5.0),child:new Text(widget.id+(data[widget.id]["t"]!=null?" • ${timeago.format(new DateTime.fromMillisecondsSinceEpoch(data[widget.id]["t"]*1000))}":"")+" • ${correctList.reduce((n1,n2)=>n1+n2)} vote"+((correctList.reduce((n1,n2)=>n1+n2)==1)?"":"s"),style: new TextStyle(fontSize: 12.0,color:textColor.withOpacity(.8)))),
+              new Padding(padding:EdgeInsets.only(top:5.0,left:11.0,bottom:5.0),child:new Text(widget.id+(data[widget.id]["t"]!=null?" • ${timeago.format(new DateTime.fromMillisecondsSinceEpoch(data[widget.id]["t"]*1000))}":"")+" • $totalVotes vote"+((totalVotes==1)?"":"s"),style: new TextStyle(fontSize: 12.0,color:textColor.withOpacity(.8)))),
               image!=null?new Padding(padding:EdgeInsets.only(top:5.0,bottom:5.0),child:new FutureBuilder<ui.Image>(
                 future: completer.future,
                 builder: (BuildContext context, AsyncSnapshot<ui.Image> snapshot){
@@ -1185,7 +1228,7 @@ class PollState extends State<Poll>{
               new Column(
                   children: data[widget.id]["c"].map((c){
                     dynamic used = pids.length>0?lastChoice:choice;
-                    double percent = ((correctList.reduce((n1,n2)=>n1+n2))!=0?correctList[data[widget.id]["c"].indexOf(c)]/(correctList.reduce((n1,n2)=>n1+n2)):0.0);
+                    double percent = (totalVotes!=0?correctList[data[widget.id]["c"].indexOf(c)]/totalVotes:0.0);
                     return widget.viewPage||((hasVoted&&settings[1]!="Never")||(data[widget.id]["c"].indexOf(c)<5||settings[1]=="Always"))?new MaterialButton(onPressed: () async{
                       if(multiSelect||c!=choice){
                         if(widget.viewPage){
