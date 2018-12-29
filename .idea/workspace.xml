@@ -26,8 +26,11 @@
       <file leaf-file-name="main.dart" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/lib/main.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="483">
-              <caret line="139" column="31" lean-forward="true" selection-start-line="139" selection-start-column="31" selection-end-line="139" selection-end-column="31" />
+            <state relative-caret-position="405">
+              <caret line="27" column="44" lean-forward="true" selection-start-line="27" selection-start-column="44" selection-end-line="27" selection-end-column="44" />
+              <folding>
+                <element signature="e#0#39#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -36,7 +39,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>new Switch</find>
       <find>.value =</find>
       <find>removedNotifier.value</find>
       <find>unLoadedPolls</find>
@@ -66,6 +68,7 @@
       <find>ValueKey</find>
       <find>print</find>
       <find>.removeWhere</find>
+      <find>'</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -112,11 +115,6 @@
             <path>
               <item name="PPoll_Redesign" type="b2602c69:ProjectViewProjectNode" />
               <item name="PPoll_Redesign" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="PPoll_Redesign" type="b2602c69:ProjectViewProjectNode" />
-              <item name="PPoll_Redesign" type="462c0819:PsiDirectoryNode" />
-              <item name="ios" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="PPoll_Redesign" type="b2602c69:ProjectViewProjectNode" />
@@ -247,7 +245,6 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1440" height="877" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info anchor="bottom" id="Android Profiler" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -554,8 +551,11 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/main.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="483">
-          <caret line="139" column="31" lean-forward="true" selection-start-line="139" selection-start-column="31" selection-end-line="139" selection-end-column="31" />
+        <state relative-caret-position="405">
+          <caret line="27" column="44" lean-forward="true" selection-start-line="27" selection-start-column="44" selection-end-line="27" selection-end-column="44" />
+          <folding>
+            <element signature="e#0#39#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

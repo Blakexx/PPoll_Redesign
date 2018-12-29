@@ -15,7 +15,7 @@ def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
 flutterVersionCode = '6'
 
 def flutterVersionName = localProperties.getProperty('flutter.versionName')
-flutterVersionName = '2.0.1'
+flutterVersionName = '2.0.2'
 
 apply plugin: 'com.android.application'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
