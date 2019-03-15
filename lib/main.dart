@@ -1552,12 +1552,12 @@ class PollViewState extends State<PollView>{
                                       link: Uri.parse("https://ppoll.me/${widget.id}"),
                                       androidParameters: AndroidParameters(
                                         packageName: "land.platypus.ppoll",
-                                        minimumVersion: 9,
+                                        minimumVersion: 9
                                       ),
                                       iosParameters: IosParameters(
                                         bundleId: "land.platypus.ppoll",
                                         minimumVersion: "2.0.3",
-                                        appStoreId: "1411244031",
+                                        appStoreId: "1411244031"
                                       )
                                   );
                                   final Uri dynamicUrl = await parameters.buildUrl();

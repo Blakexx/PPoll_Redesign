@@ -35,6 +35,7 @@ dependencies:
   flutter_sticky_header:
   permission_handler: 2.1.0
   firebase_dynamic_links:
+  firebase_core:
   dynamic_theme:
       git:
         url: git://github.com/Norbert515/dynamic_theme.git
