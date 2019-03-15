@@ -26,6 +26,7 @@ import 'package:flutter/gestures.dart';
 import 'package:share/share.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:collection/collection.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 
 bool light;
 
@@ -81,11 +82,13 @@ List<String> unLoadedPolls = new List<String>();
 
 bool isCorrectVersion;
 
-String version = "2.0.2";
+String version = "2.0.3";
 
 bool displayedVersionMessage = false;
 
 bool displayedBannedMessage = false;
+
+bool gotLink = false;
 
 ValueNotifier<String> removedNotifier = new ValueNotifier<String>(null);
 
@@ -517,6 +520,30 @@ class AppState extends State<App>{
     }
   }
 
+  Future<void> retrieveDynamicLink(BuildContext context) async{
+    final PendingDynamicLinkData linkData = await FirebaseDynamicLinks.instance.retrieveDynamicLink();
+    final Uri deepLink = linkData?.link;
+    print(deepLink.toString());
+    if(deepLink != null){
+      String id = deepLink.path.split("/").last;
+      if(data[id]!=null){
+        index = 2;
+        Navigator.push(context,new PageRouteBuilder(
+          pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation){
+            return new PollView(deepLink.toString().split("/").last);
+          },
+          transitionDuration: new Duration(milliseconds: 300),
+          transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child){
+            return new FadeTransition(
+                opacity: animation,
+                child: child
+            );
+          },
+        ));
+      }
+    }
+  }
+
   Completer<ui.Image> iconCompleter;
 
   @override
@@ -576,6 +603,20 @@ class AppState extends State<App>{
                   ),
                   body: new Builder(
                     builder: (context){
+                      if(!gotLink&&hasLoaded){
+                        if(agreesToPolicy){
+                          retrieveDynamicLink(context);
+                          gotLink = true;
+                        }else{
+                          new Timer.periodic(new Duration(milliseconds:500),(t){
+                            if(agreesToPolicy){
+                              t.cancel();
+                              retrieveDynamicLink(context);
+                              gotLink = true;
+                            }
+                          });
+                        }
+                      }
                       if(tutorialMessages[index]!=null && tutorialMessages[index][0]){
                         tutorialMessages[index][0] = false;
                         new Future.delayed(Duration.zero,()=>showDialog(context:context,builder:(context)=>new AlertDialog(actions: [new FlatButton(child: new Text("OK"),onPressed:(){Navigator.of(context).pop();})],title:new Text("Tutorial",style:new TextStyle(fontWeight:FontWeight.bold),textAlign: TextAlign.center),content:new Text(tutorialMessages[index][1]))));
@@ -1505,9 +1546,31 @@ class PollViewState extends State<PollView>{
                             ):new Container(),
                             new IconButton(
                                 icon: new Icon(Icons.share),
-                                onPressed: (){
+                                onPressed: () async{
+                                  final DynamicLinkParameters parameters = DynamicLinkParameters(
+                                      domain: "ppoll.page.link",
+                                      link: Uri.parse("https://ppoll.me/${widget.id}"),
+                                      androidParameters: AndroidParameters(
+                                        packageName: "land.platypus.ppoll",
+                                        minimumVersion: 9,
+                                      ),
+                                      iosParameters: IosParameters(
+                                        bundleId: "land.platypus.ppoll",
+                                        minimumVersion: "2.0.3",
+                                        appStoreId: "1411244031",
+                                      )
+                                  );
+                                  final Uri dynamicUrl = await parameters.buildUrl();
+                                  var params = {
+                                    "longDynamicLink": dynamicUrl.toString()
+                                  };
+                                  var r = await http.post("https://firebasedynamiclinks.googleapis.com/v1/shortLinks?key=$webApiKey",body:json.encode(params));
+                                  var map = json.decode(r.body);
+                                  print(dynamicUrl.toString());
+                                  print(map["shortLink"]);
                                   if(!isDeleted){
-                                    Share.share("Vote on \""+data[widget.id]["q"]+"\" (Code: ${widget.id}) using PPoll. Download now at https://platypuslabs.llc/downloadppoll");
+                                    Share.share(map["shortLink"]);
+                                    //Share.share("Vote on \""+data[widget.id]["q"]+"\" (Code: ${widget.id}) using PPoll. Download now at https://platypuslabs.llc/downloadppoll");
                                   }
                                 }
                             )
@@ -2046,6 +2109,9 @@ class OpenPollPageState extends State<OpenPollPage>{
       resizeToAvoidBottomPadding: false,
       body: new Stack(
         children:[
+          new Container(
+            color:!settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0)
+          ),
           new SingleChildScrollView(child:new Container(height:max(space,264.0),color:!settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),child:new Center(
               child:new Column(
                   mainAxisAlignment: MainAxisAlignment.center,
