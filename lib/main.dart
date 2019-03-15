@@ -2032,17 +2032,21 @@ class OpenPollPage extends StatefulWidget{
 }
 
 class OpenPollPageState extends State<OpenPollPage>{
+
   TextEditingController openController = new TextEditingController();
   FocusNode f = new FocusNode();
   String input;
   @override
   Widget build(BuildContext context){
-    double usedParam = min(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height);
+    double height = MediaQuery.of(context).size.height;
+    double width = MediaQuery.of(context).size.width;
+    double usedParam = min(width,height);
+    double space = height - kBottomNavigationBarHeight;
     return new Scaffold(
       resizeToAvoidBottomPadding: false,
-      body:new Stack(
+      body: new Stack(
         children:[
-          new Container(color:!settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),child:new Center(
+          new SingleChildScrollView(child:new Container(height:max(space,264.0),color:!settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),child:new Center(
               child:new Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children:[
@@ -2150,7 +2154,7 @@ class OpenPollPageState extends State<OpenPollPage>{
                     ))
                   ]
               )
-          )),
+          ))),
           new Positioned(
               left:0.0,top:0.0,
               child:new Container(height:MediaQuery.of(context).padding.top,width:MediaQuery.of(context).size.width,color:color)
@@ -2229,4 +2233,3 @@ class PersistentData{
   }
 
 }
-
