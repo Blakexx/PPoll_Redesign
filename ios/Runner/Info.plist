@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>PPoll</string>
+	<string>PPll</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -24,24 +24,10 @@
 	<string>20</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>NSAppleMusicUsageDescription</key>
-	<string>PPoll does not require your music.</string>
-	<key>NSCalendarsUsageDescription</key>
-	<string>PPoll does not require your calendar.</string>
-	<key>NSContactsUsageDescription</key>
-	<string>PPoll does not require your contacts.</string>
-	<key>NSMotionUsageDescription</key>
-	<string>PPoll does not require your motion data.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>You must grant access to your photo library in order to select an image.</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>PPoll does not require speech recognition.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
-	<key>UIRequiresFullScreen</key>
-	<false/>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

@@ -2,11 +2,17 @@ PODS:
   - connectivity (0.0.1):
     - Flutter
     - Reachability
+  - Firebase/Core (5.15.0):
+    - Firebase/CoreOnly
+    - FirebaseAnalytics (= 5.4.0)
   - Firebase/CoreOnly (5.15.0):
     - FirebaseCore (= 5.1.10)
   - Firebase/DynamicLinks (5.15.0):
     - Firebase/CoreOnly
     - FirebaseDynamicLinks (= 3.3.0)
+  - firebase_core (0.0.1):
+    - Firebase/Core
+    - Flutter
   - firebase_dynamic_links (0.1.0):
     - Firebase/DynamicLinks
     - Flutter
@@ -31,7 +37,7 @@ PODS:
     - GoogleUtilities/Environment (~> 5.3)
     - GoogleUtilities/UserDefaults (~> 5.3)
   - Flutter (1.0.0)
-  - flutter_secure_storage (3.1.1):
+  - flutter_secure_storage (3.2.0):
     - Flutter
   - GoogleAppMeasurement (5.4.0):
     - GoogleUtilities/AppDelegateSwizzler (~> 5.2)
@@ -66,7 +72,7 @@ PODS:
   - nanopb/encode (0.3.901)
   - path_provider (0.0.1):
     - Flutter
-  - permission_handler (2.1.0):
+  - permission_handler (3.0.0):
     - Flutter
   - Reachability (3.2)
   - share (0.5.2):
@@ -78,8 +84,9 @@ PODS:
 
 DEPENDENCIES:
   - connectivity (from `.symlinks/plugins/connectivity/ios`)
+  - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - firebase_dynamic_links (from `.symlinks/plugins/firebase_dynamic_links/ios`)
-  - Flutter (from `.symlinks/flutter/ios`)
+  - Flutter (from `.symlinks/flutter/ios-release`)
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
   - image_picker (from `.symlinks/plugins/image_picker/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
@@ -104,10 +111,12 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   connectivity:
     :path: ".symlinks/plugins/connectivity/ios"
+  firebase_core:
+    :path: ".symlinks/plugins/firebase_core/ios"
   firebase_dynamic_links:
     :path: ".symlinks/plugins/firebase_dynamic_links/ios"
   Flutter:
-    :path: ".symlinks/flutter/ios"
+    :path: ".symlinks/flutter/ios-release"
   flutter_secure_storage:
     :path: ".symlinks/plugins/flutter_secure_storage/ios"
   image_picker:
@@ -126,6 +135,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   connectivity: d5992e3758d68b1c4b12d6e012fe0813f1aa1645
   Firebase: 8bb9268bff82374f2cbaaabb143e725743c316ae
+  firebase_core: c96aa8b2fcf7f5167d32f22034f502f9304952b8
   firebase_dynamic_links: 91b94b0ec1ce810948f5fe4ef69c20a7be9c0a64
   FirebaseAnalytics: c06f9d70577d79074214700a71fd5d39de5550fb
   FirebaseAnalyticsInterop: e5f21be9af6548372e2f0815834ff909bff395a2
@@ -133,18 +143,18 @@ SPEC CHECKSUMS:
   FirebaseDynamicLinks: c713da5f75c324f38fb2d57164bbc1c461aa6739
   FirebaseInstanceID: e2fa4cb35ef5558c200f7f0ad8a53e212215f93e
   Flutter: 9d0fac939486c9aba2809b7982dfdbb47a7b0296
-  flutter_secure_storage: cbb73e37aa0c66689fe63799a9619ac66849b8fa
+  flutter_secure_storage: dbcc8ff35d99569c3a4d3b483afa3339416c1a78
   GoogleAppMeasurement: 98b71f5e04142793729a5ef23e5b96651ff4b70f
   GoogleUtilities: 95996bea7c7d9b8fb811b7507669a4a8762f80c7
   image_picker: ee00aab0487cedc80a304085219503cc6d0f2e22
   nanopb: 2901f78ea1b7b4015c860c2fdd1ea2fee1a18d48
   path_provider: 09407919825bfe3c2deae39453b7a5b44f467873
-  permission_handler: ffc5769b295893830703e8a5b9101e47e12da6af
+  permission_handler: 03dcf3ade9d5f398b8854b366cb9de718d3daa76
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
   share: 222b5dcc8031238af9d7de91149df65bad1aef75
   shared_preferences: 5a1d487c427ee18fcd3ea1f2a131569481834b53
   url_launcher: 92b89c1029a0373879933c21642958c874539095
 
-PODFILE CHECKSUM: e26b4a363b8b520c042cbff2623303e8796700af
+PODFILE CHECKSUM: ebd43b443038e611b86ede96e613bd6033c49497
 
 COCOAPODS: 1.5.3

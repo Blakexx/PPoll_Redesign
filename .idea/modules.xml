@@ -3,7 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/ppoll_revamp.iml" filepath="$PROJECT_DIR$/ppoll_revamp.iml" />
-      <module fileurl="file://$PROJECT_DIR$/ppoll_revamp_android.iml" filepath="$PROJECT_DIR$/ppoll_revamp_android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/android/ppoll_revamp_android.iml" filepath="$PROJECT_DIR$/android/ppoll_revamp_android.iml" />
     </modules>
   </component>
 </project>

@@ -1,3 +1,6 @@
+const request = require('request');
+const cors = require('cors')({origin: true});
+
 const functions = require('firebase-functions');
 
 const admin = require('firebase-admin');
@@ -68,27 +71,54 @@ exports.create = functions.https.onRequest((req,res)=>{
                     }
                 }
             }
-            let returned = {
-                "a":map["a"],
-                "b":map["b"],
-                "c":map["c"],
-                "q":map["q"],
-                "u":map["u"],
-                "p":(profane?1:0),
-                "t":Math.floor(Date.now()/1000)
-            };
-            return admin.database().ref("users/"+map["u"]+"/1").once("value",(snapshot)=>{
-                let created = snapshot.val();
-                if(created===null){
-                    created = [];
+            let link = "https://ppoll.page.link/?amv=9&ibi=land.platypus.ppoll&isi=1411244031&imv=2.0.3&apn=land.platypus.ppoll&link=https%3A%2F%2Fppoll.me%2F"+code;
+            request.post("https://firebasedynamiclinks.googleapis.com/v1/shortLinks?key="+keyFile.webApiKey(),{
+                    json: {
+                        "longDynamicLink":link
+                    }
+                },
+                (error, re, body)=>{
+                    let te = body["shortLink"].split("/");
+                    let returned = {
+                        "a":map["a"],
+                        "b":map["b"],
+                        "c":map["c"],
+                        "q":map["q"],
+                        "u":map["u"],
+                        "l":te[te.length-1],
+                        "p":(profane?1:0),
+                        "t":Math.floor(Date.now()/1000)
+                    };
+                    return admin.database().ref("users/"+map["u"]+"/1").once("value",(snapshot)=>{
+                        let created = snapshot.val();
+                        if(created===null){
+                            created = [];
+                        }
+                        created.push(code);
+                        admin.database().ref("users/"+map["u"]+"/1").set(created);
+                        admin.database().ref("data/"+code).set(returned);
+                        return res.send(JSON.stringify([code,returned]));
+                    });
                 }
-                created.push(code);
-                admin.database().ref("users/"+map["u"]+"/1").set(created);
-                admin.database().ref("data/"+code).set(returned);
-                return res.send(JSON.stringify([code,returned]));
-            });
+            );
         });
     }else{
         return res.send(JSON.stringify({"Error":"No Permissions"}));
     }
+});
+
+exports.getLink = functions.https.onRequest((req,res)=>{
+    return cors(req, res, ()=>{
+        const text = req.query.text;
+        let map = JSON.parse(text);
+        if(map!=null&&map["id"]!=null){
+            let id = map["id"];
+            return admin.database().ref("data/"+id+"/l").once("value",(snapshot)=>{
+                let link = snapshot.val();
+                return res.status(200).send("https://ppoll.page.link/"+link);
+            });
+        }else{
+            return res.send("Error");
+        }
+    });
 });

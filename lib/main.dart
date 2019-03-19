@@ -88,8 +88,6 @@ bool displayedVersionMessage = false;
 
 bool displayedBannedMessage = false;
 
-bool gotLink = false;
-
 ValueNotifier<String> removedNotifier = new ValueNotifier<String>(null);
 
 Map<int,List> tutorialMessages = {
@@ -120,7 +118,7 @@ void main() async{
             }
           }
           waitForPerms(++permsCount);
-          }))])))))));
+        }))])))))));
         return;
       }
     }
@@ -269,6 +267,7 @@ class AppState extends State<App>{
               }
             }
           }
+          client = new HttpClient();
           client.openUrl("GET", Uri.parse(database+"/data.json?auth="+secretKey)).then((req) async{
             req.headers.set("Accept", "text/event-stream");
             req.followRedirects = true;
@@ -520,30 +519,6 @@ class AppState extends State<App>{
     }
   }
 
-  Future<void> retrieveDynamicLink(BuildContext context) async{
-    final PendingDynamicLinkData linkData = await FirebaseDynamicLinks.instance.retrieveDynamicLink();
-    final Uri deepLink = linkData?.link;
-    print(deepLink.toString());
-    if(deepLink != null){
-      String id = deepLink.path.split("/").last;
-      if(data[id]!=null){
-        index = 2;
-        Navigator.push(context,new PageRouteBuilder(
-          pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation){
-            return new PollView(deepLink.toString().split("/").last);
-          },
-          transitionDuration: new Duration(milliseconds: 300),
-          transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child){
-            return new FadeTransition(
-                opacity: animation,
-                child: child
-            );
-          },
-        ));
-      }
-    }
-  }
-
   Completer<ui.Image> iconCompleter;
 
   @override
@@ -602,135 +577,57 @@ class AppState extends State<App>{
                       }
                   ),
                   body: new Builder(
-                    builder: (context){
-                      if(!gotLink&&hasLoaded){
-                        if(agreesToPolicy){
-                          retrieveDynamicLink(context);
-                          gotLink = true;
-                        }else{
-                          new Timer.periodic(new Duration(milliseconds:500),(t){
-                            if(agreesToPolicy){
-                              t.cancel();
-                              retrieveDynamicLink(context);
-                              gotLink = true;
+                      builder: (context){
+                        if(tutorialMessages[index]!=null && tutorialMessages[index][0]){
+                          tutorialMessages[index][0] = false;
+                          new Future.delayed(Duration.zero,()=>showDialog(context:context,builder:(context)=>new AlertDialog(actions: [new FlatButton(child: new Text("OK"),onPressed:(){Navigator.of(context).pop();})],title:new Text("Tutorial",style:new TextStyle(fontWeight:FontWeight.bold),textAlign: TextAlign.center),content:new Text(tutorialMessages[index][1]))));
+                        }
+                        if(!displayedBannedMessage&&actualUserLevel==null&&!hasGotLevel){
+                          hasGotLevel = true;
+                          tryToGetId() async{
+                            try{
+                              final result = await InternetAddress.lookup("google.com");
+                              if(result.isNotEmpty && result[0].rawAddress.isNotEmpty){
+                                http.get(Uri.encodeFull("$database/users/$userId/0.json?auth=$secretKey")).then((r){
+                                  setState((){
+                                    actualUserLevel = json.decode(r.body);
+                                    currentUserLevel = 0;
+                                  });
+                                  if(actualUserLevel is String){
+                                    new Future.delayed(Duration.zero,()=>showDialog(context:context,barrierDismissible: false,builder:(context)=>new AlertDialog(title:new Text("You have been banned from PPoll",style:new TextStyle(fontWeight:FontWeight.bold),textAlign:TextAlign.center),content:new Text("Reason: $actualUserLevel",textAlign: TextAlign.start))));
+                                    displayedBannedMessage = true;
+                                  }
+                                });
+                              }
+                            }on SocketException catch(_){
+                              print("Bad connection, retrying...");
+                              new Timer(new Duration(seconds:1),tryToGetId);
+                            }
+                          }
+                          tryToGetId();
+                        }
+                        if(isCorrectVersion==true&&(actualUserLevel!=null&&!(actualUserLevel is String))&&start&&agreesToPolicy){
+                          start = false;
+                          http.get(Uri.encodeFull("$database/message.json?auth=$secretKey")).then((r){
+                            String s = json.decode(r.body);
+                            if(s=="null"){
+                              s=null;
+                            }
+                            if(s!=lastMessage){
+                              lastMessage = s;
+                              messages.writeData(lastMessage);
+                              if(lastMessage!=null){
+                                new Future.delayed(Duration.zero,()=>showDialog(context:context,builder:(context)=>new AlertDialog(actions: [new FlatButton(child: new Text("OK"),onPressed:(){Navigator.of(context).pop();})],title:new Text("Alert",style:new TextStyle(fontWeight:FontWeight.bold),textAlign: TextAlign.center),content:new Text(lastMessage))));
+                              }
                             }
                           });
                         }
-                      }
-                      if(tutorialMessages[index]!=null && tutorialMessages[index][0]){
-                        tutorialMessages[index][0] = false;
-                        new Future.delayed(Duration.zero,()=>showDialog(context:context,builder:(context)=>new AlertDialog(actions: [new FlatButton(child: new Text("OK"),onPressed:(){Navigator.of(context).pop();})],title:new Text("Tutorial",style:new TextStyle(fontWeight:FontWeight.bold),textAlign: TextAlign.center),content:new Text(tutorialMessages[index][1]))));
-                      }
-                      if(!displayedBannedMessage&&actualUserLevel==null&&!hasGotLevel){
-                        hasGotLevel = true;
-                        tryToGetId() async{
-                          try{
-                            final result = await InternetAddress.lookup("google.com");
-                            if(result.isNotEmpty && result[0].rawAddress.isNotEmpty){
-                              http.get(Uri.encodeFull("$database/users/$userId/0.json?auth=$secretKey")).then((r){
-                                setState((){
-                                  actualUserLevel = json.decode(r.body);
-                                  currentUserLevel = 0;
-                                });
-                                if(actualUserLevel is String){
-                                  new Future.delayed(Duration.zero,()=>showDialog(context:context,barrierDismissible: false,builder:(context)=>new AlertDialog(title:new Text("You have been banned from PPoll",style:new TextStyle(fontWeight:FontWeight.bold),textAlign:TextAlign.center),content:new Text("Reason: $actualUserLevel",textAlign: TextAlign.start))));
-                                  displayedBannedMessage = true;
-                                }
-                              });
-                            }
-                          }on SocketException catch(_){
-                            print("Bad connection, retrying...");
-                            new Timer(new Duration(seconds:1),tryToGetId);
-                          }
+                        if(!displayedVersionMessage&&isCorrectVersion==false&&(actualUserLevel!=null&&!(actualUserLevel is String))){
+                          new Future.delayed(Duration.zero,()=>showDialog(context:context,barrierDismissible: false,builder:(context)=>new AlertDialog(title:new Text("Outdated Version",style:new TextStyle(fontWeight:FontWeight.bold),textAlign:TextAlign.center),content:new Text("Please update to continue",textAlign: TextAlign.start))));
+                          displayedVersionMessage = true;
                         }
-                        tryToGetId();
+                        return new MainPage();
                       }
-                      if(isCorrectVersion==true&&(actualUserLevel!=null&&!(actualUserLevel is String))&&start&&agreesToPolicy){
-                        start = false;
-                        http.get(Uri.encodeFull("$database/message.json?auth=$secretKey")).then((r){
-                          String s = json.decode(r.body);
-                          if(s=="null"){
-                            s=null;
-                          }
-                          if(s!=lastMessage){
-                            lastMessage = s;
-                            messages.writeData(lastMessage);
-                            if(lastMessage!=null){
-                              new Future.delayed(Duration.zero,()=>showDialog(context:context,builder:(context)=>new AlertDialog(actions: [new FlatButton(child: new Text("OK"),onPressed:(){Navigator.of(context).pop();})],title:new Text("Alert",style:new TextStyle(fontWeight:FontWeight.bold),textAlign: TextAlign.center),content:new Text(lastMessage))));
-                            }
-                          }
-                        });
-                      }
-                      if(!displayedVersionMessage&&isCorrectVersion==false&&(actualUserLevel!=null&&!(actualUserLevel is String))){
-                        new Future.delayed(Duration.zero,()=>showDialog(context:context,barrierDismissible: false,builder:(context)=>new AlertDialog(title:new Text("Outdated Version",style:new TextStyle(fontWeight:FontWeight.bold),textAlign:TextAlign.center),content:new Text("Please update to continue",textAlign: TextAlign.start))));
-                        displayedVersionMessage = true;
-                      }
-                      return index==0?new Container(
-                          color: !settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),
-                          child: new Center(
-                              child: new View(false)
-                          )
-                      ):index==1?new CreatePollPage(
-                      ):index==2?new OpenPollPage(
-                      ):index==3?new Container(
-                          color: !settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),
-                          child: new Center(
-                              child: new View(true)
-                          )
-                      ):new Scaffold(appBar:new AppBar(title:new Text("Settings"),backgroundColor: color),body:new Container(
-                          color: !settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),
-                          child: new Center(
-                              child: new ListView(
-                                children: [
-                                  new Padding(padding: EdgeInsets.only(top:12.0),child: new Column(
-                                      children: settings.asMap().keys.map((i)=>new Padding(padding:EdgeInsets.only(bottom:12.0),child:new GestureDetector(onTap:(){
-                                        if(i==1){
-                                          return;
-                                        }
-                                        bool b = !settings[i];
-                                        if(i==0){
-                                          //indicatorColor = !b?new Color.fromRGBO(33,150,243,1.0):new Color.fromRGBO(100,255,218,1.0);
-                                          textColor = !b?new Color.fromRGBO(34,34, 34,1.0):new Color.fromRGBO(238,238,238,1.0);
-                                          color = !b?new Color.fromRGBO(52,52,52,1.0):new Color.fromRGBO(22,22,22,1.0);
-                                        }
-                                        setState((){settings[i]=b;});
-                                        settingsData.writeData(settings);
-                                      },child:new Container(color:settings[0]?Colors.black:new Color.fromRGBO(253,253,253,1.0),child:new ListTile(
-                                        leading: new Icon(i==0?Icons.brightness_2:i==1?Icons.more_vert:i==2?Icons.visibility:Icons.settings),
-                                        title: new Text(i==0?"Dark mode":i==1?"Expand large polls":i==2?"Safe mode":"Placeholder"),
-                                        trailing: i!=1?new Switch(value:settings[i],activeColor:indicatorColor,onChanged:(b){
-                                          if(i==0){
-                                            textColor = !b?new Color.fromRGBO(34,34, 34,1.0):new Color.fromRGBO(238,238,238,1.0);
-                                            color = !b?new Color.fromRGBO(52,52,52,1.0):new Color.fromRGBO(22,22,22,1.0);
-                                          }
-                                          setState((){settings[i]=b;});
-                                          settingsData.writeData(settings);
-                                        }):new DropdownButtonHideUnderline(
-                                          child: DropdownButton<String>(
-                                            items: ["Always","After Vote","Never"].map((key)=>new DropdownMenuItem<String>(value: key, child: new Text("$key"))).toList(),
-                                            onChanged: (s){
-                                              setState((){settings[1] = s;});
-                                              settingsData.writeData(settings);
-                                            },
-                                            value: settings[1]
-                                          )
-                                        )
-                                      ))))).toList()
-                                  )),
-                                  actualUserLevel==1?new GestureDetector(onTap:(){
-                                    setState((){currentUserLevel = currentUserLevel==0?1:0;});
-                                  },child:new Container(color:settings[0]?Colors.black:new Color.fromRGBO(253,253,253,1.0),child:new ListTile(
-                                    leading: new Icon(Icons.stars),
-                                    title: new Text("Admin"),
-                                    trailing: new Switch(value: currentUserLevel==1,activeColor:indicatorColor,onChanged: (b){
-                                      setState((){currentUserLevel = b?1:0;});
-                                    })
-                                  ))):new Container()
-                                ]
-                              )
-                          )
-                      ));
-                    }
                   )
               ):new Builder(builder:(context){
                 double heightOrWidth = min(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height);
@@ -764,61 +661,61 @@ class AppState extends State<App>{
                   new Padding(padding:EdgeInsets.only(left:MediaQuery.of(context).size.width/20.0,right:MediaQuery.of(context).size.width/20.0),child:new Text("PPoll provides a completely anonymous and ad-free experience.",style:new TextStyle(fontSize:15.0*ratio,color:textColor.withOpacity(0.9)),textAlign: TextAlign.center)),
                   new Container(height:landscape?40.0*ratio:0.0),
                   new Column(
-                    children:[
-                      new Padding(padding:EdgeInsets.only(left:MediaQuery.of(context).size.width/20.0,right:MediaQuery.of(context).size.width/20.0),child:new Center(child:new RichText(
-                          textAlign:TextAlign.center,
-                          text:new TextSpan(
-                              children:[
-                                new TextSpan(
-                                  text:"By pressing the \"Get started\" button and using PPoll, you agree to our ",
-                                  style: new TextStyle(color: textColor,fontSize:8.0*ratio),
-                                ),
-                                new TextSpan(
-                                  text:"Privacy Policy",
-                                  style: new TextStyle(color: Colors.blue,fontSize:8.0*ratio),
-                                  recognizer: new TapGestureRecognizer()..onTap = () async{
-                                    if(await canLaunch("https://platypuslabs.llc/privacypolicy")){
-                                      await launch("https://platypuslabs.llc/privacypolicy");
-                                    }else{
-                                      throw "Could not launch $url";
-                                    }
-                                  },
-                                ),
-                                new TextSpan(
-                                  text:" and ",
-                                  style: new TextStyle(color: textColor,fontSize:8.0*ratio),
-                                ),
-                                new TextSpan(
-                                  text:"Terms of Use",
-                                  style: new TextStyle(color: Colors.blue,fontSize:8.0*ratio),
-                                  recognizer: new TapGestureRecognizer()..onTap = () async{
-                                    if(await canLaunch("https://platypuslabs.llc/termsandconditions")){
-                                      await launch("https://platypuslabs.llc/termsandconditions");
-                                    }else{
-                                      throw "Could not launch $url";
-                                    }
-                                  },
-                                ),
-                                new TextSpan(
-                                    text:".",
-                                    style: new TextStyle(fontSize:8.0)
-                                ),
-                              ]
-                          )
-                      ))),
-                      new Container(height:landscape?10.0*ratio:5.0*ratio),
-                      new Padding(padding:EdgeInsets.only(left:MediaQuery.of(context).size.width/20.0,right:MediaQuery.of(context).size.width/20.0),child:new Container(width:double.infinity,child:new RaisedButton(
-                          padding: EdgeInsets.all(13.0),
-                          color:Colors.grey,
-                          child:new Text("Get started",style:new TextStyle(fontSize:12.0*ratio)),
-                          onPressed:(){
-                            setState((){
-                              agreesToPolicy=true;
-                              policy.writeData(true);
-                            });
-                          }
-                      )))
-                    ]
+                      children:[
+                        new Padding(padding:EdgeInsets.only(left:MediaQuery.of(context).size.width/20.0,right:MediaQuery.of(context).size.width/20.0),child:new Center(child:new RichText(
+                            textAlign:TextAlign.center,
+                            text:new TextSpan(
+                                children:[
+                                  new TextSpan(
+                                    text:"By pressing the \"Get started\" button and using PPoll, you agree to our ",
+                                    style: new TextStyle(color: textColor,fontSize:8.0*ratio),
+                                  ),
+                                  new TextSpan(
+                                    text:"Privacy Policy",
+                                    style: new TextStyle(color: Colors.blue,fontSize:8.0*ratio),
+                                    recognizer: new TapGestureRecognizer()..onTap = () async{
+                                      if(await canLaunch("https://platypuslabs.llc/privacypolicy")){
+                                        await launch("https://platypuslabs.llc/privacypolicy");
+                                      }else{
+                                        throw "Could not launch $url";
+                                      }
+                                    },
+                                  ),
+                                  new TextSpan(
+                                    text:" and ",
+                                    style: new TextStyle(color: textColor,fontSize:8.0*ratio),
+                                  ),
+                                  new TextSpan(
+                                    text:"Terms of Use",
+                                    style: new TextStyle(color: Colors.blue,fontSize:8.0*ratio),
+                                    recognizer: new TapGestureRecognizer()..onTap = () async{
+                                      if(await canLaunch("https://platypuslabs.llc/termsandconditions")){
+                                        await launch("https://platypuslabs.llc/termsandconditions");
+                                      }else{
+                                        throw "Could not launch $url";
+                                      }
+                                    },
+                                  ),
+                                  new TextSpan(
+                                      text:".",
+                                      style: new TextStyle(fontSize:8.0)
+                                  ),
+                                ]
+                            )
+                        ))),
+                        new Container(height:landscape?10.0*ratio:5.0*ratio),
+                        new Padding(padding:EdgeInsets.only(left:MediaQuery.of(context).size.width/20.0,right:MediaQuery.of(context).size.width/20.0),child:new Container(width:double.infinity,child:new RaisedButton(
+                            padding: EdgeInsets.all(13.0),
+                            color:Colors.grey,
+                            child:new Text("Get started",style:new TextStyle(fontSize:12.0*ratio)),
+                            onPressed:(){
+                              setState((){
+                                agreesToPolicy=true;
+                                policy.writeData(true);
+                              });
+                            }
+                        )))
+                      ]
                   ),
                   new Container(height:landscape?50.0*ratio:0.0),
                 ];
@@ -829,6 +726,181 @@ class AppState extends State<App>{
         data: (brightness) => new ThemeData(fontFamily: "Roboto",brightness: settings!=null&&settings[0]?Brightness.dark:Brightness.light),
         defaultBrightness: settings!=null&&settings[0]?Brightness.dark:Brightness.light
     );
+  }
+}
+
+bool firstOne = true;
+
+class MainPage extends StatefulWidget{
+  @override
+  MainPageState createState() => new MainPageState();
+}
+
+class MainPageState extends State<MainPage> with WidgetsBindingObserver{
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state){
+    if(state == AppLifecycleState.resumed && !firstOne){
+      new Timer.periodic(new Duration(milliseconds:500),(t){
+        if(agreesToPolicy&&hasLoaded){
+          t.cancel();
+          retrieveDynamicLink();
+        }
+      });
+    }
+  }
+
+  @override
+  void initState(){
+    super.initState();
+    new Timer.periodic(new Duration(milliseconds:500),(t){
+      if(agreesToPolicy&&hasLoaded){
+        t.cancel();
+        firstOne = false;
+        retrieveDynamicLink();
+      }
+    });
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  Future<void> retrieveDynamicLink() async{
+    final PendingDynamicLinkData linkData = await FirebaseDynamicLinks.instance.retrieveDynamicLink();
+    final Uri deepLink = linkData?.link;
+    //print(deepLink.toString());
+    if(deepLink!=null){
+      String id = deepLink.path.split("/").last;
+      if(data[id]!=null){
+        if(data[id]["p"]==1&&settings[2]&&(data[id]["u"]==null||data[id]["u"]!=userId)){
+          showDialog(
+              context: this.context,
+              barrierDismissible: false,
+              builder: (context){
+                return new AlertDialog(
+                    title: new Text("Alert",style:new TextStyle(fontWeight:FontWeight.bold)),
+                    content: new Text("The poll you are attempting to open is unsafe."),
+                    actions: [
+                      new FlatButton(
+                          child: new Text("OK"),
+                          onPressed: (){
+                            Navigator.of(context).pop();
+                          }
+                      )
+                    ]
+                );
+              }
+          );
+          return;
+        }
+        if(openedPoll!=null){
+          Navigator.of(this.context).pop();
+          openedPoll = id;
+        }
+        Navigator.push(this.context,new PageRouteBuilder(
+          pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation){
+            return new PollView(deepLink.toString().split("/").last);
+          },
+          transitionDuration: new Duration(milliseconds: 300),
+          transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child){
+            return new FadeTransition(
+                opacity: animation,
+                child: child
+            );
+          },
+        )).then((r){
+          this.context.ancestorStateOfType(new TypeMatcher<AppState>()).setState((){
+            AppState.index = 2;
+          });
+        });
+      }else{
+        showDialog(
+            context: this.context,
+            barrierDismissible: false,
+            builder: (context){
+              return new AlertDialog(
+                  title: new Text("Alert",style:new TextStyle(fontWeight:FontWeight.bold)),
+                  content: new Text("The poll you are attempting to open does not exist."),
+                  actions: [
+                    new FlatButton(
+                        child: new Text("OK"),
+                        onPressed: (){
+                          Navigator.of(context).pop();
+                        }
+                    )
+                  ]
+              );
+            }
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context){
+    return AppState.index==0?new Container(
+        color: !settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),
+        child: new Center(
+            child: new View(false)
+        )
+    ):AppState.index==1?new CreatePollPage(
+    ):AppState.index==2?new OpenPollPage(
+    ):AppState.index==3?new Container(
+        color: !settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),
+        child: new Center(
+            child: new View(true)
+        )
+    ):new Scaffold(appBar:new AppBar(title:new Text("Settings"),backgroundColor: color),body:new Container(
+        color: !settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),
+        child: new Center(
+            child: new ListView(
+                children: [
+                  new Padding(padding: EdgeInsets.only(top:12.0),child: new Column(
+                      children: settings.asMap().keys.map((i)=>new Padding(padding:EdgeInsets.only(bottom:12.0),child:new GestureDetector(onTap:(){
+                        if(i==1){
+                          return;
+                        }
+                        bool b = !settings[i];
+                        if(i==0){
+                          //indicatorColor = !b?new Color.fromRGBO(33,150,243,1.0):new Color.fromRGBO(100,255,218,1.0);
+                          textColor = !b?new Color.fromRGBO(34,34, 34,1.0):new Color.fromRGBO(238,238,238,1.0);
+                          color = !b?new Color.fromRGBO(52,52,52,1.0):new Color.fromRGBO(22,22,22,1.0);
+                        }
+                        setState((){settings[i]=b;});
+                        settingsData.writeData(settings);
+                      },child:new Container(color:settings[0]?Colors.black:new Color.fromRGBO(253,253,253,1.0),child:new ListTile(
+                          leading: new Icon(i==0?Icons.brightness_2:i==1?Icons.more_vert:i==2?Icons.visibility:Icons.settings),
+                          title: new Text(i==0?"Dark mode":i==1?"Expand large polls":i==2?"Safe mode":"Placeholder"),
+                          trailing: i!=1?new Switch(value:settings[i],activeColor:indicatorColor,onChanged:(b){
+                            if(i==0){
+                              textColor = !b?new Color.fromRGBO(34,34, 34,1.0):new Color.fromRGBO(238,238,238,1.0);
+                              color = !b?new Color.fromRGBO(52,52,52,1.0):new Color.fromRGBO(22,22,22,1.0);
+                            }
+                            setState((){settings[i]=b;});
+                            settingsData.writeData(settings);
+                          }):new DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                  items: ["Always","After Vote","Never"].map((key)=>new DropdownMenuItem<String>(value: key, child: new Text("$key"))).toList(),
+                                  onChanged: (s){
+                                    setState((){settings[1] = s;});
+                                    settingsData.writeData(settings);
+                                  },
+                                  value: settings[1]
+                              )
+                          )
+                      ))))).toList()
+                  )),
+                  actualUserLevel==1?new GestureDetector(onTap:(){
+                    setState((){currentUserLevel = currentUserLevel==0?1:0;});
+                  },child:new Container(color:settings[0]?Colors.black:new Color.fromRGBO(253,253,253,1.0),child:new ListTile(
+                      leading: new Icon(Icons.stars),
+                      title: new Text("Admin"),
+                      trailing: new Switch(value: currentUserLevel==1,activeColor:indicatorColor,onChanged: (b){
+                        setState((){currentUserLevel = b?1:0;});
+                      })
+                  ))):new Container()
+                ]
+            )
+        )
+    ));
   }
 }
 
@@ -945,104 +1017,18 @@ class ViewState extends State<View>{
     if(!hasLoaded){
       lastHasLoaded = false;
       return new CustomScrollView(
-        slivers: [
-          new SliverAppBar(
-            pinned: false,
-            backgroundColor: color,
-            floating: true,
-            centerTitle: false,
-            expandedHeight: 30.0,
-            title: new Text(!widget.onlyCreated?"Browse":"Created"),
-            actions: [
-              new IconButton(
-                icon: new Icon(Icons.search),
-                onPressed: (){}
-              ),
-              new Padding(padding: EdgeInsets.only(right:3.0),child:new Container(
-                  width: 35.0,
-                  child: new PopupMenuButton<String>(
-                      itemBuilder: (BuildContext context)=>widget.onlyCreated?[
-                        new PopupMenuItem<String>(child: const Text("Top"), value: "top"),
-                        new PopupMenuItem<String>(child: const Text("Newest"), value: "newest"),
-                        new PopupMenuItem<String>(child: const Text("Oldest"), value: "oldest")
-                      ]:[
-                        new PopupMenuItem<String>(child: const Text("Trending"), value: "trending"),
-                        new PopupMenuItem<String>(child: const Text("Top"), value: "top"),
-                        new PopupMenuItem<String>(child: const Text("Newest"), value: "newest"),
-                        new PopupMenuItem<String>(child: const Text("Oldest"), value: "oldest")
-                      ],
-                      child: new Icon(Icons.sort),
-                      onSelected: (str){}
-                  )
-              ))
-            ],
-            bottom:new PreferredSize(preferredSize: new Size(double.infinity,3.0),child: new Container(height:3.0,child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor))))
-          )
-        ]
-      );
-    }else if(sortedMap==null){
-      sortMap();
-    }else if(!lastHasLoaded&&unLoadedPolls.length>0){
-      setState((){
-        sortMap();
-        unLoadedPolls=new List<String>();
-      });
-    }
-    lastHasLoaded = true;
-    return new Stack(
-      children: [
-        new SafeArea(bottom:false,child:new CustomScrollView(
-            slivers: [
-              new SliverAppBar(
+          slivers: [
+            new SliverAppBar(
                 pinned: false,
+                backgroundColor: color,
                 floating: true,
-                title:!inSearch?new Text(!widget.onlyCreated?"Browse":"Created"):new TextField(
-                    textCapitalization: TextCapitalization.sentences,
-                    style: new TextStyle(fontSize:20.0,color: Colors.white),
-                    controller: c,
-                    autofocus: true,
-                    autocorrect: false,
-                    decoration: new InputDecoration(
-                        border: InputBorder.none,
-                        hintText: "Search",
-                        hintStyle: new TextStyle(color:Colors.white30)
-                    ),
-                    focusNode: f,
-                    onChanged: (str){
-                      search = str;
-                    },
-                    onSubmitted:(str){
-                      s.jumpTo(0.0);
-                      setState((){search = str;});
-                      sortMap();
-                    }
-                ),
                 centerTitle: false,
                 expandedHeight: 30.0,
-                backgroundColor: color,
+                title: new Text(!widget.onlyCreated?"Browse":"Created"),
                 actions: [
-                  inSearch?new IconButton(
-                    icon: new Icon(Icons.close),
-                    onPressed: (){
-                      if(f.hasFocus){
-                        search = "";
-                        s.jumpTo(0.0);
-                        setState((){c.text = search;});
-                        sortMap();
-                      }else{
-                        search = "";
-                        c.text = "";
-                        s.jumpTo(0.0);
-                        setState((){inSearch = false;});
-                        sortMap();
-                      }
-                    },
-                  ):new IconButton(
+                  new IconButton(
                       icon: new Icon(Icons.search),
-                      onPressed: (){
-                        s.jumpTo(0.0);
-                        setState((){inSearch = true;});
-                      }
+                      onPressed: (){}
                   ),
                   new Padding(padding: EdgeInsets.only(right:3.0),child:new Container(
                       width: 35.0,
@@ -1058,49 +1044,135 @@ class ViewState extends State<View>{
                             new PopupMenuItem<String>(child: const Text("Oldest"), value: "oldest")
                           ],
                           child: new Icon(Icons.sort),
-                          onSelected: (str){
-                            s.jumpTo(0.0);
-                            setState((){
-                              sorting = str;
-                              s.jumpTo(0.0);
-                              sortMap();
-                            });
-                          }
+                          onSelected: (str){}
                       )
-                  )),
-                ]
-              ),
-              new SliverStickyHeader(
-                header:unLoadedPolls.length>0?!loadingNewPolls?new GestureDetector(onTap:() async{
-                  await s.animateTo(0.0,curve: Curves.easeOut, duration: const Duration(milliseconds: 300));
-                  setState((){loadingNewPolls = true;});
-                  new Timer(new Duration(milliseconds:350),(){
-                    setState((){
-                      loadingNewPolls = false;
-                      sortMap();
-                      unLoadedPolls=new List<String>();
-                    });
-                  });
-                },child:new Container(height:30.0,color:indicatorColor,child:new Row(mainAxisAlignment:MainAxisAlignment.center,children:[new Text("Show ${unLoadedPolls.length} new Poll${unLoadedPolls.length==1?"":"s"} ",style:new TextStyle(fontSize:12.5,color:Colors.white)),new Icon(Icons.refresh,size:15.0,color:Colors.white)]))):new Container(height:3.0,child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor))):new Container(height:0.0,width:0.0),
-                sliver:new SliverPadding(padding: new EdgeInsets.only(right:5.0,left:5.0,top:5.0),sliver:sortedMap.keys.length>0||search==null||search.length==0?new SliverStaggeredGrid.countBuilder(
-                  crossAxisCount: (MediaQuery.of(context).size.width/500.0).ceil(),
-                  mainAxisSpacing: 0.0,
-                  crossAxisSpacing: 0.0,
-                  itemCount: sortedMap.keys.length,
-                  itemBuilder: (BuildContext context, int i)=>new Poll(sortedMap.keys.toList()[i],false),
-                  staggeredTileBuilder:(i)=>new StaggeredTile.fit(1),
-                ):new SliverStickyHeader(
-                    header:new Padding(padding:EdgeInsets.only(top:10.0),child:new Center(child:new Text("Your search did not match any polls",textAlign:TextAlign.center,style: new TextStyle(fontSize:15.0*min(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height)/320,color:textColor))))
-                ))
-              )
-            ],
-            controller: s
-        )),
-        new Positioned(
-            left:0.0,top:0.0,
-            child:new Container(height:MediaQuery.of(context).padding.top,width:MediaQuery.of(context).size.width,color:color)
-        )
-      ]
+                  ))
+                ],
+                bottom:new PreferredSize(preferredSize: new Size(double.infinity,3.0),child: new Container(height:3.0,child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor))))
+            )
+          ]
+      );
+    }else if(sortedMap==null){
+      sortMap();
+    }else if(!lastHasLoaded&&unLoadedPolls.length>0){
+      setState((){
+        sortMap();
+        unLoadedPolls=new List<String>();
+      });
+    }
+    lastHasLoaded = true;
+    return new Stack(
+        children: [
+          new SafeArea(bottom:false,child:new CustomScrollView(
+              slivers: [
+                new SliverAppBar(
+                    pinned: false,
+                    floating: true,
+                    title:!inSearch?new Text(!widget.onlyCreated?"Browse":"Created"):new TextField(
+                        textCapitalization: TextCapitalization.sentences,
+                        style: new TextStyle(fontSize:20.0,color: Colors.white),
+                        controller: c,
+                        autofocus: true,
+                        autocorrect: false,
+                        decoration: new InputDecoration(
+                            border: InputBorder.none,
+                            hintText: "Search",
+                            hintStyle: new TextStyle(color:Colors.white30)
+                        ),
+                        focusNode: f,
+                        onChanged: (str){
+                          search = str;
+                        },
+                        onSubmitted:(str){
+                          s.jumpTo(0.0);
+                          setState((){search = str;});
+                          sortMap();
+                        }
+                    ),
+                    centerTitle: false,
+                    expandedHeight: 30.0,
+                    backgroundColor: color,
+                    actions: [
+                      inSearch?new IconButton(
+                        icon: new Icon(Icons.close),
+                        onPressed: (){
+                          if(f.hasFocus){
+                            search = "";
+                            s.jumpTo(0.0);
+                            setState((){c.text = search;});
+                            sortMap();
+                          }else{
+                            search = "";
+                            c.text = "";
+                            s.jumpTo(0.0);
+                            setState((){inSearch = false;});
+                            sortMap();
+                          }
+                        },
+                      ):new IconButton(
+                          icon: new Icon(Icons.search),
+                          onPressed: (){
+                            s.jumpTo(0.0);
+                            setState((){inSearch = true;});
+                          }
+                      ),
+                      new Padding(padding: EdgeInsets.only(right:3.0),child:new Container(
+                          width: 35.0,
+                          child: new PopupMenuButton<String>(
+                              itemBuilder: (BuildContext context)=>widget.onlyCreated?[
+                                new PopupMenuItem<String>(child: const Text("Top"), value: "top"),
+                                new PopupMenuItem<String>(child: const Text("Newest"), value: "newest"),
+                                new PopupMenuItem<String>(child: const Text("Oldest"), value: "oldest")
+                              ]:[
+                                new PopupMenuItem<String>(child: const Text("Trending"), value: "trending"),
+                                new PopupMenuItem<String>(child: const Text("Top"), value: "top"),
+                                new PopupMenuItem<String>(child: const Text("Newest"), value: "newest"),
+                                new PopupMenuItem<String>(child: const Text("Oldest"), value: "oldest")
+                              ],
+                              child: new Icon(Icons.sort),
+                              onSelected: (str){
+                                s.jumpTo(0.0);
+                                setState((){
+                                  sorting = str;
+                                  s.jumpTo(0.0);
+                                  sortMap();
+                                });
+                              }
+                          )
+                      )),
+                    ]
+                ),
+                new SliverStickyHeader(
+                    header:unLoadedPolls.length>0?!loadingNewPolls?new GestureDetector(onTap:() async{
+                      await s.animateTo(0.0,curve: Curves.easeOut, duration: const Duration(milliseconds: 300));
+                      setState((){loadingNewPolls = true;});
+                      new Timer(new Duration(milliseconds:350),(){
+                        setState((){
+                          loadingNewPolls = false;
+                          sortMap();
+                          unLoadedPolls=new List<String>();
+                        });
+                      });
+                    },child:new Container(height:30.0,color:indicatorColor,child:new Row(mainAxisAlignment:MainAxisAlignment.center,children:[new Text("Show ${unLoadedPolls.length} new Poll${unLoadedPolls.length==1?"":"s"} ",style:new TextStyle(fontSize:12.5,color:Colors.white)),new Icon(Icons.refresh,size:15.0,color:Colors.white)]))):new Container(height:3.0,child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor))):new Container(height:0.0,width:0.0),
+                    sliver:new SliverPadding(padding: new EdgeInsets.only(right:5.0,left:5.0,top:5.0),sliver:sortedMap.keys.length>0||search==null||search.length==0?new SliverStaggeredGrid.countBuilder(
+                      crossAxisCount: (MediaQuery.of(context).size.width/500.0).ceil(),
+                      mainAxisSpacing: 0.0,
+                      crossAxisSpacing: 0.0,
+                      itemCount: sortedMap.keys.length,
+                      itemBuilder: (BuildContext context, int i)=>new Poll(sortedMap.keys.toList()[i],false),
+                      staggeredTileBuilder:(i)=>new StaggeredTile.fit(1),
+                    ):new SliverStickyHeader(
+                        header:new Padding(padding:EdgeInsets.only(top:10.0),child:new Center(child:new Text("Your search did not match any polls",textAlign:TextAlign.center,style: new TextStyle(fontSize:15.0*min(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height)/320,color:textColor))))
+                    ))
+                )
+              ],
+              controller: s
+          )),
+          new Positioned(
+              left:0.0,top:0.0,
+              child:new Container(height:MediaQuery.of(context).padding.top,width:MediaQuery.of(context).size.width,color:color)
+          )
+        ]
     );
   }
 }
@@ -1243,163 +1315,163 @@ class PollState extends State<Poll>{
     Widget returnedWidget = new Column(
         children:[
           new Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              new Padding(padding:EdgeInsets.only(top:10.0,left:11.0,right:11.0),child:new Text(data[widget.id]["q"],style: new TextStyle(color:textColor,fontSize: 15.0,letterSpacing:.2,fontWeight: FontWeight.w600,fontFamily: "Futura"),maxLines: !widget.viewPage?2:100,overflow: TextOverflow.ellipsis)),
-              new Padding(padding:EdgeInsets.only(top:5.0,left:11.0,bottom:5.0),child:new Text(widget.id+(data[widget.id]["t"]!=null?" • ${timeago.format(new DateTime.fromMillisecondsSinceEpoch(data[widget.id]["t"]*1000))}":"")+" • $totalVotes vote"+((totalVotes==1)?"":"s"),style: new TextStyle(fontSize: 12.0,color:textColor.withOpacity(.8)))),
-              image!=null?new Padding(padding:EdgeInsets.only(top:5.0,bottom:5.0),child:new FutureBuilder<ui.Image>(
-                future: completer.future,
-                builder: (BuildContext context, AsyncSnapshot<ui.Image> snapshot){
-                  if(snapshot.hasData||height!=null||width!=null||(widget.image!=null&&widget.height!=null&&widget.width!=null)){
-                    if(snapshot.hasData){
-                      height = snapshot.data.height*1.0;
-                      width = snapshot.data.width*1.0;
-                    }
-                    return new GestureDetector(onTap:(){Navigator.push(context,new PageRouteBuilder(opaque:false,pageBuilder:(context,a1,a2)=>new ImageView(child:new Center(child:new PhotoView(imageProvider:image.image,minScale:min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height),maxScale:4.0*min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height))),name:widget.id)));},child:new SizedBox(
-                        width: double.infinity,
-                        height: max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0*((MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?1:3*((MediaQuery.of(context).size.width/500.0).ceil())/4)),
-                        child: new Image(image:image.image,fit:BoxFit.cover)
-                    ));
-                  }else{
-                    return new Container(width:double.infinity,height:max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0*((MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?1:3*((MediaQuery.of(context).size.width/500.0).ceil())/4)),color:Colors.black12,child: new Center(child: new Container(height:MediaQuery.of(context).size.width/(15*(!widget.viewPage?(MediaQuery.of(context).size.width/500.0).ceil():1)),width:MediaQuery.of(context).size.width/(15*(!widget.viewPage?(MediaQuery.of(context).size.width/500.0).ceil():1)),child:new CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor)))));
-                  }
-                },
-              )):new Container(),
-              new Container(height:5.0),
-              new Column(
-                  children: data[widget.id]["c"].map((c){
-                    dynamic used = pids.length>0?lastChoice:choice;
-                    double percent = (totalVotes!=0?correctList[data[widget.id]["c"].indexOf(c)]/totalVotes:0.0);
-                    return widget.viewPage||((hasVoted&&settings[1]!="Never")||(data[widget.id]["c"].indexOf(c)<5||settings[1]=="Always"))?new MaterialButton(onPressed: () async{
-                      if(multiSelect||c!=choice){
-                        if(widget.viewPage){
-                          PollViewState.canLeaveView = false;
-                        }
-                        String pid;
-                        do{
-                          pid = "";
-                          Random r = new Random();
-                          List<String> nums = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
-                          for(int i = 0;i<8;i++){
-                            pid+=(r.nextInt(2)==0?nums[r.nextInt(36)]:nums[r.nextInt(36)].toLowerCase());
-                          }
-                        }while(pids.contains(pid));
-                        pids.add(pid);
-                        waitForVote(){
-                          new Timer(Duration.zero,(){
-                            if(pids[0]==pid){
-                              vote(c,context,pid,multiSelect?!choice.contains(data[widget.id]["c"].indexOf(c)):null);
-                            }else if(pids.length>0){
-                              waitForVote();
-                            }
-                          });
-                        }
-                        waitForVote();
-                      }else if(!multiSelect&&c==choice&&pids.length==0){
-                        if(widget.viewPage){
-                          PollViewState.canLeaveView = false;
-                        }
-                        String pid;
-                        do{
-                          pid = "";
-                          Random r = new Random();
-                          List<String> nums = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
-                          for(int i = 0;i<8;i++){
-                            pid+=(r.nextInt(2)==0?nums[r.nextInt(36)]:nums[r.nextInt(36)].toLowerCase());
-                          }
-                        }while(pids.contains(pid));
-                        pids.add(pid);
-                        vote(null,context,pid);
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                new Padding(padding:EdgeInsets.only(top:10.0,left:11.0,right:11.0),child:new Text(data[widget.id]["q"],style: new TextStyle(color:textColor,fontSize: 15.0,letterSpacing:.2,fontWeight: FontWeight.w600,fontFamily: "Futura"),maxLines: !widget.viewPage?2:100,overflow: TextOverflow.ellipsis)),
+                new Padding(padding:EdgeInsets.only(top:5.0,left:11.0,bottom:5.0),child:new Text(widget.id+(data[widget.id]["t"]!=null?" • ${timeago.format(new DateTime.fromMillisecondsSinceEpoch(data[widget.id]["t"]*1000))}":"")+" • $totalVotes vote"+((totalVotes==1)?"":"s"),style: new TextStyle(fontSize: 12.0,color:textColor.withOpacity(.8)))),
+                image!=null?new Padding(padding:EdgeInsets.only(top:5.0,bottom:5.0),child:new FutureBuilder<ui.Image>(
+                  future: completer.future,
+                  builder: (BuildContext context, AsyncSnapshot<ui.Image> snapshot){
+                    if(snapshot.hasData||height!=null||width!=null||(widget.image!=null&&widget.height!=null&&widget.width!=null)){
+                      if(snapshot.hasData){
+                        height = snapshot.data.height*1.0;
+                        width = snapshot.data.width*1.0;
                       }
-                    },padding:EdgeInsets.only(top:12.0,bottom:12.0),child:new Column(children: [
-                      new Row(
-                          children: [
-                            !multiSelect?(pids.length>0)&&((choice==c)||(lastChoice==c&&choice==null))?new Container(width:2*kRadialReactionRadius+8.0,height:kRadialReactionRadius,child:new Center(child:new Container(height:16.0,width:16.0,child: new CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor),strokeWidth: 2.0)))):new Container(height:kRadialReactionRadius,child:new Radio(
-                              activeColor: indicatorColor,
-                              value: c,
-                              groupValue: choice,
-                              onChanged: (s){
-                                if(s!=choice){
-                                  if(widget.viewPage){
-                                    PollViewState.canLeaveView = false;
-                                  }
-                                  String pid;
-                                  do{
-                                    pid = "";
-                                    Random r = new Random();
-                                    List<String> nums = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
-                                    for(int i = 0;i<8;i++){
-                                      pid+=(r.nextInt(2)==0?nums[r.nextInt(36)]:nums[r.nextInt(36)].toLowerCase());
-                                    }
-                                  }while(pids.contains(pid));
-                                  pids.add(pid);
-                                  waitForVote(){
-                                    new Timer(Duration.zero,(){
-                                      if(pids[0]==pid){
-                                        vote(c,context,pid);
-                                      }else if(pids.length>0){
-                                        waitForVote();
-                                      }
-                                    });
-                                  }
-                                  waitForVote();
-                                }else if(!multiSelect&&s==choice&&pids.length==0){
-                                  if(widget.viewPage){
-                                    PollViewState.canLeaveView = false;
-                                  }
-                                  String pid;
-                                  do{
-                                    pid = "";
-                                    Random r = new Random();
-                                    List<String> nums = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
-                                    for(int i = 0;i<8;i++){
-                                      pid+=(r.nextInt(2)==0?nums[r.nextInt(36)]:nums[r.nextInt(36)].toLowerCase());
-                                    }
-                                  }while(pids.contains(pid));
-                                  pids.add(pid);
-                                  vote(null,context,pid);
-                                }
-                              },
-                            )):new Container(height:18.0,child:new Checkbox(
+                      return new GestureDetector(onTap:(){Navigator.push(context,new PageRouteBuilder(opaque:false,pageBuilder:(context,a1,a2)=>new ImageView(child:new Center(child:new PhotoView(imageProvider:image.image,minScale:min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height),maxScale:4.0*min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height))),name:widget.id)));},child:new SizedBox(
+                          width: double.infinity,
+                          height: max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0*((MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?1:3*((MediaQuery.of(context).size.width/500.0).ceil())/4)),
+                          child: new Image(image:image.image,fit:BoxFit.cover)
+                      ));
+                    }else{
+                      return new Container(width:double.infinity,height:max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0*((MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?1:3*((MediaQuery.of(context).size.width/500.0).ceil())/4)),color:Colors.black12,child: new Center(child: new Container(height:MediaQuery.of(context).size.width/(15*(!widget.viewPage?(MediaQuery.of(context).size.width/500.0).ceil():1)),width:MediaQuery.of(context).size.width/(15*(!widget.viewPage?(MediaQuery.of(context).size.width/500.0).ceil():1)),child:new CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor)))));
+                    }
+                  },
+                )):new Container(),
+                new Container(height:5.0),
+                new Column(
+                    children: data[widget.id]["c"].map((c){
+                      dynamic used = pids.length>0?lastChoice:choice;
+                      double percent = (totalVotes!=0?correctList[data[widget.id]["c"].indexOf(c)]/totalVotes:0.0);
+                      return widget.viewPage||((hasVoted&&settings[1]!="Never")||(data[widget.id]["c"].indexOf(c)<5||settings[1]=="Always"))?new MaterialButton(onPressed: () async{
+                        if(multiSelect||c!=choice){
+                          if(widget.viewPage){
+                            PollViewState.canLeaveView = false;
+                          }
+                          String pid;
+                          do{
+                            pid = "";
+                            Random r = new Random();
+                            List<String> nums = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
+                            for(int i = 0;i<8;i++){
+                              pid+=(r.nextInt(2)==0?nums[r.nextInt(36)]:nums[r.nextInt(36)].toLowerCase());
+                            }
+                          }while(pids.contains(pid));
+                          pids.add(pid);
+                          waitForVote(){
+                            new Timer(Duration.zero,(){
+                              if(pids[0]==pid){
+                                vote(c,context,pid,multiSelect?!choice.contains(data[widget.id]["c"].indexOf(c)):null);
+                              }else if(pids.length>0){
+                                waitForVote();
+                              }
+                            });
+                          }
+                          waitForVote();
+                        }else if(!multiSelect&&c==choice&&pids.length==0){
+                          if(widget.viewPage){
+                            PollViewState.canLeaveView = false;
+                          }
+                          String pid;
+                          do{
+                            pid = "";
+                            Random r = new Random();
+                            List<String> nums = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
+                            for(int i = 0;i<8;i++){
+                              pid+=(r.nextInt(2)==0?nums[r.nextInt(36)]:nums[r.nextInt(36)].toLowerCase());
+                            }
+                          }while(pids.contains(pid));
+                          pids.add(pid);
+                          vote(null,context,pid);
+                        }
+                      },padding:EdgeInsets.only(top:12.0,bottom:12.0),child:new Column(children: [
+                        new Row(
+                            children: [
+                              !multiSelect?(pids.length>0)&&((choice==c)||(lastChoice==c&&choice==null))?new Container(width:2*kRadialReactionRadius+8.0,height:kRadialReactionRadius,child:new Center(child:new Container(height:16.0,width:16.0,child: new CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor),strokeWidth: 2.0)))):new Container(height:kRadialReactionRadius,child:new Radio(
                                 activeColor: indicatorColor,
-                                value: choice.contains(data[widget.id]["c"].indexOf(c)),
-                                onChanged:(b){
-                                  if(widget.viewPage){
-                                    PollViewState.canLeaveView = false;
-                                  }
-                                  String pid;
-                                  do{
-                                    pid = "";
-                                    Random r = new Random();
-                                    List<String> nums = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
-                                    for(int i = 0;i<8;i++){
-                                      pid+=(r.nextInt(2)==0?nums[r.nextInt(36)]:nums[r.nextInt(36)].toLowerCase());
+                                value: c,
+                                groupValue: choice,
+                                onChanged: (s){
+                                  if(s!=choice){
+                                    if(widget.viewPage){
+                                      PollViewState.canLeaveView = false;
                                     }
-                                  }while(pids.contains(pid));
-                                  pids.add(pid);
-                                  waitForVote(){
-                                    new Timer(Duration.zero,(){
-                                      if(pids[0]==pid){
-                                        vote(c,context,pid,b);
-                                      }else if(pids.length>0){
-                                        waitForVote();
+                                    String pid;
+                                    do{
+                                      pid = "";
+                                      Random r = new Random();
+                                      List<String> nums = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
+                                      for(int i = 0;i<8;i++){
+                                        pid+=(r.nextInt(2)==0?nums[r.nextInt(36)]:nums[r.nextInt(36)].toLowerCase());
                                       }
-                                    });
+                                    }while(pids.contains(pid));
+                                    pids.add(pid);
+                                    waitForVote(){
+                                      new Timer(Duration.zero,(){
+                                        if(pids[0]==pid){
+                                          vote(c,context,pid);
+                                        }else if(pids.length>0){
+                                          waitForVote();
+                                        }
+                                      });
+                                    }
+                                    waitForVote();
+                                  }else if(!multiSelect&&s==choice&&pids.length==0){
+                                    if(widget.viewPage){
+                                      PollViewState.canLeaveView = false;
+                                    }
+                                    String pid;
+                                    do{
+                                      pid = "";
+                                      Random r = new Random();
+                                      List<String> nums = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
+                                      for(int i = 0;i<8;i++){
+                                        pid+=(r.nextInt(2)==0?nums[r.nextInt(36)]:nums[r.nextInt(36)].toLowerCase());
+                                      }
+                                    }while(pids.contains(pid));
+                                    pids.add(pid);
+                                    vote(null,context,pid);
                                   }
-                                  waitForVote();
-                                }
-                            )),
-                            new Expanded(child:new Text(c,maxLines:!widget.viewPage?2:100,style: new TextStyle(color:textColor),overflow: TextOverflow.ellipsis)),
-                            new Container(width:8.0)
-                          ]
-                      ),
-                      new Container(height:6.0),
-                      hasVoted?new Row(crossAxisAlignment: CrossAxisAlignment.center,children:[new Expanded(child:new Padding(padding: EdgeInsets.only(top:7.5-((MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?5.0:5.0/(3*((MediaQuery.of(context).size.width/500.0).ceil())/4))/2,left:48.0,bottom:5.0),child: new Container(height:(MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?5.0:5.0/(3*((MediaQuery.of(context).size.width/500.0).ceil())/4),child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation((!multiSelect?used==c:used.contains(data[widget.id]["c"].indexOf(c)))?indicatorColor:settings[0]?Colors.white54:Colors.grey[600]),backgroundColor:settings[0]?Colors.white24:Colors.black26,value:percent)))),new Padding(padding:EdgeInsets.only(right:8.0),child:new Container(height:15.0,width:42.0,child:new FittedBox(fit:BoxFit.fitHeight,alignment: Alignment.centerRight,child:new Text((100*percent).toStringAsFixed(percent>=.9995?0:percent<.01?2:1)+"%",style:new TextStyle(color:(used!=null&&((multiSelect&&used.contains(c))||(!multiSelect&&used==c)))?indicatorColor:textColor.withOpacity(0.8))))))]):new Container()
-                    ])):data[widget.id]["c"].indexOf(c)==5?/*new Container(color:Colors.red,child:new Text("...",style:new TextStyle(fontSize:20.0,fontWeight: FontWeight.bold)))*/new Icon(Icons.more_horiz):new Container();
-                  }).toList().cast<Widget>()
-              ),
-              new Container(height:7.0)
-            ]
+                                },
+                              )):new Container(height:18.0,child:new Checkbox(
+                                  activeColor: indicatorColor,
+                                  value: choice.contains(data[widget.id]["c"].indexOf(c)),
+                                  onChanged:(b){
+                                    if(widget.viewPage){
+                                      PollViewState.canLeaveView = false;
+                                    }
+                                    String pid;
+                                    do{
+                                      pid = "";
+                                      Random r = new Random();
+                                      List<String> nums = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
+                                      for(int i = 0;i<8;i++){
+                                        pid+=(r.nextInt(2)==0?nums[r.nextInt(36)]:nums[r.nextInt(36)].toLowerCase());
+                                      }
+                                    }while(pids.contains(pid));
+                                    pids.add(pid);
+                                    waitForVote(){
+                                      new Timer(Duration.zero,(){
+                                        if(pids[0]==pid){
+                                          vote(c,context,pid,b);
+                                        }else if(pids.length>0){
+                                          waitForVote();
+                                        }
+                                      });
+                                    }
+                                    waitForVote();
+                                  }
+                              )),
+                              new Expanded(child:new Text(c,maxLines:!widget.viewPage?2:100,style: new TextStyle(color:textColor),overflow: TextOverflow.ellipsis)),
+                              new Container(width:8.0)
+                            ]
+                        ),
+                        new Container(height:6.0),
+                        hasVoted?new Row(crossAxisAlignment: CrossAxisAlignment.center,children:[new Expanded(child:new Padding(padding: EdgeInsets.only(top:7.5-((MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?5.0:5.0/(3*((MediaQuery.of(context).size.width/500.0).ceil())/4))/2,left:48.0,bottom:5.0),child: new Container(height:(MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?5.0:5.0/(3*((MediaQuery.of(context).size.width/500.0).ceil())/4),child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation((!multiSelect?used==c:used.contains(data[widget.id]["c"].indexOf(c)))?indicatorColor:settings[0]?Colors.white54:Colors.grey[600]),backgroundColor:settings[0]?Colors.white24:Colors.black26,value:percent)))),new Padding(padding:EdgeInsets.only(right:8.0),child:new Container(height:15.0,width:42.0,child:new FittedBox(fit:BoxFit.fitHeight,alignment: Alignment.centerRight,child:new Text((100*percent).toStringAsFixed(percent>=.9995?0:percent<.01?2:1)+"%",style:new TextStyle(color:(used!=null&&((multiSelect&&used.contains(c))||(!multiSelect&&used==c)))?indicatorColor:textColor.withOpacity(0.8))))))]):new Container()
+                      ])):data[widget.id]["c"].indexOf(c)==5?/*new Container(color:Colors.red,child:new Text("...",style:new TextStyle(fontSize:20.0,fontWeight: FontWeight.bold)))*/new Icon(Icons.more_horiz):new Container();
+                    }).toList().cast<Widget>()
+                ),
+                new Container(height:7.0)
+              ]
             //trailing: new Text(data[widget.id]["a"].reduce((n1,n2)=>n1+n2).toString(),style: new TextStyle(color:Colors.black))
           )
         ]
@@ -1420,8 +1492,8 @@ class PollState extends State<Poll>{
             transitionDuration: new Duration(milliseconds: 300),
             transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
               return new FadeTransition(
-                opacity: animation,
-                child: child
+                  opacity: animation,
+                  child: child
               );
             },
           ));
@@ -1497,102 +1569,80 @@ class PollViewState extends State<PollView>{
         body: new Container(
             color: !settings[0]?new Color.fromRGBO(250, 250, 250, 1.0):new Color.fromRGBO(32,33,36,1.0),
             child: new Stack(
-              children: [
-                new CustomScrollView(
-                    slivers: [
-                      new SliverAppBar(
-                          actions: [
-                            canDelete?new IconButton(
-                              icon:new Icon(Icons.delete),
-                              onPressed:(){
-                                showDialog(
-                                    context: context,
-                                    barrierDismissible: true,
-                                    builder: (context){
-                                      return new AlertDialog(
-                                          title:new Text("Are you sure?",style:new TextStyle(fontWeight:FontWeight.bold)),
-                                          content:new Text("Your poll will be permanently deleted."),
-                                          actions: [
-                                            new FlatButton(
-                                                child: new Text("No"),
-                                                onPressed: (){
-                                                  Navigator.of(context).pop();
-                                                }
-                                            ),
-                                            new FlatButton(
-                                                child: new Text("Yes"),
-                                                onPressed: () async{
-                                                  pressedDelete = true;
-                                                  openedPoll = null;
-                                                  Navigator.of(context).pop();
-                                                  Navigator.of(context).pop();
-                                                  if(data[widget.id]["b"].length==4&&data[widget.id]["b"][3]==1){
-                                                    await http.delete(Uri.encodeFull(imageLink+widget.id));
-                                                  }
-                                                  await http.put(Uri.encodeFull(database+"/data/"+widget.id+".json?auth="+secretKey),body:"{}");
-                                                  int lengthBefore = createdPolls.length;
-                                                  createdPolls.remove(widget.id);
-                                                  createdPolls.removeWhere((s)=>data[s]==null);
-                                                  if(createdPolls.length!=lengthBefore){
-                                                    await http.put(Uri.encodeFull(database+"/users/"+userId+"/1.json?auth="+secretKey),body:json.encode(createdPolls));
-                                                  }
-                                                }
-                                            )
-                                          ]
-                                      );
-                                    }
-                                );
-                              }
-                            ):new Container(),
-                            new IconButton(
-                                icon: new Icon(Icons.share),
-                                onPressed: () async{
-                                  final DynamicLinkParameters parameters = DynamicLinkParameters(
-                                      domain: "ppoll.page.link",
-                                      link: Uri.parse("https://ppoll.me/${widget.id}"),
-                                      androidParameters: AndroidParameters(
-                                        packageName: "land.platypus.ppoll",
-                                        minimumVersion: 9
-                                      ),
-                                      iosParameters: IosParameters(
-                                        bundleId: "land.platypus.ppoll",
-                                        minimumVersion: "2.0.3",
-                                        appStoreId: "1411244031"
-                                      )
-                                  );
-                                  final Uri dynamicUrl = await parameters.buildUrl();
-                                  var params = {
-                                    "longDynamicLink": dynamicUrl.toString()
-                                  };
-                                  var r = await http.post("https://firebasedynamiclinks.googleapis.com/v1/shortLinks?key=$webApiKey",body:json.encode(params));
-                                  var map = json.decode(r.body);
-                                  print(dynamicUrl.toString());
-                                  print(map["shortLink"]);
-                                  if(!isDeleted){
-                                    Share.share(map["shortLink"]);
-                                    //Share.share("Vote on \""+data[widget.id]["q"]+"\" (Code: ${widget.id}) using PPoll. Download now at https://platypuslabs.llc/downloadppoll");
+                children: [
+                  new CustomScrollView(
+                      slivers: [
+                        new SliverAppBar(
+                            actions: [
+                              canDelete?new IconButton(
+                                  icon:new Icon(Icons.delete),
+                                  onPressed:(){
+                                    showDialog(
+                                        context: context,
+                                        barrierDismissible: true,
+                                        builder: (context){
+                                          return new AlertDialog(
+                                              title:new Text("Are you sure?",style:new TextStyle(fontWeight:FontWeight.bold)),
+                                              content:new Text("Your poll will be permanently deleted."),
+                                              actions: [
+                                                new FlatButton(
+                                                    child: new Text("No"),
+                                                    onPressed: (){
+                                                      Navigator.of(context).pop();
+                                                    }
+                                                ),
+                                                new FlatButton(
+                                                    child: new Text("Yes"),
+                                                    onPressed: () async{
+                                                      pressedDelete = true;
+                                                      openedPoll = null;
+                                                      Navigator.of(context).pop();
+                                                      Navigator.of(context).pop();
+                                                      if(data[widget.id]["b"].length==4&&data[widget.id]["b"][3]==1){
+                                                        await http.delete(Uri.encodeFull(imageLink+widget.id));
+                                                      }
+                                                      await http.put(Uri.encodeFull(database+"/data/"+widget.id+".json?auth="+secretKey),body:"{}");
+                                                      int lengthBefore = createdPolls.length;
+                                                      createdPolls.remove(widget.id);
+                                                      createdPolls.removeWhere((s)=>data[s]==null);
+                                                      if(createdPolls.length!=lengthBefore){
+                                                        await http.put(Uri.encodeFull(database+"/users/"+userId+"/1.json?auth="+secretKey),body:json.encode(createdPolls));
+                                                      }
+                                                    }
+                                                )
+                                              ]
+                                          );
+                                        }
+                                    );
                                   }
-                                }
-                            )
-                          ],
-                          pinned: false,
-                          backgroundColor:color,
-                          floating: true,
-                          centerTitle: false,
-                          expandedHeight: 30.0,
-                          title: new Text(!isDeleted?widget.id:"Poll removed"),
-                          bottom: isDeleted?new PreferredSize(preferredSize: new Size(double.infinity,3.0),child: new Container(height:3.0,child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor)))):new PreferredSize(preferredSize:new Size(0.0,0.0),child: new Container())
-                      ),
-                      new SliverList(
-                          delegate: new SliverChildBuilderDelegate((context,i)=>new Hero(tag:widget.id,child:!isDeleted?new Material(child:widget.state!=null?new Poll(widget.id,true,widget.state.image,widget.state.height,widget.state.width):new Poll(widget.id,true)):new Container()),childCount:1)
-                      )
-                    ]
-                ),
-                new Positioned(
-                    left:0.0,top:0.0,
-                    child:new Container(height:MediaQuery.of(context).padding.top,width:MediaQuery.of(context).size.width,color:color)
-                )
-              ]
+                              ):new Container(),
+                              new IconButton(
+                                  icon: new Icon(Icons.share),
+                                  onPressed: () async{
+                                    if(!isDeleted){
+                                      Share.share("Vote on \""+data[widget.id]["q"]+"\" (Code: ${widget.id}) using PPoll. Use this link: https://ppoll.me/"+widget.id);
+                                    }
+                                  }
+                              )
+                            ],
+                            pinned: false,
+                            backgroundColor:color,
+                            floating: true,
+                            centerTitle: false,
+                            expandedHeight: 30.0,
+                            title: new Text(!isDeleted?widget.id:"Poll removed"),
+                            bottom: isDeleted?new PreferredSize(preferredSize: new Size(double.infinity,3.0),child: new Container(height:3.0,child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor)))):new PreferredSize(preferredSize:new Size(0.0,0.0),child: new Container())
+                        ),
+                        new SliverList(
+                            delegate: new SliverChildBuilderDelegate((context,i)=>new Hero(tag:widget.id,child:!isDeleted?new Material(child:widget.state!=null?new Poll(widget.id,true,widget.state.image,widget.state.height,widget.state.width):new Poll(widget.id,true)):new Container()),childCount:1)
+                        )
+                      ]
+                  ),
+                  new Positioned(
+                      left:0.0,top:0.0,
+                      child:new Container(height:MediaQuery.of(context).padding.top,width:MediaQuery.of(context).size.width,color:color)
+                  )
+                ]
             )
         )
     ));
@@ -1622,12 +1672,12 @@ class ImageViewState extends State<ImageView> with SingleTickerProviderStateMixi
   void initState(){
     super.initState();
     controller = new AnimationController(
-    duration: new Duration(milliseconds: 175),
-    vsync: this
+        duration: new Duration(milliseconds: 175),
+        vsync: this
     );
     animation = new Tween(
-      begin:0.0,
-      end:1.0
+        begin:0.0,
+        end:1.0
     ).animate(controller);
     controller.forward();
   }
@@ -1734,355 +1784,355 @@ class CreatePollPageState extends State<CreatePollPage>{
         color: !settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),
         child: new Center(
             child: new ListView(
-              controller: createController,
-              children:[
-                new Padding(padding:EdgeInsets.only(top:5.0,left:5.0,right:5.0),child:new Card(
-                  color: !settings[0]?new Color.fromRGBO(250, 250, 250, 1.0):new Color.fromRGBO(32,33,36,1.0),
-                  child:new Column(
-                    children:[
-                      new Padding(padding:EdgeInsets.only(top:10.0,left:11.0,right:11.0),child:new TextField(
-                        textCapitalization: TextCapitalization.sentences,
-                        style: new TextStyle(
-                          color:textColor,fontSize: 15.0,letterSpacing:.2,fontFamily: "Futura"
-                        ),
-                        onChanged: (s){
-                          question = s;
-                        },
-                        onSubmitted: (s){
-                          question = s;
-                        },
-                        decoration: new InputDecoration(
-                            hintText: "Question",
-                            hintStyle: new TextStyle(color:textColor.withOpacity(0.8)),
-                            border: new OutlineInputBorder(),
-                            filled: true,
-                            contentPadding: EdgeInsets.only(top:12.0,bottom:12.0,left:8.0,right:8.0)
-                        ),
-                        controller: questionController,
-                        inputFormatters: [new MaxInputFormatter(200)],
-                      )),
-                      image!=null?new Padding(padding:EdgeInsets.only(top:10.0,bottom:5.0),child:new FutureBuilder<ui.Image>(
-                        future: completer.future,
-                        builder:(BuildContext context, AsyncSnapshot<ui.Image> snapshot){
-                          if(snapshot.hasData){
-                            height = snapshot.data.height*1.0;
-                            width = snapshot.data.width*1.0;
-                            if(removing){
-                              return new GestureDetector(
-                                onTap: (){
-                                  setState((){
-                                    image = null;
-                                    height = null;
-                                    width = null;
-                                  });
-                                  createController.jumpTo(max(0.0,createController.position.pixels-(10+MediaQuery.of(context).size.height/3.0)));
-                                },
-                                child:new Container(color:Colors.grey[400],child:new SizedBox(
-                                  width: double.infinity,
-                                  height: max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0),
-                                  child: new Center(
-                                    child:new IconButton(
-                                      onPressed:(){
-                                        setState((){
-                                          image = null;
-                                          height = null;
-                                          width = null;
-                                        });
-                                      },
-                                      icon:new Icon(Icons.delete),
-                                      iconSize:MediaQuery.of(context).size.height/736.0*50,
-                                      color:Colors.black
-                                    )
-                                  )
-                                ))
-                              );
-                            }
-                            return new GestureDetector(onTap:(){Navigator.push(context,new PageRouteBuilder(opaque:false,pageBuilder: (context,a1,a2)=>new ImageView(child:new Center(child:new PhotoView(imageProvider:new Image.file(image).image,minScale: min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height),maxScale:4.0*min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height))),name:"Image")));},child:new SizedBox(
-                                width: double.infinity,
-                                height: max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0),
-                                child: new Image(image:new Image.file(image).image,fit:BoxFit.cover)
-                            ));
-                          }else{
-                            return new Container(width:double.infinity,height:max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0),color:Colors.black12,child: new Center(child: new Container(height:MediaQuery.of(context).size.height/20.0,width:MediaQuery.of(context).size.height/20.0,child:new CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor)))));
-                          }
-                        },
-                      )):new Container(),
-                      new Column(
-                        children:choices.asMap().keys.map((i)=>new AnimatedOpacity(opacity:removedIndex==i?0.0:1.0,duration:new Duration(milliseconds:250),child:new Container(key:new ValueKey<int>(i),height:50.0,child:new Row(
-                            children: [
-                              !removing?!multiSelect?new Radio(groupValue: null,value:i,onChanged:(i){}):new Checkbox(onChanged:(b){},value:false):new IconButton(icon:new Icon(Icons.delete),onPressed:(){
-                                if(choices.length>2&&removedIndex==-1){
-                                  setState((){removedIndex=i;});
-                                  new Timer(new Duration(milliseconds:250),(){
-                                    choices.removeAt(i);controllers.removeAt(i);
-                                    for(int j = 0; j<choices.length;j++){
-                                      controllers[j].text = choices[j];
-                                    }
-                                    createController.jumpTo(max(0.0,createController.position.pixels-50));
-                                    setState((){removedIndex=-1;});
-                                  });
-                                }
-                              }),
-                              new Expanded(
-                                  child: new Padding(padding:EdgeInsets.only(right:11.0),child:new TextField(
-                                    textCapitalization: TextCapitalization.sentences,
-                                    style: new TextStyle(color:textColor,fontSize:14.0),
-                                    onChanged: (s){
-                                      choices[i]=s;
-                                    },
-                                    onSubmitted: (s){
-                                      choices[i]=s;
-                                    },
-                                    decoration: new InputDecoration(
-                                      hintText: "Option ${i+1}",
-                                      hintStyle: new TextStyle(color:textColor.withOpacity(0.7)),
-                                    ),
-                                    controller: controllers[i],
-                                    inputFormatters: [new MaxInputFormatter(100)]
-                                  )),
-                              ),
-                              new Container(width:5.0)
-                            ]
-                        )))).toList()
-                      ),
-                      new MaterialButton(
-                        padding:EdgeInsets.zero,
-                        child: new Container(height:50.0,child:new Row(
+                controller: createController,
+                children:[
+                  new Padding(padding:EdgeInsets.only(top:5.0,left:5.0,right:5.0),child:new Card(
+                      color: !settings[0]?new Color.fromRGBO(250, 250, 250, 1.0):new Color.fromRGBO(32,33,36,1.0),
+                      child:new Column(
                           children:[
-                            new Container(width:2*kRadialReactionRadius+8.0,height:2*kRadialReactionRadius+8.0,child:new Icon(Icons.add)),
-                            new Expanded(child:new Text("Add",style:new TextStyle(color:textColor,fontSize:15.0)))
+                            new Padding(padding:EdgeInsets.only(top:10.0,left:11.0,right:11.0),child:new TextField(
+                              textCapitalization: TextCapitalization.sentences,
+                              style: new TextStyle(
+                                  color:textColor,fontSize: 15.0,letterSpacing:.2,fontFamily: "Futura"
+                              ),
+                              onChanged: (s){
+                                question = s;
+                              },
+                              onSubmitted: (s){
+                                question = s;
+                              },
+                              decoration: new InputDecoration(
+                                  hintText: "Question",
+                                  hintStyle: new TextStyle(color:textColor.withOpacity(0.8)),
+                                  border: new OutlineInputBorder(),
+                                  filled: true,
+                                  contentPadding: EdgeInsets.only(top:12.0,bottom:12.0,left:8.0,right:8.0)
+                              ),
+                              controller: questionController,
+                              inputFormatters: [new MaxInputFormatter(200)],
+                            )),
+                            image!=null?new Padding(padding:EdgeInsets.only(top:10.0,bottom:5.0),child:new FutureBuilder<ui.Image>(
+                              future: completer.future,
+                              builder:(BuildContext context, AsyncSnapshot<ui.Image> snapshot){
+                                if(snapshot.hasData){
+                                  height = snapshot.data.height*1.0;
+                                  width = snapshot.data.width*1.0;
+                                  if(removing){
+                                    return new GestureDetector(
+                                        onTap: (){
+                                          setState((){
+                                            image = null;
+                                            height = null;
+                                            width = null;
+                                          });
+                                          createController.jumpTo(max(0.0,createController.position.pixels-(10+MediaQuery.of(context).size.height/3.0)));
+                                        },
+                                        child:new Container(color:Colors.grey[400],child:new SizedBox(
+                                            width: double.infinity,
+                                            height: max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0),
+                                            child: new Center(
+                                                child:new IconButton(
+                                                    onPressed:(){
+                                                      setState((){
+                                                        image = null;
+                                                        height = null;
+                                                        width = null;
+                                                      });
+                                                    },
+                                                    icon:new Icon(Icons.delete),
+                                                    iconSize:MediaQuery.of(context).size.height/736.0*50,
+                                                    color:Colors.black
+                                                )
+                                            )
+                                        ))
+                                    );
+                                  }
+                                  return new GestureDetector(onTap:(){Navigator.push(context,new PageRouteBuilder(opaque:false,pageBuilder: (context,a1,a2)=>new ImageView(child:new Center(child:new PhotoView(imageProvider:new Image.file(image).image,minScale: min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height),maxScale:4.0*min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height))),name:"Image")));},child:new SizedBox(
+                                      width: double.infinity,
+                                      height: max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0),
+                                      child: new Image(image:new Image.file(image).image,fit:BoxFit.cover)
+                                  ));
+                                }else{
+                                  return new Container(width:double.infinity,height:max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0),color:Colors.black12,child: new Center(child: new Container(height:MediaQuery.of(context).size.height/20.0,width:MediaQuery.of(context).size.height/20.0,child:new CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor)))));
+                                }
+                              },
+                            )):new Container(),
+                            new Column(
+                                children:choices.asMap().keys.map((i)=>new AnimatedOpacity(opacity:removedIndex==i?0.0:1.0,duration:new Duration(milliseconds:250),child:new Container(key:new ValueKey<int>(i),height:50.0,child:new Row(
+                                    children: [
+                                      !removing?!multiSelect?new Radio(groupValue: null,value:i,onChanged:(i){}):new Checkbox(onChanged:(b){},value:false):new IconButton(icon:new Icon(Icons.delete),onPressed:(){
+                                        if(choices.length>2&&removedIndex==-1){
+                                          setState((){removedIndex=i;});
+                                          new Timer(new Duration(milliseconds:250),(){
+                                            choices.removeAt(i);controllers.removeAt(i);
+                                            for(int j = 0; j<choices.length;j++){
+                                              controllers[j].text = choices[j];
+                                            }
+                                            createController.jumpTo(max(0.0,createController.position.pixels-50));
+                                            setState((){removedIndex=-1;});
+                                          });
+                                        }
+                                      }),
+                                      new Expanded(
+                                        child: new Padding(padding:EdgeInsets.only(right:11.0),child:new TextField(
+                                            textCapitalization: TextCapitalization.sentences,
+                                            style: new TextStyle(color:textColor,fontSize:14.0),
+                                            onChanged: (s){
+                                              choices[i]=s;
+                                            },
+                                            onSubmitted: (s){
+                                              choices[i]=s;
+                                            },
+                                            decoration: new InputDecoration(
+                                              hintText: "Option ${i+1}",
+                                              hintStyle: new TextStyle(color:textColor.withOpacity(0.7)),
+                                            ),
+                                            controller: controllers[i],
+                                            inputFormatters: [new MaxInputFormatter(100)]
+                                        )),
+                                      ),
+                                      new Container(width:5.0)
+                                    ]
+                                )))).toList()
+                            ),
+                            new MaterialButton(
+                                padding:EdgeInsets.zero,
+                                child: new Container(height:50.0,child:new Row(
+                                    children:[
+                                      new Container(width:2*kRadialReactionRadius+8.0,height:2*kRadialReactionRadius+8.0,child:new Icon(Icons.add)),
+                                      new Expanded(child:new Text("Add",style:new TextStyle(color:textColor,fontSize:15.0)))
+                                    ]
+                                )),
+                                onPressed:(){
+                                  if(choices.length<20){
+                                    if(createController.position.pixels>0){
+                                      createController.jumpTo(createController.position.pixels+50.0);
+                                    }
+                                    controllers.add(new TextEditingController());
+                                    setState((){choices.add(null);});
+                                  }
+                                }
+                            ),
+                            new Container(height:7.0)
                           ]
-                        )),
-                        onPressed:(){
-                          if(choices.length<20){
-                            if(createController.position.pixels>0){
-                              createController.jumpTo(createController.position.pixels+50.0);
-                            }
-                            controllers.add(new TextEditingController());
-                            setState((){choices.add(null);});
-                          }
+                      )
+                  )),
+                  new Container(height:5.0),
+                  new MaterialButton(color:settings[0]?new Color.fromRGBO(32,33,36,1.0):new Color.fromRGBO(253,253,253,1.0),onPressed:(){setState((){multiSelect=!multiSelect;public=false;});},padding:EdgeInsets.zero,child:new ListTile(leading:new Text("Multiple selections",style:new TextStyle(color:textColor)),trailing:new Switch(value:multiSelect,activeColor:indicatorColor,onChanged:(b){setState((){multiSelect=b;public=false;});}))),
+                  new MaterialButton(color:settings[0]?new Color.fromRGBO(32,33,36,1.0):new Color.fromRGBO(253,253,253,1.0),onPressed:(){setState((){public=!public;multiSelect=false;});},padding:EdgeInsets.zero,child:new ListTile(leading:new Text("Publicly searchable",style:new TextStyle(color:textColor)),trailing:new Switch(value:public,activeColor:indicatorColor,onChanged:(b){setState((){public=b;multiSelect=false;});}))),
+                  new MaterialButton(color:settings[0]?new Color.fromRGBO(32,33,36,1.0):new Color.fromRGBO(253,253,253,1.0),onPressed:() async{
+                    if(image!=null&&width!=null){
+                      Navigator.push(context,new PageRouteBuilder(opaque:false,pageBuilder: (context,a1,a2)=>new ImageView(child:new Center(child:new PhotoView(imageProvider:new Image.file(image).image,minScale: min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height),maxScale:4.0*min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height))),name:"Image")));
+                    }else if(!imageLoading){
+                      completer = new Completer<ui.Image>();
+                      File tempImage = await ImagePicker.pickImage(source: ImageSource.gallery);
+                      if(tempImage!=null){
+                        if(tempImage!=null&&(basename(tempImage.path)==null||lookupMimeType(basename(tempImage.path))==null||!["image/png","image/jpeg"].contains(lookupMimeType(basename(tempImage.path))))){
+                          imageLoading=false;
+                          showDialog(
+                              context: context,
+                              barrierDismissible: true,
+                              builder: (context){
+                                return new AlertDialog(
+                                    title:new Text("Error",style:new TextStyle(fontWeight:FontWeight.bold)),
+                                    content:new Text(basename(tempImage.path)==null?"Invalid file path":"Invalid file type"),
+                                    actions: [
+                                      new FlatButton(
+                                          child: new Text("OK"),
+                                          onPressed: (){
+                                            Navigator.of(context).pop();
+                                          }
+                                      )
+                                    ]
+                                );
+                              }
+                          );
+                          return;
                         }
-                      ),
-                      new Container(height:7.0)
-                    ]
-                  )
-                )),
-                new Container(height:5.0),
-                new MaterialButton(color:settings[0]?new Color.fromRGBO(32,33,36,1.0):new Color.fromRGBO(253,253,253,1.0),onPressed:(){setState((){multiSelect=!multiSelect;public=false;});},padding:EdgeInsets.zero,child:new ListTile(leading:new Text("Multiple selections",style:new TextStyle(color:textColor)),trailing:new Switch(value:multiSelect,activeColor:indicatorColor,onChanged:(b){setState((){multiSelect=b;public=false;});}))),
-                new MaterialButton(color:settings[0]?new Color.fromRGBO(32,33,36,1.0):new Color.fromRGBO(253,253,253,1.0),onPressed:(){setState((){public=!public;multiSelect=false;});},padding:EdgeInsets.zero,child:new ListTile(leading:new Text("Publicly searchable",style:new TextStyle(color:textColor)),trailing:new Switch(value:public,activeColor:indicatorColor,onChanged:(b){setState((){public=b;multiSelect=false;});}))),
-                new MaterialButton(color:settings[0]?new Color.fromRGBO(32,33,36,1.0):new Color.fromRGBO(253,253,253,1.0),onPressed:() async{
-                  if(image!=null&&width!=null){
-                    Navigator.push(context,new PageRouteBuilder(opaque:false,pageBuilder: (context,a1,a2)=>new ImageView(child:new Center(child:new PhotoView(imageProvider:new Image.file(image).image,minScale: min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height),maxScale:4.0*min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height))),name:"Image")));
-                  }else if(!imageLoading){
-                    completer = new Completer<ui.Image>();
-                    File tempImage = await ImagePicker.pickImage(source: ImageSource.gallery);
-                    if(tempImage!=null){
-                      if(tempImage!=null&&(basename(tempImage.path)==null||lookupMimeType(basename(tempImage.path))==null||!["image/png","image/jpeg"].contains(lookupMimeType(basename(tempImage.path))))){
+                        setState((){imageLoading = true;image = tempImage;});
+                        createController.jumpTo(createController.position.pixels+10+MediaQuery.of(context).size.height/3.0);
+                        new Image.file(tempImage).image.resolve(new ImageConfiguration()).addListener((ImageInfo info, bool b){
+                          completer.complete(info.image);
+                          height = info.image.height*1.0;
+                          width = info.image.width*1.0;
+                          setState((){imageLoading = false;});
+                        });
+                      }else{
+                        height=null;
+                        width=null;
                         imageLoading=false;
-                        showDialog(
-                            context: context,
-                            barrierDismissible: true,
-                            builder: (context){
-                              return new AlertDialog(
-                                  title:new Text("Error",style:new TextStyle(fontWeight:FontWeight.bold)),
-                                  content:new Text(basename(tempImage.path)==null?"Invalid file path":"Invalid file type"),
-                                  actions: [
-                                    new FlatButton(
-                                        child: new Text("OK"),
-                                        onPressed: (){
-                                          Navigator.of(context).pop();
-                                        }
-                                    )
-                                  ]
-                              );
-                            }
-                        );
-                        return;
+                        image=null;
                       }
-                      setState((){imageLoading = true;image = tempImage;});
-                      createController.jumpTo(createController.position.pixels+10+MediaQuery.of(context).size.height/3.0);
-                      new Image.file(tempImage).image.resolve(new ImageConfiguration()).addListener((ImageInfo info, bool b){
-                        completer.complete(info.image);
-                        height = info.image.height*1.0;
-                        width = info.image.width*1.0;
-                        setState((){imageLoading = false;});
-                      });
-                    }else{
-                      height=null;
-                      width=null;
-                      imageLoading=false;
-                      image=null;
                     }
-                  }
-                },padding:EdgeInsets.zero,child:new ListTile(leading:new Text(image!=null?"Image selected":"Add an image",style:new TextStyle(color:textColor)),trailing:new Padding(padding:EdgeInsets.only(right:10.0),child:new SizedBox(height:40.0,width:40.0,child:image!=null?!imageLoading?!removing?new Image.file(image,fit:BoxFit.cover):new IconButton(color:settings[0]?Colors.white:Colors.black,icon: new Icon(Icons.delete),onPressed:(){
-                  createController.jumpTo(max(0.0,createController.position.pixels-(10+MediaQuery.of(context).size.height/3.0)));
-                  setState((){
-                    image = null;
-                    height = null;
-                    width = null;
-                  });
-                }):new Padding(padding:EdgeInsets.all(7.0),child:new CircularProgressIndicator()):new Icon(Icons.add,color:settings[0]?Colors.white:Colors.black))))),
-                new Container(height:20.0),
-                new Padding(padding:EdgeInsets.only(left:MediaQuery.of(context).size.width/20.0,right:MediaQuery.of(context).size.width/20.0),child:new MaterialButton(
-                  color:color,
-                  height:40.0,
-                  child:new Text("SUBMIT",style:new TextStyle(fontSize:14.0,color:Colors.white,letterSpacing:.5)),
-                  onPressed:() async{
-                    if(!hasLoaded){
-                      showDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (context){
-                            return new AlertDialog(
-                                title: new Text("Error",style:new TextStyle(fontWeight:FontWeight.bold)),
-                                content: new Text("You must wait for the browse page to load before you create polls."),
-                                actions: [
-                                  new FlatButton(
-                                      child: new Text("OK"),
-                                      onPressed: (){
-                                        Navigator.of(context).pop();
-                                      }
-                                  )
-                                ]
-                            );
-                          }
-                      );
-                      return;
-                    }
-                    try{
-                      await InternetAddress.lookup("google.com");
-                    }on SocketException catch(_){
-                      showDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (context){
-                            return new AlertDialog(
-                                title: new Text("Error",style:new TextStyle(fontWeight:FontWeight.bold)),
-                                content: new Text("Please check your internet connection"),
-                                actions: [
-                                  new FlatButton(
-                                      child: new Text("OK"),
-                                      onPressed: (){
-                                        Navigator.of(context).pop();
-                                      }
-                                  )
-                                ]
-                            );
-                          }
-                      );
-                      return;
-                    }
-                    bool validQuestion = question!=null&&question!="";
-                    bool validChoices = !choices.contains(null)&&!choices.contains("")&&(choices.toSet().length==choices.length);
-                    bool validImage;
-                    if(image==null){
-                      validImage = true;
-                    }else{
-                      validImage = ((await image.length())<5000000)&&(basename(image.path)!=null&&lookupMimeType(basename(image.path))!=null&&["image/png","image/jpeg"].contains(lookupMimeType(basename(image.path))));
-                    }
-                    if(validQuestion&&validChoices&&validImage){
-                      showDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (context){
-                            return new AlertDialog(
-                                title: new Text("Loading"),
-                                content: new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor))
-                            );
-                          }
-                      );
-                      String code;
-                      await http.get(Uri.encodeFull(functionsLink+"/create?text={\"key\":"+json.encode(secretKey)+",\"a\":"+json.encode(new List<int>(choices.length).map((i)=>0).toList())+",\"c\":"+json.encode(choices)+",\"q\":"+json.encode(question)+",\"u\":"+json.encode(userId)+",\"b\":"+json.encode([multiSelect?1:0,0,public?1:0,image!=null?1:0])+"}").replaceAll("#","%23").replaceAll("&","%26")).then((r){
-                        List l = json.decode(r.body);
-                        code = l[0];
-                        data[code] = l[1];
-                      }).catchError((e){
-                        Navigator.of(context).pop();
-                        showDialog(
-                            context: context,
-                            barrierDismissible: false,
-                            builder: (context){
-                              return new AlertDialog(
-                                  title: new Text("Error",style:new TextStyle(fontWeight:FontWeight.bold)),
-                                  content: new Text("Something went wrong"),
-                                  actions: [
-                                    new FlatButton(
-                                        child: new Text("OK"),
-                                        onPressed: (){
-                                          Navigator.of(context).pop();
-                                        }
-                                    )
-                                  ]
-                              );
-                            }
-                        );
-                        throw e;
-                      });
-                      if(code==null){
-                        return;
-                      }
-                      if(image!=null){
-                        await http.post(Uri.encodeFull(cloudUploadDatabase+"/o?uploadType=media&name="+code),headers:{"content-type":lookupMimeType(basename(image.path))},body:await image.readAsBytes());
-                      }
-                      Navigator.of(context).pop();
-                      createController.jumpTo(0.0);
-                      choices = [null,null];
-                      question = null;
-                      multiSelect = false;
-                      public = false;
+                  },padding:EdgeInsets.zero,child:new ListTile(leading:new Text(image!=null?"Image selected":"Add an image",style:new TextStyle(color:textColor)),trailing:new Padding(padding:EdgeInsets.only(right:10.0),child:new SizedBox(height:40.0,width:40.0,child:image!=null?!imageLoading?!removing?new Image.file(image,fit:BoxFit.cover):new IconButton(color:settings[0]?Colors.white:Colors.black,icon: new Icon(Icons.delete),onPressed:(){
+                    createController.jumpTo(max(0.0,createController.position.pixels-(10+MediaQuery.of(context).size.height/3.0)));
+                    setState((){
                       image = null;
                       height = null;
                       width = null;
-                      completer = new Completer<ui.Image>();
-                      imageLoading = false;
-                      removing = false;
-                      removedIndex = -1;
-                      questionController = new TextEditingController();
-                      controllers = new List<TextEditingController>()..addAll([new TextEditingController(),new TextEditingController()]);
-                      setState((){});
-                      Navigator.push(context,new MaterialPageRoute(builder: (context)=>new PollView(code)));
-                    }else{
-                      String errorMessage = "";
-                      if((question==null||choices.contains(null)||question==""||choices.contains(""))&&choices.toSet().length!=choices.length){
-                        errorMessage="Please complete all the fields without duplicates";
-                      }else if(question==null||choices.contains(null)||question==""||choices.contains("")){
-                        errorMessage="Please complete all the fields";
-                      }else if(choices.toSet().length!=choices.length){
-                        errorMessage="Please do not include duplicate choices";
-                      }
-                      if(image!=null&&((await image.length()>5000000))){
-                        if(errorMessage==""){
-                          errorMessage="That image is too big (max size is 5 MB)";
+                    });
+                  }):new Padding(padding:EdgeInsets.all(7.0),child:new CircularProgressIndicator()):new Icon(Icons.add,color:settings[0]?Colors.white:Colors.black))))),
+                  new Container(height:20.0),
+                  new Padding(padding:EdgeInsets.only(left:MediaQuery.of(context).size.width/20.0,right:MediaQuery.of(context).size.width/20.0),child:new MaterialButton(
+                      color:color,
+                      height:40.0,
+                      child:new Text("SUBMIT",style:new TextStyle(fontSize:14.0,color:Colors.white,letterSpacing:.5)),
+                      onPressed:() async{
+                        if(!hasLoaded){
+                          showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (context){
+                                return new AlertDialog(
+                                    title: new Text("Error",style:new TextStyle(fontWeight:FontWeight.bold)),
+                                    content: new Text("You must wait for the browse page to load before you create polls."),
+                                    actions: [
+                                      new FlatButton(
+                                          child: new Text("OK"),
+                                          onPressed: (){
+                                            Navigator.of(context).pop();
+                                          }
+                                      )
+                                    ]
+                                );
+                              }
+                          );
+                          return;
+                        }
+                        try{
+                          await InternetAddress.lookup("google.com");
+                        }on SocketException catch(_){
+                          showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (context){
+                                return new AlertDialog(
+                                    title: new Text("Error",style:new TextStyle(fontWeight:FontWeight.bold)),
+                                    content: new Text("Please check your internet connection"),
+                                    actions: [
+                                      new FlatButton(
+                                          child: new Text("OK"),
+                                          onPressed: (){
+                                            Navigator.of(context).pop();
+                                          }
+                                      )
+                                    ]
+                                );
+                              }
+                          );
+                          return;
+                        }
+                        bool validQuestion = question!=null&&question!="";
+                        bool validChoices = !choices.contains(null)&&!choices.contains("")&&(choices.toSet().length==choices.length);
+                        bool validImage;
+                        if(image==null){
+                          validImage = true;
                         }else{
-                          errorMessage+=" and reduce the image size to below 5 MB";
+                          validImage = ((await image.length())<5000000)&&(basename(image.path)!=null&&lookupMimeType(basename(image.path))!=null&&["image/png","image/jpeg"].contains(lookupMimeType(basename(image.path))));
+                        }
+                        if(validQuestion&&validChoices&&validImage){
+                          showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (context){
+                                return new AlertDialog(
+                                    title: new Text("Loading"),
+                                    content: new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor))
+                                );
+                              }
+                          );
+                          String code;
+                          await http.get(Uri.encodeFull(functionsLink+"/create?text={\"key\":"+json.encode(secretKey)+",\"a\":"+json.encode(new List<int>(choices.length).map((i)=>0).toList())+",\"c\":"+json.encode(choices)+",\"q\":"+json.encode(question)+",\"u\":"+json.encode(userId)+",\"b\":"+json.encode([multiSelect?1:0,0,public?1:0,image!=null?1:0])+"}").replaceAll("#","%23").replaceAll("&","%26")).then((r){
+                            List l = json.decode(r.body);
+                            code = l[0];
+                            data[code] = l[1];
+                          }).catchError((e){
+                            Navigator.of(context).pop();
+                            showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (context){
+                                  return new AlertDialog(
+                                      title: new Text("Error",style:new TextStyle(fontWeight:FontWeight.bold)),
+                                      content: new Text("Something went wrong"),
+                                      actions: [
+                                        new FlatButton(
+                                            child: new Text("OK"),
+                                            onPressed: (){
+                                              Navigator.of(context).pop();
+                                            }
+                                        )
+                                      ]
+                                  );
+                                }
+                            );
+                            throw e;
+                          });
+                          if(code==null){
+                            return;
+                          }
+                          if(image!=null){
+                            await http.post(Uri.encodeFull(cloudUploadDatabase+"/o?uploadType=media&name="+code),headers:{"content-type":lookupMimeType(basename(image.path))},body:await image.readAsBytes());
+                          }
+                          Navigator.of(context).pop();
+                          createController.jumpTo(0.0);
+                          choices = [null,null];
+                          question = null;
+                          multiSelect = false;
+                          public = false;
+                          image = null;
+                          height = null;
+                          width = null;
+                          completer = new Completer<ui.Image>();
+                          imageLoading = false;
+                          removing = false;
+                          removedIndex = -1;
+                          questionController = new TextEditingController();
+                          controllers = new List<TextEditingController>()..addAll([new TextEditingController(),new TextEditingController()]);
+                          setState((){});
+                          Navigator.push(context,new MaterialPageRoute(builder: (context)=>new PollView(code)));
+                        }else{
+                          String errorMessage = "";
+                          if((question==null||choices.contains(null)||question==""||choices.contains(""))&&choices.toSet().length!=choices.length){
+                            errorMessage="Please complete all the fields without duplicates";
+                          }else if(question==null||choices.contains(null)||question==""||choices.contains("")){
+                            errorMessage="Please complete all the fields";
+                          }else if(choices.toSet().length!=choices.length){
+                            errorMessage="Please do not include duplicate choices";
+                          }
+                          if(image!=null&&((await image.length()>5000000))){
+                            if(errorMessage==""){
+                              errorMessage="That image is too big (max size is 5 MB)";
+                            }else{
+                              errorMessage+=" and reduce the image size to below 5 MB";
+                            }
+                          }
+                          if(image!=null&&(basename(image.path)==null||lookupMimeType(basename(image.path))==null||!["image/png","image/jpeg"].contains(lookupMimeType(basename(image.path))))){
+                            errorMessage+=(errorMessage==""?"Invalid image format":". The image format is invalid");
+                          }
+                          showDialog(
+                              context: context,
+                              barrierDismissible: true,
+                              builder: (context){
+                                return new AlertDialog(
+                                    title:new Text("Error",style:new TextStyle(fontWeight:FontWeight.bold)),
+                                    content:new Text(errorMessage),
+                                    actions: [
+                                      new FlatButton(
+                                          child: new Text("OK"),
+                                          onPressed: (){
+                                            Navigator.of(context).pop();
+                                          }
+                                      )
+                                    ]
+                                );
+                              }
+                          );
                         }
                       }
-                      if(image!=null&&(basename(image.path)==null||lookupMimeType(basename(image.path))==null||!["image/png","image/jpeg"].contains(lookupMimeType(basename(image.path))))){
-                        errorMessage+=(errorMessage==""?"Invalid image format":". The image format is invalid");
-                      }
-                      showDialog(
-                          context: context,
-                          barrierDismissible: true,
-                          builder: (context){
-                            return new AlertDialog(
-                                title:new Text("Error",style:new TextStyle(fontWeight:FontWeight.bold)),
-                                content:new Text(errorMessage),
-                                actions: [
-                                  new FlatButton(
-                                      child: new Text("OK"),
-                                      onPressed: (){
-                                        Navigator.of(context).pop();
-                                      }
-                                  )
-                                ]
-                            );
-                          }
-                      );
-                    }
-                  }
-                )),
-                new Container(height:20.0)
-              ]
+                  )),
+                  new Container(height:20.0)
+                ]
             )
         )
     ));
@@ -2096,6 +2146,14 @@ class OpenPollPage extends StatefulWidget{
 
 class OpenPollPageState extends State<OpenPollPage>{
 
+  @override
+  void initState(){
+    super.initState();
+    f.addListener((){
+      setState((){});
+    });
+  }
+
   TextEditingController openController = new TextEditingController();
   FocusNode f = new FocusNode();
   String input;
@@ -2104,129 +2162,129 @@ class OpenPollPageState extends State<OpenPollPage>{
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
     double usedParam = min(width,height);
-    double space = height - kBottomNavigationBarHeight;
+    double space = f.hasFocus?0.0:(height - kBottomNavigationBarHeight);
     return new Scaffold(
-      resizeToAvoidBottomPadding: false,
-      body: new Stack(
-        children:[
-          new Container(
-            color:!settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0)
-          ),
-          new SingleChildScrollView(child:new Container(height:max(space,264.0),color:!settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),child:new Center(
-              child:new Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children:[
-                    new Container(width:usedParam*3/4,child:new FittedBox(fit:BoxFit.fitWidth,child:new Text("PPoll"))),
-                    new Container(height:7.5),
-                    new Container(constraints:BoxConstraints.loose(new Size(usedParam*3/4,48.0)),child:new TextField(
-                      controller:openController,
-                      focusNode: f,
-                      inputFormatters: [new UpperCaseTextFormatter()],
-                      onChanged:(s){
-                        input=s;
-                      },
-                      onSubmitted:(s){
-                        input=s;
-                      },
-                      textAlign:TextAlign.center,
-                      style:new TextStyle(
-                          color:textColor,
-                          fontSize:20.0
-                      ),
-                      decoration: new InputDecoration(
-                          hintText: "Poll Code",
-                          border: InputBorder.none,
-                          fillColor: !settings[0]?Colors.grey[400]:Colors.grey[600],
-                          filled:true
-                      ),
-                    )),
-                    new Container(height:7.5),
-                    new Container(width:usedParam*3/4,height:48.0,child:new RaisedButton(
-                        color:color,
-                        child:new Text("Open Poll",style:new TextStyle(fontSize:20.0,color:Colors.white)),
-                        onPressed:() async{
-                          if(!hasLoaded){
-                            showDialog(
-                                context: context,
-                                barrierDismissible: false,
-                                builder: (context){
-                                  return new AlertDialog(
-                                      title: new Text("Error",style:new TextStyle(fontWeight:FontWeight.bold)),
-                                      content: new Text("You must wait for the browse page to load before you view polls."),
-                                      actions: [
-                                        new FlatButton(
-                                            child: new Text("OK"),
-                                            onPressed: (){
-                                              Navigator.of(context).pop();
-                                            }
-                                        )
-                                      ]
-                                  );
-                                }
-                            );
-                            return;
-                          }
-                          try{
-                            await InternetAddress.lookup("google.com");
-                          }on SocketException catch(_){
-                            showDialog(
-                                context: context,
-                                barrierDismissible: false,
-                                builder: (context){
-                                  return new AlertDialog(
-                                      title: new Text("Error",style:new TextStyle(fontWeight:FontWeight.bold)),
-                                      content: new Text("Please check your internet connection"),
-                                      actions: [
-                                        new FlatButton(
-                                            child: new Text("OK"),
-                                            onPressed: (){
-                                              Navigator.of(context).pop();
-                                            }
-                                        )
-                                      ]
-                                  );
-                                }
-                            );
-                            return;
-                          }
-                          if(input==null||input.length<4){
-                            Scaffold.of(context).removeCurrentSnackBar();
-                            Scaffold.of(context).showSnackBar(new SnackBar(duration:new Duration(milliseconds:450),content:new Text("Invalid code")));
-                          }else if(data[input]==null){
-                            Scaffold.of(context).removeCurrentSnackBar();
-                            Scaffold.of(context).showSnackBar(new SnackBar(duration:new Duration(milliseconds:450),content:new Text("Poll not found")));
-                          }else if(data[input]["p"]==1&&settings[2]&&(data[input]["u"]==null||data[input]["u"]!=userId)){
-                            Scaffold.of(context).removeCurrentSnackBar();
-                            Scaffold.of(context).showSnackBar(new SnackBar(duration:new Duration(milliseconds:450),content:new Text("Unsafe Poll")));
-                          }else{
-                            String temp = input;
-                            openController = new TextEditingController();
-                            f = new FocusNode();
-                            setState((){input = null;});
-                            Navigator.push(context,new PageRouteBuilder(
-                              pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation){
-                                return new PollView(temp);
-                              },
-                              transitionDuration: new Duration(milliseconds: 300),
-                              transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child){
-                                return new FadeTransition(
-                                    opacity: animation,
-                                    child: child
+        resizeToAvoidBottomPadding: false,
+        body: new Stack(
+            children:[
+              new Container(
+                  color:!settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0)
+              ),
+              new SingleChildScrollView(child:new Center(child:new Container(height:!f.hasFocus?max(space,260.0):max(300*height/568.0,260.0),color:!settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),child:new Center(
+                  child:new Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children:[
+                        new Container(width:usedParam*3/4,child:new FittedBox(fit:BoxFit.fitWidth,child:new Text("PPoll"))),
+                        new Container(height:7.5),
+                        new Container(constraints:BoxConstraints.loose(new Size(usedParam*3/4,48.0)),child:new TextField(
+                          controller:openController,
+                          focusNode: f,
+                          inputFormatters: [new UpperCaseTextFormatter()],
+                          onChanged:(s){
+                            input = s;
+                          },
+                          onSubmitted:(s){
+                            input=s;
+                          },
+                          textAlign:TextAlign.center,
+                          style:new TextStyle(
+                              color:textColor,
+                              fontSize:20.0
+                          ),
+                          decoration: new InputDecoration(
+                              hintText: "Poll Code",
+                              border: InputBorder.none,
+                              fillColor: !settings[0]?Colors.grey[400]:Colors.grey[600],
+                              filled:true
+                          ),
+                        )),
+                        new Container(height:7.5),
+                        new Container(width:usedParam*3/4,height:48.0,child:new RaisedButton(
+                            color:color,
+                            child:new Text("Open Poll",style:new TextStyle(fontSize:20.0,color:Colors.white)),
+                            onPressed:() async{
+                              if(!hasLoaded){
+                                showDialog(
+                                    context: context,
+                                    barrierDismissible: false,
+                                    builder: (context){
+                                      return new AlertDialog(
+                                          title: new Text("Error",style:new TextStyle(fontWeight:FontWeight.bold)),
+                                          content: new Text("You must wait for the browse page to load before you view polls."),
+                                          actions: [
+                                            new FlatButton(
+                                                child: new Text("OK"),
+                                                onPressed: (){
+                                                  Navigator.of(context).pop();
+                                                }
+                                            )
+                                          ]
+                                      );
+                                    }
                                 );
-                              },
-                            ));
-                          }
-                        }
-                    ))
-                  ]
+                                return;
+                              }
+                              try{
+                                await InternetAddress.lookup("google.com");
+                              }on SocketException catch(_){
+                                showDialog(
+                                    context: context,
+                                    barrierDismissible: false,
+                                    builder: (context){
+                                      return new AlertDialog(
+                                          title: new Text("Error",style:new TextStyle(fontWeight:FontWeight.bold)),
+                                          content: new Text("Please check your internet connection"),
+                                          actions: [
+                                            new FlatButton(
+                                                child: new Text("OK"),
+                                                onPressed: (){
+                                                  Navigator.of(context).pop();
+                                                }
+                                            )
+                                          ]
+                                      );
+                                    }
+                                );
+                                return;
+                              }
+                              if(input==null||input.length<4){
+                                Scaffold.of(context).removeCurrentSnackBar();
+                                Scaffold.of(context).showSnackBar(new SnackBar(duration:new Duration(milliseconds:450),content:new Text("Invalid code")));
+                              }else if(data[input]==null){
+                                Scaffold.of(context).removeCurrentSnackBar();
+                                Scaffold.of(context).showSnackBar(new SnackBar(duration:new Duration(milliseconds:450),content:new Text("Poll not found")));
+                              }else if(data[input]["p"]==1&&settings[2]&&(data[input]["u"]==null||data[input]["u"]!=userId)){
+                                Scaffold.of(context).removeCurrentSnackBar();
+                                Scaffold.of(context).showSnackBar(new SnackBar(duration:new Duration(milliseconds:450),content:new Text("Unsafe Poll")));
+                              }else{
+                                String temp = input;
+                                openController = new TextEditingController();
+                                f.unfocus();
+                                setState((){input = null;});
+                                Navigator.push(context,new PageRouteBuilder(
+                                  pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation){
+                                    return new PollView(temp);
+                                  },
+                                  transitionDuration: new Duration(milliseconds: 300),
+                                  transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child){
+                                    return new FadeTransition(
+                                        opacity: animation,
+                                        child: child
+                                    );
+                                  },
+                                ));
+                              }
+                            }
+                        ))
+                      ]
+                  )
+              )))),
+              new Positioned(
+                  left:0.0,top:0.0,
+                  child:new Container(height:MediaQuery.of(context).padding.top,width:MediaQuery.of(context).size.width,color:color)
               )
-          ))),
-          new Positioned(
-              left:0.0,top:0.0,
-              child:new Container(height:MediaQuery.of(context).padding.top,width:MediaQuery.of(context).size.width,color:color)
-          )
-        ]
-      )
+            ]
+        )
     );
   }
 }
