@@ -793,8 +793,7 @@ class MainPageState extends State<MainPage> with WidgetsBindingObserver{
         }
         if(openedPoll==id){
           return;
-        }
-        if(openedPoll!=null){
+        }else if(openedPoll!=null){
           Navigator.of(this.context).pop();
           openedPoll = id;
         }
