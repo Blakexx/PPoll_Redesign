@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "779771864148",
+    "firebase_url": "https://ppoll-revamp.firebaseio.com",
+    "project_id": "ppoll-revamp",
+    "storage_bucket": "ppoll-revamp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:779771864148:android:e9341c55fee93f1d",
+        "android_client_info": {
+          "package_name": "land.platypus.ppoll"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "779771864148-38g569ob74hc8qln0u5rhqs2fuoj9d27.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "land.platypus.ppoll",
+            "certificate_hash": "ebf11963344331c0f11f6957c44c62c811facfd9"
+          }
+        },
+        {
+          "client_id": "779771864148-ufpg6gm74hi35rr44nfn64avlr2d3dgn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCNHwigTEHtKZDycN7i7x6PvFLOhXTdiYE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "779771864148-ufpg6gm74hi35rr44nfn64avlr2d3dgn.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "779771864148-antaabqpnqa7uh3sjebi2cin9d3hvart.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "land.platypus.ppoll",
+                "app_store_id": "1411244031"
+              }
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
