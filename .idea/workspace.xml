@@ -6,7 +6,9 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9b8ee99f-bf0b-4f64-86db-b38312827a07" name="Default" comment="" />
+    <list default="true" id="9b8ee99f-bf0b-4f64-86db-b38312827a07" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <ignored path="$PROJECT_DIR$/.dart_tool/" />
     <ignored path="$PROJECT_DIR$/.idea/" />
     <ignored path="$PROJECT_DIR$/.pub/" />
@@ -68,8 +70,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/lib/main.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="161">
-              <caret line="1870" column="26" selection-start-line="1870" selection-start-column="26" selection-end-line="1870" selection-end-column="26" />
+            <state relative-caret-position="167">
+              <caret line="1909" column="8" selection-start-line="1909" selection-start-column="8" selection-end-line="1909" selection-end-column="8" />
               <folding>
                 <element signature="e#0#39#0" expanded="true" />
               </folding>
@@ -381,8 +383,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/main.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="161">
-          <caret line="1870" column="26" selection-start-line="1870" selection-start-column="26" selection-end-line="1870" selection-end-column="26" />
+        <state relative-caret-position="167">
+          <caret line="1909" column="8" selection-start-line="1909" selection-start-column="8" selection-end-line="1909" selection-end-column="8" />
           <folding>
             <element signature="e#0#39#0" expanded="true" />
           </folding>
