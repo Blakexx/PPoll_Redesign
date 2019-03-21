@@ -6,12 +6,7 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9b8ee99f-bf0b-4f64-86db-b38312827a07" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ios/Podfile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Podfile.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ios/Runner.xcodeproj/project.pbxproj" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Runner.xcodeproj/project.pbxproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ios/Runner/GoogleService-Info.plist" beforeDir="false" />
-    </list>
+    <list default="true" id="9b8ee99f-bf0b-4f64-86db-b38312827a07" name="Default" comment="" />
     <ignored path="$PROJECT_DIR$/.dart_tool/" />
     <ignored path="$PROJECT_DIR$/.idea/" />
     <ignored path="$PROJECT_DIR$/.pub/" />
@@ -26,7 +21,7 @@
     <session id="127096944">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="3" />
+          <entry key="project.closed" value="4" />
           <entry key="project.open.time.13" value="1" />
           <entry key="project.open.time.15" value="1" />
           <entry key="project.open.time.16" value="1" />
@@ -55,14 +50,14 @@
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="dart" value="4" />
+          <entry key="dart" value="9" />
           <entry key="gradle" value="17" />
           <entry key="md" value="2" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Dart" value="4" />
+          <entry key="Dart" value="9" />
           <entry key="Groovy" value="17" />
           <entry key="PLAIN_TEXT" value="2" />
         </counts>
@@ -74,8 +69,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/lib/main.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="64">
-              <caret line="178" column="32" lean-forward="true" selection-start-line="178" selection-start-column="32" selection-end-line="178" selection-end-column="32" />
+            <state relative-caret-position="349">
+              <caret line="197" column="57" selection-start-line="197" selection-start-column="57" selection-end-line="197" selection-end-column="57" />
               <folding>
                 <element signature="e#0#39#0" expanded="true" />
               </folding>
@@ -264,7 +259,6 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1440" height="877" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.16309012" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -276,7 +270,7 @@
       <window_info id="Capture Tool" order="7" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.32866243" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.32866243" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -287,7 +281,7 @@
       <window_info anchor="bottom" id="Logcat" order="10" />
       <window_info anchor="bottom" id="Flutter Performance" order="11" side_tool="true" />
       <window_info anchor="bottom" id="Version Control" order="12" />
-      <window_info anchor="bottom" id="Terminal" order="13" weight="0.32611465" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="13" visible="true" weight="0.32611465" />
       <window_info anchor="bottom" id="Messages" order="14" weight="0.32866243" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -408,8 +402,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/main.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="64">
-          <caret line="178" column="32" lean-forward="true" selection-start-line="178" selection-start-column="32" selection-end-line="178" selection-end-column="32" />
+        <state relative-caret-position="349">
+          <caret line="197" column="57" selection-start-line="197" selection-start-column="57" selection-end-line="197" selection-end-column="57" />
           <folding>
             <element signature="e#0#39#0" expanded="true" />
           </folding>
