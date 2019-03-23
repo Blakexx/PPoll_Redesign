@@ -795,8 +795,8 @@ class MainPageState extends State<MainPage> with WidgetsBindingObserver{
           return;
         }else if(openedPoll!=null){
           Navigator.of(this.context).pop();
-          openedPoll = id;
         }
+        openedPoll = id;
         Navigator.push(this.context,new PageRouteBuilder(
           pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation){
             return new PollView(deepLink.toString().split("/").last);
