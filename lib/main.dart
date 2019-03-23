@@ -799,7 +799,7 @@ class MainPageState extends State<MainPage> with WidgetsBindingObserver{
         openedPoll = id;
         Navigator.push(this.context,new PageRouteBuilder(
           pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation){
-            return new PollView(deepLink.toString().split("/").last);
+            return new PollView(id);
           },
           transitionDuration: new Duration(milliseconds: 300),
           transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child){

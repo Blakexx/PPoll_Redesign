@@ -27,7 +27,8 @@
     <session id="127096944">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="8" />
+          <entry key="project.closed" value="9" />
+          <entry key="project.open.time.12" value="1" />
           <entry key="project.open.time.13" value="2" />
           <entry key="project.open.time.15" value="1" />
           <entry key="project.open.time.16" value="3" />
@@ -35,7 +36,7 @@
           <entry key="project.open.time.20" value="2" />
           <entry key="project.open.time.21" value="1" />
           <entry key="project.open.time.28" value="1" />
-          <entry key="project.opened" value="11" />
+          <entry key="project.opened" value="12" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
@@ -62,7 +63,7 @@
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="dart" value="225" />
+          <entry key="dart" value="861" />
           <entry key="gradle" value="30" />
           <entry key="md" value="2" />
           <entry key="properties" value="18" />
@@ -70,7 +71,7 @@
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Dart" value="225" />
+          <entry key="Dart" value="861" />
           <entry key="Groovy" value="30" />
           <entry key="PLAIN_TEXT" value="2" />
           <entry key="Properties" value="18" />
@@ -83,8 +84,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/lib/main.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="668">
-              <caret line="819" column="16" lean-forward="true" selection-start-line="819" selection-start-column="16" selection-end-line="819" selection-end-column="16" />
+            <state relative-caret-position="-188">
+              <caret line="774" column="25" selection-start-line="774" selection-start-column="25" selection-end-line="774" selection-end-column="25" />
               <folding>
                 <element signature="e#0#39#0" expanded="true" />
               </folding>
@@ -112,36 +113,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>ppollrev</find>
-      <find>land.platypus.ppollrevam</find>
-      <find>height:</find>
-      <find>//height</find>
-      <find>perm</find>
-      <find>width&gt;height</find>
-      <find>//</find>
-      <find>/*</find>
-      <find>Height:</find>
-      <find>SingleChild</find>
-      <find>if(openedPOll</find>
-      <find>Firebase</find>
-      <find>http.delete</find>
-      <find>parentSt</find>
       <find>ValueNotif</find>
       <find>removedNotif</find>
       <find>CreatedPOll</find>
       <find>http.delet</find>
       <find>Poll</find>
-      <find>PollState</find>
-      <find>print</find>
       <find>ViewState</find>
       <find>context.</find>
       <find>print(creat</find>
       <find>OpenPollPage</find>
-      <find>Navigator.push</find>
       <find>PollView</find>
       <find>PollViewState</find>
       <find>new PollView(temp</find>
       <find>new PollView(code</find>
+      <find>Navigator.pus</find>
+      <find>index</find>
+      <find>AppState.index</find>
+      <find>new Image.netwo</find>
+      <find>widget.image</find>
+      <find>height = null</find>
+      <find>PollState</find>
+      <find>isCompleted</find>
+      <find>pri</find>
+      <find>print(e.wi</find>
+      <find>completer.is</find>
+      <find>Navigator.push</find>
+      <find>this.cont</find>
+      <find>Mainpage</find>
+      <find>print(conte</find>
+      <find>.index = 2</find>
+      <find>print</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -178,6 +179,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="AndroidView" />
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -205,9 +208,7 @@
         </subPane>
         <option name="show-excluded-files" value="false" />
       </pane>
-      <pane id="Scope" />
       <pane id="PackagesPane" />
-      <pane id="AndroidView" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -284,7 +285,7 @@
       <window_info id="Capture Tool" order="7" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.32866243" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.32866243" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -433,8 +434,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/main.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="668">
-          <caret line="819" column="16" lean-forward="true" selection-start-line="819" selection-start-column="16" selection-end-line="819" selection-end-column="16" />
+        <state relative-caret-position="-188">
+          <caret line="774" column="25" selection-start-line="774" selection-start-column="25" selection-end-line="774" selection-end-column="25" />
           <folding>
             <element signature="e#0#39#0" expanded="true" />
           </folding>
