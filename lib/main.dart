@@ -1184,7 +1184,7 @@ class Poll extends StatefulWidget{
   final bool viewPage;
   final Image image;
   final double height,width;
-  Poll(this.id,this.viewPage,[this.image,this.height,this.width]):super(key:new ValueKey<String>(id));
+  Poll(this.id,this.viewPage,[this.image,this.height,this.width]):super(key:new ObjectKey(id));
   @override
   PollState createState() => new PollState();
 }
