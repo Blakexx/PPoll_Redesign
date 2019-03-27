@@ -763,9 +763,16 @@ class MainPageState extends State<MainPage> with WidgetsBindingObserver{
     WidgetsBinding.instance.addObserver(this);
   }
 
+  int lastOpenedLink = -1;
+
   Future<void> retrieveDynamicLink() async{
     final PendingDynamicLinkData linkData = await FirebaseDynamicLinks.instance.retrieveDynamicLink();
-    final Uri deepLink = linkData?.link;
+    print(linkData.hashCode);
+    if(linkData==null||linkData.hashCode==lastOpenedLink){
+      return;
+    }
+    lastOpenedLink = linkData.hashCode;
+    final Uri deepLink = linkData.link;
     //print(deepLink.toString());
     if(deepLink!=null){
       String id = deepLink.path.split("/").last;
