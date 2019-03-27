@@ -71,7 +71,7 @@ exports.create = functions.https.onRequest((req,res)=>{
                     }
                 }
             }
-            let link = "https://ppoll.page.link/?amv=9&ibi=land.platypus.ppoll&isi=1411244031&imv=2.0.3&apn=land.platypus.ppoll&link=https%3A%2F%2Fppoll.me%2F"+code;
+            let link = "https://ppoll.page.link/?amv=9&ibi=land.platypus.ppoll&isi=1411244031&imv=2.0.3&apn=land.platypus.ppoll&link=https%3A%2F%2Fppoll.me%2F"+code+"&?d=1";
             request.post("https://firebasedynamiclinks.googleapis.com/v1/shortLinks?key="+keyFile.webApiKey(),{
                     json: {
                         "longDynamicLink":link

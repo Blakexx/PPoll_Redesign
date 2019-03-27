@@ -866,7 +866,7 @@ class MainPageState extends State<MainPage> with WidgetsBindingObserver{
                           textColor = !b?new Color.fromRGBO(34,34, 34,1.0):new Color.fromRGBO(238,238,238,1.0);
                           color = !b?new Color.fromRGBO(52,52,52,1.0):new Color.fromRGBO(22,22,22,1.0);
                         }
-                        setState((){settings[i]=b;});
+                        context.ancestorStateOfType(new TypeMatcher<AppState>()).setState((){settings[i]=b;});
                         settingsData.writeData(settings);
                       },child:new Container(color:settings[0]?Colors.black:new Color.fromRGBO(253,253,253,1.0),child:new ListTile(
                           leading: new Icon(i==0?Icons.brightness_2:i==1?Icons.more_vert:i==2?Icons.visibility:Icons.settings),
@@ -876,13 +876,13 @@ class MainPageState extends State<MainPage> with WidgetsBindingObserver{
                               textColor = !b?new Color.fromRGBO(34,34, 34,1.0):new Color.fromRGBO(238,238,238,1.0);
                               color = !b?new Color.fromRGBO(52,52,52,1.0):new Color.fromRGBO(22,22,22,1.0);
                             }
-                            setState((){settings[i]=b;});
+                            context.ancestorStateOfType(new TypeMatcher<AppState>()).setState((){settings[i]=b;});
                             settingsData.writeData(settings);
                           }):new DropdownButtonHideUnderline(
                               child: DropdownButton<String>(
                                   items: ["Always","After Vote","Never"].map((key)=>new DropdownMenuItem<String>(value: key, child: new Text("$key"))).toList(),
                                   onChanged: (s){
-                                    setState((){settings[1] = s;});
+                                    context.ancestorStateOfType(new TypeMatcher<AppState>()).setState((){settings[1] = s;});
                                     settingsData.writeData(settings);
                                   },
                                   value: settings[1]
@@ -891,12 +891,12 @@ class MainPageState extends State<MainPage> with WidgetsBindingObserver{
                       ))))).toList()
                   )),
                   actualUserLevel==1?new GestureDetector(onTap:(){
-                    setState((){currentUserLevel = currentUserLevel==0?1:0;});
+                    context.ancestorStateOfType(new TypeMatcher<AppState>()).setState((){currentUserLevel = currentUserLevel==0?1:0;});
                   },child:new Container(color:settings[0]?Colors.black:new Color.fromRGBO(253,253,253,1.0),child:new ListTile(
                       leading: new Icon(Icons.stars),
                       title: new Text("Admin"),
                       trailing: new Switch(value: currentUserLevel==1,activeColor:indicatorColor,onChanged: (b){
-                        setState((){currentUserLevel = b?1:0;});
+                        context.ancestorStateOfType(new TypeMatcher<AppState>()).setState((){currentUserLevel = b?1:0;});
                       })
                   ))):new Container()
                 ]
