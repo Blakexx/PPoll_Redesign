@@ -767,7 +767,6 @@ class MainPageState extends State<MainPage> with WidgetsBindingObserver{
 
   Future<void> retrieveDynamicLink() async{
     final PendingDynamicLinkData linkData = await FirebaseDynamicLinks.instance.retrieveDynamicLink();
-    print(linkData.hashCode);
     if(linkData==null||linkData.hashCode==lastOpenedLink){
       return;
     }
