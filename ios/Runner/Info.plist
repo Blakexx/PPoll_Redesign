@@ -2,12 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Location is not used</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Location is not used</string>
-	<key>NSLocationUsageDescription</key>
-	<string>Location is not used</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
@@ -27,7 +21,7 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>25</string>
+	<string>26</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppleMusicUsageDescription</key>
@@ -36,6 +30,12 @@
 	<string>Calendars are not used</string>
 	<key>NSContactsUsageDescription</key>
 	<string>Contacts are not used</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Location is not used</string>
+	<key>NSLocationUsageDescription</key>
+	<string>Location is not used</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Location is not used</string>
 	<key>NSMotionUsageDescription</key>
 	<string>Motion is not used</string>
 	<key>NSPhotoLibraryUsageDescription</key>
