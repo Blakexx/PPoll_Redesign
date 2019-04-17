@@ -82,7 +82,7 @@ List<String> unLoadedPolls = new List<String>();
 
 bool isCorrectVersion;
 
-String version = "2.0.3";
+String version = "2.0.4";
 
 bool displayedVersionMessage = false;
 
@@ -252,7 +252,14 @@ class AppState extends State<App>{
         final result = await InternetAddress.lookup("google.com");
         if(result.isNotEmpty&&result[0].rawAddress.isNotEmpty){
           data = json.decode(utf8.decode((await http.get(Uri.encodeFull(database+"/data.json?auth="+secretKey))).bodyBytes));
-          for(String key in data.keys){
+          for(int i = 0; i<data.keys.length;i++){
+            String key = data.keys.toList()[i];
+            if(data[key]["a"]==null){
+              data.remove(key);
+              i--;
+              http.delete(Uri.encodeFull(database+"/data/"+key+".json?auth="+secretKey));
+              continue;
+            }
             if(data[key]["i"]!=null){
               for(String s in data[key]["i"].keys){
                 if(data[key]["b"][0]==1&&!data[key]["i"][s].contains(-1)){
@@ -298,6 +305,12 @@ class AppState extends State<App>{
                       return;
                     }
                     List<dynamic> path = returned["path"].split("/");
+                    if(path.length>=3&&data[path[1]]==null&&path[2]=="i"&&returned["data"]!=null){
+                      http.delete(Uri.encodeFull(database+"/data/"+path[1]+".json?auth="+secretKey));
+                      return;
+                    }else if(path.length==2&&(data[path[1]]==null||(data[path[1]]!=null&&data[path[1]]["a"]==null))&&returned["data"]==null){
+                      return;
+                    }
                     if(returned["data"]!=null){
                       if(((path!=null&&path.length==2)&&(returned["data"]["b"][2]==1||currentUserLevel==1)&&index==0)&&(!settings[2]||(settings[2]&&returned["data"]["p"]==0))){
                         unLoadedPolls.add(path[1]);
