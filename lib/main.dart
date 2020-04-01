@@ -636,7 +636,7 @@ class AppState extends State<App>{
                           });
                         }
                         if(!displayedVersionMessage&&isCorrectVersion==false&&(actualUserLevel!=null&&!(actualUserLevel is String))){
-                          new Future.delayed(Duration.zero,()=>showDialog(context:context,barrierDismissible: false,builder:(context)=>new AlertDialog(title:new Text("Outdated Version",style:new TextStyle(fontWeight:FontWeight.bold),textAlign:TextAlign.center),content:new Text("Please update to continue",textAlign: TextAlign.start))));
+                          new Future.delayed(Duration.zero,()=>showDialog(context:context,barrierDismissible: false,builder:(context)=>new WillPopScope(onWillPop: ()=>new Future<bool>(()=>false),child:new AlertDialog(title:new Text("Outdated Version",style:new TextStyle(fontWeight:FontWeight.bold),textAlign:TextAlign.center),content:new Text("Please update to continue",textAlign: TextAlign.start)))));
                           displayedVersionMessage = true;
                         }
                         return new MainPage();

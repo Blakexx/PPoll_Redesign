@@ -8,8 +8,6 @@ Apple app store: https://itunes.apple.com/us/app/ppoll-create-polls/id1411244031
 
 Google play store: https://play.google.com/store/apps/details?id=land.platypus.ppoll
 
-Amazon app store: Coming soon
-
 ## Built With
 
 Flutter - Google's app development framework. (https://flutter.io)
