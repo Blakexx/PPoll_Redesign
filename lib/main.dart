@@ -30,17 +30,17 @@ import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 
 bool light;
 
-PersistentData settingsData = new PersistentData(name:"settings",external:false);
+PersistentData settingsData = PersistentData(name:"settings",external:false);
 
-PersistentData userIdData = new PersistentData(name:"themeinfo",external:false);
+PersistentData userIdData = PersistentData(name:"themeinfo",external:false);
 
-dynamic realUserId = Platform.isAndroid?new PersistentData(name:"userId",external:true):new FlutterSecureStorage();
+dynamic realUserId = Platform.isAndroid?PersistentData(name:"userId",external:true):FlutterSecureStorage();
 
-PersistentData createdPollsData = new PersistentData(name:"createdinfo",external:false);
+PersistentData createdPollsData = PersistentData(name:"createdinfo",external:false);
 
-PersistentData messages = new PersistentData(name:"messages",external:false);
+PersistentData messages = PersistentData(name:"messages",external:false);
 
-PersistentData policy = new PersistentData(name:"privacyPolicy",external:false);
+PersistentData policy = PersistentData(name:"privacyPolicy",external:false);
 
 String lastMessage;
 
@@ -58,17 +58,17 @@ List<dynamic> createdPolls;
 
 Map<String,dynamic> data;
 
-ScrollController s = new ScrollController();
+ScrollController s = ScrollController();
 
 bool hasLoaded = false;
 
-Color color = new Color.fromRGBO(52,52,52,1.0);
+Color color = Color.fromRGBO(52,52,52,1.0);
 
-Color textColor = new Color.fromRGBO(34, 34, 34,1.0);
+Color textColor = Color.fromRGBO(34, 34, 34,1.0);
 
 ConnectivityResult current;
 
-Connectivity connection = new Connectivity();
+Connectivity connection = Connectivity();
 
 bool agreesToPolicy = false;
 
@@ -78,7 +78,7 @@ String openedPoll;
 
 Color indicatorColor;
 
-List<String> unLoadedPolls = new List<String>();
+List<String> unLoadedPolls = List<String>();
 
 bool isCorrectVersion;
 
@@ -88,10 +88,10 @@ bool displayedVersionMessage = false;
 
 bool displayedBannedMessage = false;
 
-ValueNotifier<String> removedNotifier = new ValueNotifier<String>(null);
+ValueNotifier<String> removedNotifier = ValueNotifier<String>(null);
 
 Map<int,List> tutorialMessages = {
-  1:[false,"This is the create page. You can enter in all of your poll options and click submit to create a new poll. Then, the app will generare a 4 character code which you can use to open or share the poll. If you make the poll publicly searchable it will appear on the Browse page."],
+  1:[false,"This is the create page. You can enter in all of your poll options and click submit to create a poll. Then, the app will generare a 4 character code which you can use to open or share the poll. If you make the poll publicly searchable it will appear on the Browse page."],
   2:[false,"This is the vote page. You can use the four character codes found under the question of every poll the open them here."],
   4:[false,"This is the settings page. You can customize your app here. In dark mode, the app switches to a darker theme which prevents eye strain. In safe mode, the app attempts to filter polls with inappropriate content out of the browse page."]
 };
@@ -103,7 +103,7 @@ void main() async{
     while(!hasPerms){
       hasPerms = (await PermissionHandler().requestPermissions([PermissionGroup.storage]))[PermissionGroup.storage]==PermissionStatus.granted;
       if(++count==10){
-        runApp(new MaterialApp(home:new Scaffold(body:new Builder(builder:(context)=>new Container(child:new Center(child:new Column(mainAxisAlignment: MainAxisAlignment.center,children:[new Padding(padding: EdgeInsets.only(left:MediaQuery.of(context).size.width*.05,right:MediaQuery.of(context).size.width*.05),child:new FittedBox(fit: BoxFit.scaleDown,child:new Text("In order to use PPoll you must enable storage permissions.",style:new TextStyle(fontSize:10000.0)))),new RichText(text:new TextSpan(text:"\nGrant Permissions",style: new TextStyle(color:Colors.blue,fontSize:20.0),recognizer: new TapGestureRecognizer()..onTap = (){
+        runApp(MaterialApp(home:Scaffold(body:Builder(builder:(context)=>Container(child:Center(child:Column(mainAxisAlignment: MainAxisAlignment.center,children:[Padding(padding: EdgeInsets.only(left:MediaQuery.of(context).size.width*.05,right:MediaQuery.of(context).size.width*.05),child:FittedBox(fit: BoxFit.scaleDown,child:Text("In order to use PPoll you must enable storage permissions.",style:TextStyle(fontSize:10000.0)))),RichText(text:TextSpan(text:"\nGrant Permissions",style: TextStyle(color:Colors.blue,fontSize:20.0),recognizer: TapGestureRecognizer()..onTap = (){
           PermissionHandler().openAppSettings();
           waitForPerms(int count) async{
             if(!hasPerms&&(await PermissionHandler().checkPermissionStatus(PermissionGroup.storage))==PermissionStatus.granted){
@@ -112,7 +112,7 @@ void main() async{
               return;
             }
             if(count==permsCount){
-              new Timer(new Duration(seconds:1),(){
+              Timer(Duration(seconds:1),(){
                 waitForPerms(count);
               });
             }
@@ -131,22 +131,22 @@ void main() async{
   }
   settings = await settingsData.readData();
   if(settings==null){
-    settings = new List<dynamic>();
+    settings = List<dynamic>();
   }
   if(settings.length>numSettings){
     settings = settings.sublist(0,numSettings);
     await settingsData.writeData(settings);
   }else if(settings.length<numSettings){
-    settings.addAll(new List<dynamic>(numSettings-settings.length).map((n)=>false));
+    settings.addAll(List<dynamic>(numSettings-settings.length).map((n)=>false));
     if(settings[1] is bool){
       settings[1] = "After Vote";
     }
     await settingsData.writeData(settings);
   }
-  //indicatorColor = !settings[0]?new Color.fromRGBO(33,150,243,1.0):new Color.fromRGBO(100,255,218,1.0);
-  indicatorColor = new Color.fromRGBO(33,150,243,1.0);
-  textColor = !settings[0]?new Color.fromRGBO(34, 34, 34,1.0):Colors.white;
-  color = !settings[0]?new Color.fromRGBO(52,52,52,1.0):new Color.fromRGBO(22,22,22,1.0);
+  //indicatorColor = !settings[0]?Color.fromRGBO(33,150,243,1.0):Color.fromRGBO(100,255,218,1.0);
+  indicatorColor = Color.fromRGBO(33,150,243,1.0);
+  textColor = !settings[0]?Color.fromRGBO(34, 34, 34,1.0):Colors.white;
+  color = !settings[0]?Color.fromRGBO(52,52,52,1.0):Color.fromRGBO(22,22,22,1.0);
   if(Platform.isIOS){
     userId = await realUserId.read(key: "PPollUserID");
     if(userId==null){
@@ -176,7 +176,7 @@ void main() async{
       userId = "";
       do{
         userId = "";
-        Random r = new Random();
+        Random r = Random();
         List<String> nums = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
         for(int i = 0;i<16;i++){
           userId+=(r.nextInt(2)==0?nums[r.nextInt(36)]:nums[r.nextInt(36)].toLowerCase());
@@ -190,7 +190,7 @@ void main() async{
       }
       await userIdData.writeData(userId);
     });
-    createdPolls=new List<dynamic>();
+    createdPolls=List<dynamic>();
   }else{
     doWhenHasConnection(() async{
       createdPolls = json.decode((await http.get(Uri.encodeFull(database+"/users/$userId/1.json?auth="+secretKey))).body);
@@ -199,7 +199,7 @@ void main() async{
         if(createdPolls!=null){
           await http.put(Uri.encodeFull(database+"/users/$userId/1.json?auth="+secretKey),body:json.encode(createdPolls));
         }else{
-          createdPolls = new List<dynamic>();
+          createdPolls = List<dynamic>();
         }
       }
     });
@@ -209,7 +209,7 @@ void main() async{
     isCorrectVersion = int.parse(minVersion.replaceAll(".",""))<=int.parse(version.replaceAll(".",""));
   });
   lastMessage = (await messages.readData());
-  runApp(new App());
+  runApp(App());
 }
 
 doWhenHasConnection(Function function) async{
@@ -220,7 +220,7 @@ doWhenHasConnection(Function function) async{
     }
   }on SocketException catch(_){
     print("Bad connection, retrying...");
-    new Timer(new Duration(seconds:1),await doWhenHasConnection(function));
+    Timer(Duration(seconds:1),await doWhenHasConnection(function));
   }
 }
 
@@ -230,22 +230,22 @@ bool hasGotLevel = false;
 
 class App extends StatefulWidget{
   @override
-  AppState createState() => new AppState();
+  AppState createState() => AppState();
 }
 
 class AppState extends State<App>{
 
-  HttpClient client = new HttpClient();
+  HttpClient client = HttpClient();
 
   void setUp(ConnectivityResult r) async{
-    Stopwatch watch = new Stopwatch();
+    Stopwatch watch = Stopwatch();
     watch.start();
     waitForConnection() async{
       if(r!=current){
         return;
       }
       if(userId==null||createdPolls==null||isCorrectVersion==null){
-        new Timer(new Duration(seconds:1),waitForConnection);
+        Timer(Duration(seconds:1),waitForConnection);
         return;
       }
       try{
@@ -274,7 +274,7 @@ class AppState extends State<App>{
               }
             }
           }
-          client = new HttpClient();
+          client = HttpClient();
           client.openUrl("GET", Uri.parse(database+"/data.json?auth="+secretKey)).then((req) async{
             req.headers.set("Accept", "text/event-stream");
             req.followRedirects = true;
@@ -333,7 +333,7 @@ class AppState extends State<App>{
                       try{
                         int i = int.parse(o);
                         if(temp[i]==null){
-                          throw new Exception();
+                          throw Exception();
                         }
                         temp = temp[i];
                       }catch(e){
@@ -384,12 +384,12 @@ class AppState extends State<App>{
                               }else{
                                 List<int> previous;
                                 if(temp[finalPath]!=null){
-                                  previous = new List.from(temp[finalPath]);
+                                  previous = List.from(temp[finalPath]);
                                   previous.removeWhere((i)=>i==-1);
                                 }else{
-                                  previous = new List<int>();
+                                  previous = List<int>();
                                 }
-                                List<int> after = new List.from(returned["data"]);
+                                List<int> after = List.from(returned["data"]);
                                 after.removeWhere((i)=>i==-1);
                                 if(after.length>previous.length){
                                   (after..removeWhere((i)=>previous.contains(i))).forEach((i){
@@ -437,12 +437,12 @@ class AppState extends State<App>{
                             }else{
                               List<int> previous;
                               if(temp[finalPath]!=null){
-                                previous = new List.from(temp[finalPath]);
+                                previous = List.from(temp[finalPath]);
                                 previous.removeWhere((i)=>i==-1);
                               }else{
-                                previous = new List<int>();
+                                previous = List<int>();
                               }
-                              List<int> after = new List.from(returned["data"]);
+                              List<int> after = List.from(returned["data"]);
                               after.removeWhere((i)=>i==-1);
                               if(after.length>previous.length){
                                 (after..removeWhere((i)=>previous.contains(i))).forEach((i){
@@ -473,7 +473,7 @@ class AppState extends State<App>{
         }
       }on SocketException catch(_){
         print("Bad connection, retrying...");
-        new Timer(new Duration(seconds:1),waitForConnection);
+        Timer(Duration(seconds:1),waitForConnection);
       }
     }
     waitForConnection();
@@ -488,7 +488,7 @@ class AppState extends State<App>{
     super.initState();
     /*
     ensureConnection(){
-      new Timer(new Duration(seconds:1),() async{
+      Timer(Duration(seconds:1),() async{
         ConnectivityResult r = await connection.checkConnectivity();
         if(r!=current){
           print("$current $r");
@@ -522,9 +522,9 @@ class AppState extends State<App>{
       setUp(current);
     }
     if(!agreesToPolicy){
-      iconCompleter = new Completer<ui.Image>();
-      icon = new Image.asset("icon/platypus2.png");
-      icon.image.resolve(new ImageConfiguration()).addListener((ImageInfo info, bool b){
+      iconCompleter = Completer<ui.Image>();
+      icon = Image.asset("icon/platypus2.png");
+      icon.image.resolve(ImageConfiguration()).addListener((ImageInfo info, bool b){
         if(!iconCompleter.isCompleted){
           iconCompleter.complete(info.image);
         }
@@ -542,40 +542,40 @@ class AppState extends State<App>{
 
   @override
   Widget build(BuildContext context){
-    return new DynamicTheme(
+    return DynamicTheme(
         themedWidgetBuilder: (context, theme){
-          return new MaterialApp(
+          return MaterialApp(
               theme: theme,
               debugShowCheckedModeBanner: false,
-              home: agreesToPolicy?new Scaffold(
-                  bottomNavigationBar: new BottomNavigationBar(
+              home: agreesToPolicy?Scaffold(
+                  bottomNavigationBar: BottomNavigationBar(
                       currentIndex: index,
                       type: BottomNavigationBarType.fixed,
                       fixedColor: settings[0]?indicatorColor:Colors.indigoAccent,
                       items: [
                         BottomNavigationBarItem(
-                          icon: new Icon(Icons.language),
-                          title: new Text("Browse"),
+                          icon: Icon(Icons.language),
+                          title: Text("Browse"),
                         ),
                         BottomNavigationBarItem(
-                          icon: new Icon(Icons.add_circle_outline),
-                          title: new Text("New"),
+                          icon: Icon(Icons.add_circle_outline),
+                          title: Text("New"),
                         ),
                         BottomNavigationBarItem(
-                          icon: new Icon(Icons.check_circle),
-                          title: new Text("Vote"),
+                          icon: Icon(Icons.check_circle),
+                          title: Text("Vote"),
                         ),
                         BottomNavigationBarItem(
-                          icon: new Icon(Icons.dehaze),
-                          title: new Text("Created"),
+                          icon: Icon(Icons.dehaze),
+                          title: Text("Created"),
                         ),
                         BottomNavigationBarItem(
-                          icon: new Icon(Icons.settings),
-                          title: new Text("Settings"),
+                          icon: Icon(Icons.settings),
+                          title: Text("Settings"),
                         ),
                       ],
                       onTap:(i){
-                        unLoadedPolls = new List<String>();
+                        unLoadedPolls = List<String>();
                         if(loadingData){
                           return;
                         }
@@ -589,11 +589,11 @@ class AppState extends State<App>{
                         }
                       }
                   ),
-                  body: new Builder(
+                  body: Builder(
                       builder: (context){
                         if(tutorialMessages[index]!=null && tutorialMessages[index][0]){
                           tutorialMessages[index][0] = false;
-                          new Future.delayed(Duration.zero,()=>showDialog(context:context,builder:(context)=>new AlertDialog(actions: [new FlatButton(child: new Text("OK"),onPressed:(){Navigator.of(context).pop();})],title:new Text("Tutorial",style:new TextStyle(fontWeight:FontWeight.bold),textAlign: TextAlign.center),content:new Text(tutorialMessages[index][1]))));
+                          Future.delayed(Duration.zero,()=>showDialog(context:context,builder:(context)=>AlertDialog(actions: [FlatButton(child: Text("OK"),onPressed:(){Navigator.of(context).pop();})],title:Text("Tutorial",style:TextStyle(fontWeight:FontWeight.bold),textAlign: TextAlign.center),content:Text(tutorialMessages[index][1]))));
                         }
                         if(!displayedBannedMessage&&actualUserLevel==null&&!hasGotLevel){
                           hasGotLevel = true;
@@ -607,14 +607,14 @@ class AppState extends State<App>{
                                     currentUserLevel = 0;
                                   });
                                   if(actualUserLevel is String){
-                                    new Future.delayed(Duration.zero,()=>showDialog(context:context,barrierDismissible: false,builder:(context)=>new AlertDialog(title:new Text("You have been banned from PPoll",style:new TextStyle(fontWeight:FontWeight.bold),textAlign:TextAlign.center),content:new Text("Reason: $actualUserLevel",textAlign: TextAlign.start))));
+                                    Future.delayed(Duration.zero,()=>showDialog(context:context,barrierDismissible: false,builder:(context)=>AlertDialog(title:Text("You have been banned from PPoll",style:TextStyle(fontWeight:FontWeight.bold),textAlign:TextAlign.center),content:Text("Reason: $actualUserLevel",textAlign: TextAlign.start))));
                                     displayedBannedMessage = true;
                                   }
                                 });
                               }
                             }on SocketException catch(_){
                               print("Bad connection, retrying...");
-                              new Timer(new Duration(seconds:1),tryToGetId);
+                              Timer(Duration(seconds:1),tryToGetId);
                             }
                           }
                           tryToGetId();
@@ -630,63 +630,63 @@ class AppState extends State<App>{
                               lastMessage = s;
                               messages.writeData(lastMessage);
                               if(lastMessage!=null){
-                                new Future.delayed(Duration.zero,()=>showDialog(context:context,builder:(context)=>new AlertDialog(actions: [new FlatButton(child: new Text("OK"),onPressed:(){Navigator.of(context).pop();})],title:new Text("Alert",style:new TextStyle(fontWeight:FontWeight.bold),textAlign: TextAlign.center),content:new Text(lastMessage))));
+                                Future.delayed(Duration.zero,()=>showDialog(context:context,builder:(context)=>AlertDialog(actions: [FlatButton(child: Text("OK"),onPressed:(){Navigator.of(context).pop();})],title:Text("Alert",style:TextStyle(fontWeight:FontWeight.bold),textAlign: TextAlign.center),content:Text(lastMessage))));
                               }
                             }
                           });
                         }
                         if(!displayedVersionMessage&&isCorrectVersion==false&&(actualUserLevel!=null&&!(actualUserLevel is String))){
-                          new Future.delayed(Duration.zero,()=>showDialog(context:context,barrierDismissible: false,builder:(context)=>new WillPopScope(onWillPop: ()=>new Future<bool>(()=>false),child:new AlertDialog(title:new Text("Outdated Version",style:new TextStyle(fontWeight:FontWeight.bold),textAlign:TextAlign.center),content:new Text("Please update to continue",textAlign: TextAlign.start)))));
+                          Future.delayed(Duration.zero,()=>showDialog(context:context,barrierDismissible: false,builder:(context)=>WillPopScope(onWillPop: ()=>Future<bool>(()=>false),child:AlertDialog(title:Text("Outdated Version",style:TextStyle(fontWeight:FontWeight.bold),textAlign:TextAlign.center),content:Text("Please update to continue",textAlign: TextAlign.start)))));
                           displayedVersionMessage = true;
                         }
-                        return new MainPage();
+                        return MainPage();
                       }
                   )
-              ):new Builder(builder:(context){
+              ):Builder(builder:(context){
                 double heightOrWidth = min(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height);
                 double ratio = max(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height)/568.0;
                 bool landscape = MediaQuery.of(context).size.width>MediaQuery.of(context).size.height;
                 List<Widget> widgets = [
-                  new Container(height:landscape?20.0*ratio:0.0),
-                  new FutureBuilder(
+                  Container(height:landscape?20.0*ratio:0.0),
+                  FutureBuilder(
                     future: iconCompleter.future,
                     builder: (BuildContext context, AsyncSnapshot<ui.Image> snapshot){
                       if(snapshot.hasData){
                         if(snapshot.hasData){
-                          return new Image(image:icon.image,width:heightOrWidth*5/8,height:heightOrWidth*5/8);
+                          return Image(image:icon.image,width:heightOrWidth*5/8,height:heightOrWidth*5/8);
                         }
                       }else{
-                        return new Container(
+                        return Container(
                             width:heightOrWidth*5/8,
                             height:heightOrWidth*5/8,
-                            child:new Padding(
+                            child:Padding(
                                 padding:EdgeInsets.all(heightOrWidth*5/16-25),
-                                child:new CircularProgressIndicator()
+                                child:CircularProgressIndicator()
                             )
                         );
                       }
                     },
                   ),
-                  new Container(height:landscape?20.0*ratio:0.0),
-                  new Text("Hi there!",style:new TextStyle(fontSize:25.0*ratio,color:textColor),textAlign: TextAlign.center),
-                  new Text("Welcome to PPoll.",style: new TextStyle(fontSize:25.0*ratio,color:textColor),textAlign: TextAlign.center),
-                  new Container(height:landscape?20.0*ratio:0.0),
-                  new Padding(padding:EdgeInsets.only(left:MediaQuery.of(context).size.width/20.0,right:MediaQuery.of(context).size.width/20.0),child:new Text("PPoll provides a completely anonymous and ad-free experience.",style:new TextStyle(fontSize:15.0*ratio,color:textColor.withOpacity(0.9)),textAlign: TextAlign.center)),
-                  new Container(height:landscape?40.0*ratio:0.0),
-                  new Column(
+                  Container(height:landscape?20.0*ratio:0.0),
+                  Text("Hi there!",style:TextStyle(fontSize:25.0*ratio,color:textColor),textAlign: TextAlign.center),
+                  Text("Welcome to PPoll.",style: TextStyle(fontSize:25.0*ratio,color:textColor),textAlign: TextAlign.center),
+                  Container(height:landscape?20.0*ratio:0.0),
+                  Padding(padding:EdgeInsets.only(left:MediaQuery.of(context).size.width/20.0,right:MediaQuery.of(context).size.width/20.0),child:Text("PPoll provides a completely anonymous and ad-free experience.",style:TextStyle(fontSize:15.0*ratio,color:textColor.withOpacity(0.9)),textAlign: TextAlign.center)),
+                  Container(height:landscape?40.0*ratio:0.0),
+                  Column(
                       children:[
-                        new Padding(padding:EdgeInsets.only(left:MediaQuery.of(context).size.width/20.0,right:MediaQuery.of(context).size.width/20.0),child:new Center(child:new RichText(
+                        Padding(padding:EdgeInsets.only(left:MediaQuery.of(context).size.width/20.0,right:MediaQuery.of(context).size.width/20.0),child:Center(child:RichText(
                             textAlign:TextAlign.center,
-                            text:new TextSpan(
+                            text:TextSpan(
                                 children:[
-                                  new TextSpan(
+                                  TextSpan(
                                     text:"By pressing the \"Get started\" button and using PPoll, you agree to our ",
-                                    style: new TextStyle(color: textColor,fontSize:8.0*ratio),
+                                    style: TextStyle(color: textColor,fontSize:8.0*ratio),
                                   ),
-                                  new TextSpan(
+                                  TextSpan(
                                     text:"Privacy Policy",
-                                    style: new TextStyle(color: Colors.blue,fontSize:8.0*ratio),
-                                    recognizer: new TapGestureRecognizer()..onTap = () async{
+                                    style: TextStyle(color: Colors.blue,fontSize:8.0*ratio),
+                                    recognizer: TapGestureRecognizer()..onTap = () async{
                                       if(await canLaunch("https://platypuslabs.llc/privacypolicy")){
                                         await launch("https://platypuslabs.llc/privacypolicy");
                                       }else{
@@ -694,14 +694,14 @@ class AppState extends State<App>{
                                       }
                                     },
                                   ),
-                                  new TextSpan(
+                                  TextSpan(
                                     text:" and ",
-                                    style: new TextStyle(color: textColor,fontSize:8.0*ratio),
+                                    style: TextStyle(color: textColor,fontSize:8.0*ratio),
                                   ),
-                                  new TextSpan(
+                                  TextSpan(
                                     text:"Terms of Use",
-                                    style: new TextStyle(color: Colors.blue,fontSize:8.0*ratio),
-                                    recognizer: new TapGestureRecognizer()..onTap = () async{
+                                    style: TextStyle(color: Colors.blue,fontSize:8.0*ratio),
+                                    recognizer: TapGestureRecognizer()..onTap = () async{
                                       if(await canLaunch("https://platypuslabs.llc/termsandconditions")){
                                         await launch("https://platypuslabs.llc/termsandconditions");
                                       }else{
@@ -709,18 +709,18 @@ class AppState extends State<App>{
                                       }
                                     },
                                   ),
-                                  new TextSpan(
+                                  TextSpan(
                                       text:".",
-                                      style: new TextStyle(fontSize:8.0)
+                                      style: TextStyle(fontSize:8.0)
                                   ),
                                 ]
                             )
                         ))),
-                        new Container(height:landscape?10.0*ratio:5.0*ratio),
-                        new Padding(padding:EdgeInsets.only(left:MediaQuery.of(context).size.width/20.0,right:MediaQuery.of(context).size.width/20.0),child:new Container(width:double.infinity,child:new RaisedButton(
+                        Container(height:landscape?10.0*ratio:5.0*ratio),
+                        Padding(padding:EdgeInsets.only(left:MediaQuery.of(context).size.width/20.0,right:MediaQuery.of(context).size.width/20.0),child:Container(width:double.infinity,child:RaisedButton(
                             padding: EdgeInsets.all(13.0),
                             color:Colors.grey,
-                            child:new Text("Get started",style:new TextStyle(fontSize:12.0*ratio)),
+                            child:Text("Get started",style:TextStyle(fontSize:12.0*ratio)),
                             onPressed:(){
                               setState((){
                                 agreesToPolicy=true;
@@ -730,13 +730,13 @@ class AppState extends State<App>{
                         )))
                       ]
                   ),
-                  new Container(height:landscape?50.0*ratio:0.0),
+                  Container(height:landscape?50.0*ratio:0.0),
                 ];
-                return new Scaffold(appBar:new AppBar(automaticallyImplyLeading:false,title:new Text("User agreement"),backgroundColor: color),body:new Container(color:!settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),child:new Center(child:!landscape?new Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly,children:widgets):new ListView(children:widgets))));
+                return Scaffold(appBar:AppBar(automaticallyImplyLeading:false,title:Text("User agreement"),backgroundColor: color),body:Container(color:!settings[0]?Color.fromRGBO(230, 230, 230, 1.0):Color.fromRGBO(51,51,51,1.0),child:Center(child:!landscape?Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly,children:widgets):ListView(children:widgets))));
               })
           );
         },
-        data: (brightness) => new ThemeData(fontFamily: "Roboto",brightness: settings!=null&&settings[0]?Brightness.dark:Brightness.light),
+        data: (brightness) => ThemeData(fontFamily: "Roboto",brightness: settings!=null&&settings[0]?Brightness.dark:Brightness.light),
         defaultBrightness: settings!=null&&settings[0]?Brightness.dark:Brightness.light
     );
   }
@@ -746,7 +746,7 @@ bool firstOne = true;
 
 class MainPage extends StatefulWidget{
   @override
-  MainPageState createState() => new MainPageState();
+  MainPageState createState() => MainPageState();
 }
 
 class MainPageState extends State<MainPage> with WidgetsBindingObserver{
@@ -754,7 +754,7 @@ class MainPageState extends State<MainPage> with WidgetsBindingObserver{
   @override
   void didChangeAppLifecycleState(AppLifecycleState state){
     if(state == AppLifecycleState.resumed && !firstOne){
-      new Timer.periodic(new Duration(milliseconds:500),(t){
+      Timer.periodic(Duration(milliseconds:500),(t){
         if(agreesToPolicy&&hasLoaded){
           t.cancel();
           retrieveDynamicLink();
@@ -766,7 +766,7 @@ class MainPageState extends State<MainPage> with WidgetsBindingObserver{
   @override
   void initState(){
     super.initState();
-    new Timer.periodic(new Duration(milliseconds:500),(t){
+    Timer.periodic(Duration(milliseconds:500),(t){
       if(agreesToPolicy&&hasLoaded){
         t.cancel();
         firstOne = false;
@@ -794,12 +794,12 @@ class MainPageState extends State<MainPage> with WidgetsBindingObserver{
               context: this.context,
               barrierDismissible: false,
               builder: (context){
-                return new AlertDialog(
-                    title: new Text("Alert",style:new TextStyle(fontWeight:FontWeight.bold)),
-                    content: new Text("The poll you are attempting to open is unsafe."),
+                return AlertDialog(
+                    title: Text("Alert",style:TextStyle(fontWeight:FontWeight.bold)),
+                    content: Text("The poll you are attempting to open is unsafe."),
                     actions: [
-                      new FlatButton(
-                          child: new Text("OK"),
+                      FlatButton(
+                          child: Text("OK"),
                           onPressed: (){
                             Navigator.of(context).pop();
                           }
@@ -816,19 +816,19 @@ class MainPageState extends State<MainPage> with WidgetsBindingObserver{
           Navigator.of(this.context).pop();
         }
         openedPoll = id;
-        Navigator.push(this.context,new PageRouteBuilder(
+        Navigator.push(this.context,PageRouteBuilder(
           pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation){
-            return new PollView(id);
+            return PollView(id);
           },
-          transitionDuration: new Duration(milliseconds: 300),
+          transitionDuration: Duration(milliseconds: 300),
           transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child){
-            return new FadeTransition(
+            return FadeTransition(
                 opacity: animation,
                 child: child
             );
           },
         )).then((r){
-          this.context.ancestorStateOfType(new TypeMatcher<AppState>()).setState((){
+          this.context.ancestorStateOfType(TypeMatcher<AppState>()).setState((){
             AppState.index = 2;
           });
         });
@@ -837,12 +837,12 @@ class MainPageState extends State<MainPage> with WidgetsBindingObserver{
             context: this.context,
             barrierDismissible: false,
             builder: (context){
-              return new AlertDialog(
-                  title: new Text("Alert",style:new TextStyle(fontWeight:FontWeight.bold)),
-                  content: new Text("The poll you are attempting to open does not exist."),
+              return AlertDialog(
+                  title: Text("Alert",style:TextStyle(fontWeight:FontWeight.bold)),
+                  content: Text("The poll you are attempting to open does not exist."),
                   actions: [
-                    new FlatButton(
-                        child: new Text("OK"),
+                    FlatButton(
+                        child: Text("OK"),
                         onPressed: (){
                           Navigator.of(context).pop();
                         }
@@ -857,51 +857,51 @@ class MainPageState extends State<MainPage> with WidgetsBindingObserver{
 
   @override
   Widget build(BuildContext context){
-    return AppState.index==0?new Container(
-        color: !settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),
-        child: new Center(
-            child: new View(false)
+    return AppState.index==0?Container(
+        color: !settings[0]?Color.fromRGBO(230, 230, 230, 1.0):Color.fromRGBO(51,51,51,1.0),
+        child: Center(
+            child: View(false)
         )
-    ):AppState.index==1?new CreatePollPage(
-    ):AppState.index==2?new OpenPollPage(
-    ):AppState.index==3?new Container(
-        color: !settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),
-        child: new Center(
-            child: new View(true)
+    ):AppState.index==1?CreatePollPage(
+    ):AppState.index==2?OpenPollPage(
+    ):AppState.index==3?Container(
+        color: !settings[0]?Color.fromRGBO(230, 230, 230, 1.0):Color.fromRGBO(51,51,51,1.0),
+        child: Center(
+            child: View(true)
         )
-    ):new Scaffold(appBar:new AppBar(title:new Text("Settings"),backgroundColor: color),body:new Container(
-        color: !settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),
-        child: new Center(
-            child: new ListView(
+    ):Scaffold(appBar:AppBar(title:Text("Settings"),backgroundColor: color),body:Container(
+        color: !settings[0]?Color.fromRGBO(230, 230, 230, 1.0):Color.fromRGBO(51,51,51,1.0),
+        child: Center(
+            child: ListView(
                 children: [
-                  new Padding(padding: EdgeInsets.only(top:12.0),child: new Column(
-                      children: settings.asMap().keys.map((i)=>new Padding(padding:EdgeInsets.only(bottom:12.0),child:new GestureDetector(onTap:(){
+                  Padding(padding: EdgeInsets.only(top:12.0),child: Column(
+                      children: settings.asMap().keys.map((i)=>Padding(padding:EdgeInsets.only(bottom:12.0),child:GestureDetector(onTap:(){
                         if(i==1){
                           return;
                         }
                         bool b = !settings[i];
                         if(i==0){
-                          //indicatorColor = !b?new Color.fromRGBO(33,150,243,1.0):new Color.fromRGBO(100,255,218,1.0);
-                          textColor = !b?new Color.fromRGBO(34,34, 34,1.0):new Color.fromRGBO(238,238,238,1.0);
-                          color = !b?new Color.fromRGBO(52,52,52,1.0):new Color.fromRGBO(22,22,22,1.0);
+                          //indicatorColor = !b?Color.fromRGBO(33,150,243,1.0):Color.fromRGBO(100,255,218,1.0);
+                          textColor = !b?Color.fromRGBO(34,34, 34,1.0):Color.fromRGBO(238,238,238,1.0);
+                          color = !b?Color.fromRGBO(52,52,52,1.0):Color.fromRGBO(22,22,22,1.0);
                         }
-                        context.ancestorStateOfType(new TypeMatcher<AppState>()).setState((){settings[i]=b;});
+                        context.ancestorStateOfType(TypeMatcher<AppState>()).setState((){settings[i]=b;});
                         settingsData.writeData(settings);
-                      },child:new Container(color:settings[0]?Colors.black:new Color.fromRGBO(253,253,253,1.0),child:new ListTile(
-                          leading: new Icon(i==0?Icons.brightness_2:i==1?Icons.more_vert:i==2?Icons.visibility:Icons.settings),
-                          title: new Text(i==0?"Dark mode":i==1?"Expand large polls":i==2?"Safe mode":"Placeholder"),
-                          trailing: i!=1?new Switch(value:settings[i],activeColor:indicatorColor,onChanged:(b){
+                      },child:Container(color:settings[0]?Colors.black:Color.fromRGBO(253,253,253,1.0),child:ListTile(
+                          leading: Icon(i==0?Icons.brightness_2:i==1?Icons.more_vert:i==2?Icons.visibility:Icons.settings),
+                          title: Text(i==0?"Dark mode":i==1?"Expand large polls":i==2?"Safe mode":"Placeholder"),
+                          trailing: i!=1?Switch(value:settings[i],activeColor:indicatorColor,onChanged:(b){
                             if(i==0){
-                              textColor = !b?new Color.fromRGBO(34,34, 34,1.0):new Color.fromRGBO(238,238,238,1.0);
-                              color = !b?new Color.fromRGBO(52,52,52,1.0):new Color.fromRGBO(22,22,22,1.0);
+                              textColor = !b?Color.fromRGBO(34,34, 34,1.0):Color.fromRGBO(238,238,238,1.0);
+                              color = !b?Color.fromRGBO(52,52,52,1.0):Color.fromRGBO(22,22,22,1.0);
                             }
-                            context.ancestorStateOfType(new TypeMatcher<AppState>()).setState((){settings[i]=b;});
+                            context.ancestorStateOfType(TypeMatcher<AppState>()).setState((){settings[i]=b;});
                             settingsData.writeData(settings);
-                          }):new DropdownButtonHideUnderline(
+                          }):DropdownButtonHideUnderline(
                               child: DropdownButton<String>(
-                                  items: ["Always","After Vote","Never"].map((key)=>new DropdownMenuItem<String>(value: key, child: new Text("$key"))).toList(),
+                                  items: ["Always","After Vote","Never"].map((key)=>DropdownMenuItem<String>(value: key, child: Text("$key"))).toList(),
                                   onChanged: (s){
-                                    context.ancestorStateOfType(new TypeMatcher<AppState>()).setState((){settings[1] = s;});
+                                    context.ancestorStateOfType(TypeMatcher<AppState>()).setState((){settings[1] = s;});
                                     settingsData.writeData(settings);
                                   },
                                   value: settings[1]
@@ -909,15 +909,15 @@ class MainPageState extends State<MainPage> with WidgetsBindingObserver{
                           )
                       ))))).toList()
                   )),
-                  actualUserLevel==1?new GestureDetector(onTap:(){
-                    context.ancestorStateOfType(new TypeMatcher<AppState>()).setState((){currentUserLevel = currentUserLevel==0?1:0;});
-                  },child:new Container(color:settings[0]?Colors.black:new Color.fromRGBO(253,253,253,1.0),child:new ListTile(
-                      leading: new Icon(Icons.stars),
-                      title: new Text("Admin"),
-                      trailing: new Switch(value: currentUserLevel==1,activeColor:indicatorColor,onChanged: (b){
-                        context.ancestorStateOfType(new TypeMatcher<AppState>()).setState((){currentUserLevel = b?1:0;});
+                  actualUserLevel==1?GestureDetector(onTap:(){
+                    context.ancestorStateOfType(TypeMatcher<AppState>()).setState((){currentUserLevel = currentUserLevel==0?1:0;});
+                  },child:Container(color:settings[0]?Colors.black:Color.fromRGBO(253,253,253,1.0),child:ListTile(
+                      leading: Icon(Icons.stars),
+                      title: Text("Admin"),
+                      trailing: Switch(value: currentUserLevel==1,activeColor:indicatorColor,onChanged: (b){
+                        context.ancestorStateOfType(TypeMatcher<AppState>()).setState((){currentUserLevel = b?1:0;});
                       })
-                  ))):new Container()
+                  ))):Container()
                 ]
             )
         )
@@ -929,9 +929,9 @@ Timer shouldSearchTimer;
 
 class View extends StatefulWidget{
   final bool onlyCreated;
-  View(this.onlyCreated):super(key:new ValueKey<bool>(onlyCreated));
+  View(this.onlyCreated):super(key:ValueKey<bool>(onlyCreated));
   @override
-  ViewState createState() => new ViewState();
+  ViewState createState() => ViewState();
 }
 
 class ViewState extends State<View>{
@@ -944,9 +944,9 @@ class ViewState extends State<View>{
 
   bool hasSearched = false;
 
-  FocusNode f = new FocusNode();
+  FocusNode f = FocusNode();
 
-  TextEditingController c = new TextEditingController();
+  TextEditingController c = TextEditingController();
 
   Map<String,dynamic> sortedMap;
 
@@ -971,7 +971,7 @@ class ViewState extends State<View>{
       if(shouldSearchTimer!=null){
         shouldSearchTimer.cancel();
       }
-      shouldSearchTimer = new Timer(new Duration(milliseconds:500),(){
+      shouldSearchTimer = Timer(Duration(milliseconds:500),(){
         s.jumpTo(0.0);
         setState((){});
         sortMap();
@@ -987,7 +987,7 @@ class ViewState extends State<View>{
   }
 
   void sortMap(){
-    Map<String,dynamic> tempMap = new Map<String,dynamic>()..addAll(data)..removeWhere((key,value){
+    Map<String,dynamic> tempMap = Map<String,dynamic>()..addAll(data)..removeWhere((key,value){
       return ((widget.onlyCreated&&!createdPolls.contains(key))||(!(key.toUpperCase().contains(search.toUpperCase())||((value as Map<String,dynamic>)["q"] as String).toUpperCase().contains(search.toUpperCase()))||((!widget.onlyCreated&&currentUserLevel!=1)&&((((value as Map<String,dynamic>)["b"])[2]==0)||((value as Map<String,dynamic>)["b"])[0]==1||((value as Map<String,dynamic>)["b"])[1]==1))))||(settings[2]&&data[key]["p"]!=null&&data[key]["p"]==1&&!widget.onlyCreated);
     });
     sortedMap = SplayTreeMap.from(tempMap,(o1,o2){
@@ -995,7 +995,7 @@ class ViewState extends State<View>{
       int voters2 = tempMap[o2]["a"].reduce((n1,n2)=>n1+n2);
       if(!widget.onlyCreated){
         if(sorting=="trending"){
-          double currentTime = (new DateTime.now().millisecondsSinceEpoch/1000.0);
+          double currentTime = (DateTime.now().millisecondsSinceEpoch/1000.0);
           double timeChange1 = (currentTime-(tempMap[o1]["t"]!=null?tempMap[o1]["t"]:currentTime/2.0));
           double timeChange2 = (currentTime-(tempMap[o2]["t"]!=null?tempMap[o2]["t"]:currentTime/2.0));
           double trendingIndex1 = pow((voters1+1),1.5)/(pow(timeChange1!=0?timeChange1:.0001,2));
@@ -1008,7 +1008,7 @@ class ViewState extends State<View>{
           return o1.compareTo(o2);
         }
         if((sorting=="newest"||sorting=="oldest")&&tempMap[o2]["t"]!=tempMap[o1]["t"]){
-          double currentTime = (new DateTime.now().millisecondsSinceEpoch/1000.0);
+          double currentTime = (DateTime.now().millisecondsSinceEpoch/1000.0);
           double time1 = tempMap[o1]["t"]!=null?tempMap[o1]["t"].toDouble():(currentTime/2.0).roundToDouble();
           double time2 = tempMap[o2]["t"]!=null?tempMap[o2]["t"].toDouble():(currentTime/2.0).roundToDouble();
           return sorting=="newest"?time1>time2?-1:1:time1>time2?1:-1;
@@ -1037,39 +1037,39 @@ class ViewState extends State<View>{
   Widget build(BuildContext context){
     if(!hasLoaded){
       lastHasLoaded = false;
-      return new CustomScrollView(
+      return CustomScrollView(
           slivers: [
-            new SliverAppBar(
+            SliverAppBar(
                 pinned: false,
                 backgroundColor: color,
                 floating: true,
                 centerTitle: false,
                 expandedHeight: 30.0,
-                title: new Text(!widget.onlyCreated?"Browse":"Created"),
+                title: Text(!widget.onlyCreated?"Browse":"Created"),
                 actions: [
-                  new IconButton(
-                      icon: new Icon(Icons.search),
+                  IconButton(
+                      icon: Icon(Icons.search),
                       onPressed: (){}
                   ),
-                  new Padding(padding: EdgeInsets.only(right:3.0),child:new Container(
+                  Padding(padding: EdgeInsets.only(right:3.0),child:Container(
                       width: 35.0,
-                      child: new PopupMenuButton<String>(
+                      child: PopupMenuButton<String>(
                           itemBuilder: (BuildContext context)=>widget.onlyCreated?[
-                            new PopupMenuItem<String>(child: const Text("Top"), value: "top"),
-                            new PopupMenuItem<String>(child: const Text("Newest"), value: "newest"),
-                            new PopupMenuItem<String>(child: const Text("Oldest"), value: "oldest")
+                            PopupMenuItem<String>(child: const Text("Top"), value: "top"),
+                            PopupMenuItem<String>(child: const Text("Newest"), value: "newest"),
+                            PopupMenuItem<String>(child: const Text("Oldest"), value: "oldest")
                           ]:[
-                            new PopupMenuItem<String>(child: const Text("Trending"), value: "trending"),
-                            new PopupMenuItem<String>(child: const Text("Top"), value: "top"),
-                            new PopupMenuItem<String>(child: const Text("Newest"), value: "newest"),
-                            new PopupMenuItem<String>(child: const Text("Oldest"), value: "oldest")
+                            PopupMenuItem<String>(child: const Text("Trending"), value: "trending"),
+                            PopupMenuItem<String>(child: const Text("Top"), value: "top"),
+                            PopupMenuItem<String>(child: const Text("Newest"), value: "newest"),
+                            PopupMenuItem<String>(child: const Text("Oldest"), value: "oldest")
                           ],
-                          child: new Icon(Icons.sort),
+                          child: Icon(Icons.sort),
                           onSelected: (str){}
                       )
                   ))
                 ],
-                bottom:new PreferredSize(preferredSize: new Size(double.infinity,3.0),child: new Container(height:3.0,child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor))))
+                bottom:PreferredSize(preferredSize: Size(double.infinity,3.0),child: Container(height:3.0,child:LinearProgressIndicator(valueColor: AlwaysStoppedAnimation(indicatorColor))))
             )
           ]
       );
@@ -1078,27 +1078,27 @@ class ViewState extends State<View>{
     }else if(!lastHasLoaded&&unLoadedPolls.length>0){
       setState((){
         sortMap();
-        unLoadedPolls=new List<String>();
+        unLoadedPolls=List<String>();
       });
     }
     lastHasLoaded = true;
-    return new Stack(
+    return Stack(
         children: [
-          new SafeArea(bottom:false,child:new CustomScrollView(
+          SafeArea(bottom:false,child:CustomScrollView(
               slivers: [
-                new SliverAppBar(
+                SliverAppBar(
                     pinned: false,
                     floating: true,
-                    title:!inSearch?new Text(!widget.onlyCreated?"Browse":"Created"):new TextField(
+                    title:!inSearch?Text(!widget.onlyCreated?"Browse":"Created"):TextField(
                         textCapitalization: TextCapitalization.sentences,
-                        style: new TextStyle(fontSize:20.0,color: Colors.white),
+                        style: TextStyle(fontSize:20.0,color: Colors.white),
                         controller: c,
                         autofocus: true,
                         autocorrect: false,
-                        decoration: new InputDecoration(
+                        decoration: InputDecoration(
                             border: InputBorder.none,
                             hintText: "Search",
-                            hintStyle: new TextStyle(color:Colors.white30)
+                            hintStyle: TextStyle(color:Colors.white30)
                         ),
                         focusNode: f,
                         onChanged: (str){
@@ -1114,8 +1114,8 @@ class ViewState extends State<View>{
                     expandedHeight: 30.0,
                     backgroundColor: color,
                     actions: [
-                      inSearch?new IconButton(
-                        icon: new Icon(Icons.close),
+                      inSearch?IconButton(
+                        icon: Icon(Icons.close),
                         onPressed: (){
                           if(f.hasFocus){
                             search = "";
@@ -1130,27 +1130,27 @@ class ViewState extends State<View>{
                             sortMap();
                           }
                         },
-                      ):new IconButton(
-                          icon: new Icon(Icons.search),
+                      ):IconButton(
+                          icon: Icon(Icons.search),
                           onPressed: (){
                             s.jumpTo(0.0);
                             setState((){inSearch = true;});
                           }
                       ),
-                      new Padding(padding: EdgeInsets.only(right:3.0),child:new Container(
+                      Padding(padding: EdgeInsets.only(right:3.0),child:Container(
                           width: 35.0,
-                          child: new PopupMenuButton<String>(
+                          child: PopupMenuButton<String>(
                               itemBuilder: (BuildContext context)=>widget.onlyCreated?[
-                                new PopupMenuItem<String>(child: const Text("Top"), value: "top"),
-                                new PopupMenuItem<String>(child: const Text("Newest"), value: "newest"),
-                                new PopupMenuItem<String>(child: const Text("Oldest"), value: "oldest")
+                                PopupMenuItem<String>(child: const Text("Top"), value: "top"),
+                                PopupMenuItem<String>(child: const Text("Newest"), value: "newest"),
+                                PopupMenuItem<String>(child: const Text("Oldest"), value: "oldest")
                               ]:[
-                                new PopupMenuItem<String>(child: const Text("Trending"), value: "trending"),
-                                new PopupMenuItem<String>(child: const Text("Top"), value: "top"),
-                                new PopupMenuItem<String>(child: const Text("Newest"), value: "newest"),
-                                new PopupMenuItem<String>(child: const Text("Oldest"), value: "oldest")
+                                PopupMenuItem<String>(child: const Text("Trending"), value: "trending"),
+                                PopupMenuItem<String>(child: const Text("Top"), value: "top"),
+                                PopupMenuItem<String>(child: const Text("Newest"), value: "newest"),
+                                PopupMenuItem<String>(child: const Text("Oldest"), value: "oldest")
                               ],
-                              child: new Icon(Icons.sort),
+                              child: Icon(Icons.sort),
                               onSelected: (str){
                                 s.jumpTo(0.0);
                                 setState((){
@@ -1163,35 +1163,35 @@ class ViewState extends State<View>{
                       )),
                     ]
                 ),
-                new SliverStickyHeader(
-                    header:unLoadedPolls.length>0?!loadingNewPolls?new GestureDetector(onTap:() async{
+                SliverStickyHeader(
+                    header:unLoadedPolls.length>0?!loadingNewPolls?GestureDetector(onTap:() async{
                       await s.animateTo(0.0,curve: Curves.easeOut, duration: const Duration(milliseconds: 300));
                       setState((){loadingNewPolls = true;});
-                      new Timer(new Duration(milliseconds:350),(){
+                      Timer(Duration(milliseconds:350),(){
                         setState((){
                           loadingNewPolls = false;
                           sortMap();
-                          unLoadedPolls=new List<String>();
+                          unLoadedPolls=List<String>();
                         });
                       });
-                    },child:new Container(height:30.0,color:indicatorColor,child:new Row(mainAxisAlignment:MainAxisAlignment.center,children:[new Text("Show ${unLoadedPolls.length} new Poll${unLoadedPolls.length==1?"":"s"} ",style:new TextStyle(fontSize:12.5,color:Colors.white)),new Icon(Icons.refresh,size:15.0,color:Colors.white)]))):new Container(height:3.0,child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor))):new Container(height:0.0,width:0.0),
-                    sliver:new SliverPadding(padding: new EdgeInsets.only(right:5.0,left:5.0,top:5.0),sliver:sortedMap.keys.length>0||search==null||search.length==0?new SliverStaggeredGrid.countBuilder(
+                    },child:Container(height:30.0,color:indicatorColor,child:Row(mainAxisAlignment:MainAxisAlignment.center,children:[Text("Show ${unLoadedPolls.length} Poll${unLoadedPolls.length==1?"":"s"} ",style:TextStyle(fontSize:12.5,color:Colors.white)),Icon(Icons.refresh,size:15.0,color:Colors.white)]))):Container(height:3.0,child:LinearProgressIndicator(valueColor: AlwaysStoppedAnimation(indicatorColor))):Container(height:0.0,width:0.0),
+                    sliver:SliverPadding(padding: EdgeInsets.only(right:5.0,left:5.0,top:5.0),sliver:sortedMap.keys.length>0||search==null||search.length==0?SliverStaggeredGrid.countBuilder(
                       crossAxisCount: (MediaQuery.of(context).size.width/500.0).ceil(),
                       mainAxisSpacing: 0.0,
                       crossAxisSpacing: 0.0,
                       itemCount: sortedMap.keys.length,
-                      itemBuilder: (BuildContext context, int i)=>new Poll(sortedMap.keys.toList()[i],false),
-                      staggeredTileBuilder:(i)=>new StaggeredTile.fit(1),
-                    ):new SliverStickyHeader(
-                        header:new Padding(padding:EdgeInsets.only(top:10.0),child:new Center(child:new Text("Your search did not match any polls",textAlign:TextAlign.center,style: new TextStyle(fontSize:15.0*min(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height)/320,color:textColor))))
+                      itemBuilder: (BuildContext context, int i)=>Poll(sortedMap.keys.toList()[i],false),
+                      staggeredTileBuilder:(i)=>StaggeredTile.fit(1),
+                    ):SliverStickyHeader(
+                        header:Padding(padding:EdgeInsets.only(top:10.0),child:Center(child:Text("Your search did not match any polls",textAlign:TextAlign.center,style: TextStyle(fontSize:15.0*min(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height)/320,color:textColor))))
                     ))
                 )
               ],
               controller: s
           )),
-          new Positioned(
+          Positioned(
               left:0.0,top:0.0,
-              child:new Container(height:MediaQuery.of(context).padding.top,width:MediaQuery.of(context).size.width,color:color)
+              child:Container(height:MediaQuery.of(context).padding.top,width:MediaQuery.of(context).size.width,color:color)
           )
         ]
     );
@@ -1203,9 +1203,9 @@ class Poll extends StatefulWidget{
   final bool viewPage;
   final Image image;
   final double height,width;
-  Poll(this.id,this.viewPage,[this.image,this.height,this.width]):super(key:new ObjectKey(id));
+  Poll(this.id,this.viewPage,[this.image,this.height,this.width]):super(key:ObjectKey(id));
   @override
-  PollState createState() => new PollState();
+  PollState createState() => PollState();
 }
 
 class PollState extends State<Poll>{
@@ -1228,18 +1228,18 @@ class PollState extends State<Poll>{
     multiSelect = data[widget.id]["b"][0]==1;
     if(hasVoted){
       if(multiSelect&&data[widget.id]["i"]!=null&&data[widget.id]["i"][userId]!=null&&data[widget.id]["i"][userId].contains(-1)){
-        choice = new Set.from([]);
+        choice = Set.from([]);
       }else{
-        choice = !multiSelect?data[widget.id]["i"][userId]!=-1?data[widget.id]["c"][data[widget.id]["i"][userId]]:null:new Set.from(data[widget.id]["i"][userId]);
+        choice = !multiSelect?data[widget.id]["i"][userId]!=-1?data[widget.id]["c"][data[widget.id]["i"][userId]]:null:Set.from(data[widget.id]["i"][userId]);
       }
     }else if(multiSelect){
-      choice = new Set.from([]);
+      choice = Set.from([]);
     }
     hasImage = data[widget.id]["b"].length==4&&data[widget.id]["b"][3]==1;
     if(hasImage){
-      completer = new Completer<ui.Image>();
-      image = widget.image==null?new Image.network(imageLink+widget.id):widget.image;
-      image.image.resolve(new ImageConfiguration()).addListener((ImageInfo info, bool b){
+      completer = Completer<ui.Image>();
+      image = widget.image==null?Image.network(imageLink+widget.id):widget.image;
+      image.image.resolve(ImageConfiguration()).addListener((ImageInfo info, bool b){
         if(!completer.isCompleted){
           completer.complete(info.image);
         }
@@ -1272,7 +1272,7 @@ class PollState extends State<Poll>{
         choice = c;
       }
     }else{
-      lastChoice = new Set.from([]);
+      lastChoice = Set.from([]);
       lastChoice.addAll(choice);
       try{
         setState((){
@@ -1305,7 +1305,7 @@ class PollState extends State<Poll>{
     await http.put(Uri.encodeFull(database+"/data/${widget.id}/i/$userId.json?auth=$secretKey"),body: json.encode(!multiSelect?data[widget.id]["c"].indexOf(choice):(choice.length>0?choice:[-1])));
     //await http.get(Uri.encodeFull(functionsLink+"/vote?text={\"poll\":\"${widget.id}\",\"choice\":${data[widget.id]["c"].indexOf(c)},\"changed\":${!multiSelect?lastChoice!=null?data[widget.id]["c"].indexOf(lastChoice):null:!b},\"multiSelect\":$multiSelect,\"key\":\"$secretKey\"}"));
     if(multiSelect){
-      choice = new Set.from(choice);
+      choice = Set.from(choice);
     }
     try{
       setState((){pids.remove(pid);});
@@ -1325,7 +1325,7 @@ class PollState extends State<Poll>{
         choice = data[widget.id]["i"][userId]!=-1?data[widget.id]["c"][data[widget.id]["i"][userId]]:null;
       }else{
         lastChoice = choice;
-        choice = new Set.from(data[widget.id]["i"][userId]);
+        choice = Set.from(data[widget.id]["i"][userId]);
       }
     }else if(!multiSelect&&pids.length==0&&!hasVoted&&choice!=null){
       lastChoice = null;
@@ -1333,14 +1333,14 @@ class PollState extends State<Poll>{
     }
     List correctList = data[widget.id]["a"];
     int totalVotes = correctList.reduce((n1,n2)=>n1+n2);
-    Widget returnedWidget = new Column(
+    Widget returnedWidget = Column(
         children:[
-          new Column(
+          Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                new Padding(padding:EdgeInsets.only(top:10.0,left:11.0,right:11.0),child:new Text(data[widget.id]["q"],style: new TextStyle(color:textColor,fontSize: 15.0,letterSpacing:.2,fontWeight: FontWeight.w600,fontFamily: "Futura"),maxLines: !widget.viewPage?2:100,overflow: TextOverflow.ellipsis)),
-                new Padding(padding:EdgeInsets.only(top:5.0,left:11.0,bottom:5.0),child:new Text(widget.id+(data[widget.id]["t"]!=null?" • ${timeago.format(new DateTime.fromMillisecondsSinceEpoch(data[widget.id]["t"]*1000))}":"")+" • $totalVotes vote"+((totalVotes==1)?"":"s"),style: new TextStyle(fontSize: 12.0,color:textColor.withOpacity(.8)))),
-                image!=null?new Padding(padding:EdgeInsets.only(top:5.0,bottom:5.0),child:new FutureBuilder<ui.Image>(
+                Padding(padding:EdgeInsets.only(top:10.0,left:11.0,right:11.0),child:Text(data[widget.id]["q"],style: TextStyle(color:textColor,fontSize: 15.0,letterSpacing:.2,fontWeight: FontWeight.w600,fontFamily: "Futura"),maxLines: !widget.viewPage?2:100,overflow: TextOverflow.ellipsis)),
+                Padding(padding:EdgeInsets.only(top:5.0,left:11.0,bottom:5.0),child:Text(widget.id+(data[widget.id]["t"]!=null?" • ${timeago.format(DateTime.fromMillisecondsSinceEpoch(data[widget.id]["t"]*1000))}":"")+" • $totalVotes vote"+((totalVotes==1)?"":"s"),style: TextStyle(fontSize: 12.0,color:textColor.withOpacity(.8)))),
+                image!=null?Padding(padding:EdgeInsets.only(top:5.0,bottom:5.0),child:FutureBuilder<ui.Image>(
                   future: completer.future,
                   builder: (BuildContext context, AsyncSnapshot<ui.Image> snapshot){
                     if(snapshot.hasData||height!=null||width!=null||(widget.image!=null&&widget.height!=null&&widget.width!=null)){
@@ -1348,22 +1348,22 @@ class PollState extends State<Poll>{
                         height = snapshot.data.height*1.0;
                         width = snapshot.data.width*1.0;
                       }
-                      return new GestureDetector(onTap:(){Navigator.push(context,new PageRouteBuilder(opaque:false,pageBuilder:(context,a1,a2)=>new ImageView(child:new Center(child:new PhotoView(imageProvider:image.image,minScale:min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height),maxScale:4.0*min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height))),name:widget.id)));},child:new SizedBox(
+                      return GestureDetector(onTap:(){Navigator.push(context,PageRouteBuilder(opaque:false,pageBuilder:(context,a1,a2)=>ImageView(child:Center(child:PhotoView(imageProvider:image.image,minScale:min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height),maxScale:4.0*min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height))),name:widget.id)));},child:SizedBox(
                           width: double.infinity,
                           height: max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0*((MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?1:3*((MediaQuery.of(context).size.width/500.0).ceil())/4)),
-                          child: new Image(image:image.image,fit:BoxFit.cover)
+                          child: Image(image:image.image,fit:BoxFit.cover)
                       ));
                     }else{
-                      return new Container(width:double.infinity,height:max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0*((MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?1:3*((MediaQuery.of(context).size.width/500.0).ceil())/4)),color:Colors.black12,child: new Center(child: new Container(height:MediaQuery.of(context).size.width/(15*(!widget.viewPage?(MediaQuery.of(context).size.width/500.0).ceil():1)),width:MediaQuery.of(context).size.width/(15*(!widget.viewPage?(MediaQuery.of(context).size.width/500.0).ceil():1)),child:new CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor)))));
+                      return Container(width:double.infinity,height:max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0*((MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?1:3*((MediaQuery.of(context).size.width/500.0).ceil())/4)),color:Colors.black12,child: Center(child: Container(height:MediaQuery.of(context).size.width/(15*(!widget.viewPage?(MediaQuery.of(context).size.width/500.0).ceil():1)),width:MediaQuery.of(context).size.width/(15*(!widget.viewPage?(MediaQuery.of(context).size.width/500.0).ceil():1)),child:CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(indicatorColor)))));
                     }
                   },
-                )):new Container(),
-                new Container(height:5.0),
-                new Column(
+                )):Container(),
+                Container(height:5.0),
+                Column(
                     children: data[widget.id]["c"].map((c){
                       dynamic used = pids.length>0?lastChoice:choice;
                       double percent = (totalVotes!=0?correctList[data[widget.id]["c"].indexOf(c)]/totalVotes:0.0);
-                      return widget.viewPage||((hasVoted&&settings[1]!="Never")||(data[widget.id]["c"].indexOf(c)<5||settings[1]=="Always"))?new MaterialButton(onPressed: () async{
+                      return widget.viewPage||((hasVoted&&settings[1]!="Never")||(data[widget.id]["c"].indexOf(c)<5||settings[1]=="Always"))?MaterialButton(onPressed: () async{
                         if(multiSelect||c!=choice){
                           if(widget.viewPage){
                             PollViewState.canLeaveView = false;
@@ -1371,7 +1371,7 @@ class PollState extends State<Poll>{
                           String pid;
                           do{
                             pid = "";
-                            Random r = new Random();
+                            Random r = Random();
                             List<String> nums = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
                             for(int i = 0;i<8;i++){
                               pid+=(r.nextInt(2)==0?nums[r.nextInt(36)]:nums[r.nextInt(36)].toLowerCase());
@@ -1379,7 +1379,7 @@ class PollState extends State<Poll>{
                           }while(pids.contains(pid));
                           pids.add(pid);
                           waitForVote(){
-                            new Timer(Duration.zero,(){
+                            Timer(Duration.zero,(){
                               if(pids[0]==pid){
                                 vote(c,context,pid,multiSelect?!choice.contains(data[widget.id]["c"].indexOf(c)):null);
                               }else if(pids.length>0){
@@ -1395,7 +1395,7 @@ class PollState extends State<Poll>{
                           String pid;
                           do{
                             pid = "";
-                            Random r = new Random();
+                            Random r = Random();
                             List<String> nums = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
                             for(int i = 0;i<8;i++){
                               pid+=(r.nextInt(2)==0?nums[r.nextInt(36)]:nums[r.nextInt(36)].toLowerCase());
@@ -1404,10 +1404,10 @@ class PollState extends State<Poll>{
                           pids.add(pid);
                           vote(null,context,pid);
                         }
-                      },padding:EdgeInsets.only(top:12.0,bottom:12.0),child:new Column(children: [
-                        new Row(
+                      },padding:EdgeInsets.only(top:12.0,bottom:12.0),child:Column(children: [
+                        Row(
                             children: [
-                              !multiSelect?(pids.length>0)&&((choice==c)||(lastChoice==c&&choice==null))?new Container(width:2*kRadialReactionRadius+8.0,height:kRadialReactionRadius,child:new Center(child:new Container(height:16.0,width:16.0,child: new CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor),strokeWidth: 2.0)))):new Container(height:kRadialReactionRadius,child:new Radio(
+                              !multiSelect?(pids.length>0)&&((choice==c)||(lastChoice==c&&choice==null))?Container(width:2*kRadialReactionRadius+8.0,height:kRadialReactionRadius,child:Center(child:Container(height:16.0,width:16.0,child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(indicatorColor),strokeWidth: 2.0)))):Container(height:kRadialReactionRadius,child:Radio(
                                 activeColor: indicatorColor,
                                 value: c,
                                 groupValue: choice,
@@ -1419,7 +1419,7 @@ class PollState extends State<Poll>{
                                     String pid;
                                     do{
                                       pid = "";
-                                      Random r = new Random();
+                                      Random r = Random();
                                       List<String> nums = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
                                       for(int i = 0;i<8;i++){
                                         pid+=(r.nextInt(2)==0?nums[r.nextInt(36)]:nums[r.nextInt(36)].toLowerCase());
@@ -1427,7 +1427,7 @@ class PollState extends State<Poll>{
                                     }while(pids.contains(pid));
                                     pids.add(pid);
                                     waitForVote(){
-                                      new Timer(Duration.zero,(){
+                                      Timer(Duration.zero,(){
                                         if(pids[0]==pid){
                                           vote(c,context,pid);
                                         }else if(pids.length>0){
@@ -1443,7 +1443,7 @@ class PollState extends State<Poll>{
                                     String pid;
                                     do{
                                       pid = "";
-                                      Random r = new Random();
+                                      Random r = Random();
                                       List<String> nums = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
                                       for(int i = 0;i<8;i++){
                                         pid+=(r.nextInt(2)==0?nums[r.nextInt(36)]:nums[r.nextInt(36)].toLowerCase());
@@ -1453,7 +1453,7 @@ class PollState extends State<Poll>{
                                     vote(null,context,pid);
                                   }
                                 },
-                              )):new Container(height:18.0,child:new Checkbox(
+                              )):Container(height:18.0,child:Checkbox(
                                   activeColor: indicatorColor,
                                   value: choice.contains(data[widget.id]["c"].indexOf(c)),
                                   onChanged:(b){
@@ -1463,7 +1463,7 @@ class PollState extends State<Poll>{
                                     String pid;
                                     do{
                                       pid = "";
-                                      Random r = new Random();
+                                      Random r = Random();
                                       List<String> nums = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
                                       for(int i = 0;i<8;i++){
                                         pid+=(r.nextInt(2)==0?nums[r.nextInt(36)]:nums[r.nextInt(36)].toLowerCase());
@@ -1471,7 +1471,7 @@ class PollState extends State<Poll>{
                                     }while(pids.contains(pid));
                                     pids.add(pid);
                                     waitForVote(){
-                                      new Timer(Duration.zero,(){
+                                      Timer(Duration.zero,(){
                                         if(pids[0]==pid){
                                           vote(c,context,pid,b);
                                         }else if(pids.length>0){
@@ -1482,37 +1482,37 @@ class PollState extends State<Poll>{
                                     waitForVote();
                                   }
                               )),
-                              new Expanded(child:new Text(c,maxLines:!widget.viewPage?2:100,style: new TextStyle(color:textColor),overflow: TextOverflow.ellipsis)),
-                              new Container(width:8.0)
+                              Expanded(child:Text(c,maxLines:!widget.viewPage?2:100,style: TextStyle(color:textColor),overflow: TextOverflow.ellipsis)),
+                              Container(width:8.0)
                             ]
                         ),
-                        new Container(height:6.0),
-                        hasVoted?new Row(crossAxisAlignment: CrossAxisAlignment.center,children:[new Expanded(child:new Padding(padding: EdgeInsets.only(top:7.5-((MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?5.0:5.0/(3*((MediaQuery.of(context).size.width/500.0).ceil())/4))/2,left:48.0,bottom:5.0),child: new Container(height:(MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?5.0:5.0/(3*((MediaQuery.of(context).size.width/500.0).ceil())/4),child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation((!multiSelect?used==c:used.contains(data[widget.id]["c"].indexOf(c)))?indicatorColor:settings[0]?Colors.white54:Colors.grey[600]),backgroundColor:settings[0]?Colors.white24:Colors.black26,value:percent)))),new Padding(padding:EdgeInsets.only(right:8.0),child:new Container(height:15.0,width:42.0,child:new FittedBox(fit:BoxFit.fitHeight,alignment: Alignment.centerRight,child:new Text((100*percent).toStringAsFixed(percent>=.9995?0:percent<.01?2:1)+"%",style:new TextStyle(color:(used!=null&&((multiSelect&&used.contains(c))||(!multiSelect&&used==c)))?indicatorColor:textColor.withOpacity(0.8))))))]):new Container()
-                      ])):data[widget.id]["c"].indexOf(c)==5?/*new Container(color:Colors.red,child:new Text("...",style:new TextStyle(fontSize:20.0,fontWeight: FontWeight.bold)))*/new Icon(Icons.more_horiz):new Container();
+                        Container(height:6.0),
+                        hasVoted?Row(crossAxisAlignment: CrossAxisAlignment.center,children:[Expanded(child:Padding(padding: EdgeInsets.only(top:7.5-((MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?5.0:5.0/(3*((MediaQuery.of(context).size.width/500.0).ceil())/4))/2,left:48.0,bottom:5.0),child: Container(height:(MediaQuery.of(context).size.width/500.0).ceil()==1||widget.viewPage?5.0:5.0/(3*((MediaQuery.of(context).size.width/500.0).ceil())/4),child:LinearProgressIndicator(valueColor: AlwaysStoppedAnimation((!multiSelect?used==c:used.contains(data[widget.id]["c"].indexOf(c)))?indicatorColor:settings[0]?Colors.white54:Colors.grey[600]),backgroundColor:settings[0]?Colors.white24:Colors.black26,value:percent)))),Padding(padding:EdgeInsets.only(right:8.0),child:Container(height:15.0,width:42.0,child:FittedBox(fit:BoxFit.fitHeight,alignment: Alignment.centerRight,child:Text((100*percent).toStringAsFixed(percent>=.9995?0:percent<.01?2:1)+"%",style:TextStyle(color:(used!=null&&((multiSelect&&used.contains(c))||(!multiSelect&&used==c)))?indicatorColor:textColor.withOpacity(0.8))))))]):Container()
+                      ])):data[widget.id]["c"].indexOf(c)==5?/*Container(color:Colors.red,child:Text("...",style:TextStyle(fontSize:20.0,fontWeight: FontWeight.bold)))*/Icon(Icons.more_horiz):Container();
                     }).toList().cast<Widget>()
                 ),
-                new Container(height:7.0)
+                Container(height:7.0)
               ]
-            //trailing: new Text(data[widget.id]["a"].reduce((n1,n2)=>n1+n2).toString(),style: new TextStyle(color:Colors.black))
+            //trailing: Text(data[widget.id]["a"].reduce((n1,n2)=>n1+n2).toString(),style: TextStyle(color:Colors.black))
           )
         ]
     );
     if(widget.viewPage){
-      return new Container(color:!settings[0]?new Color.fromRGBO(250, 250, 250, 1.0):new Color.fromRGBO(32,33,36,1.0),child:returnedWidget);
+      return Container(color:!settings[0]?Color.fromRGBO(250, 250, 250, 1.0):Color.fromRGBO(32,33,36,1.0),child:returnedWidget);
     }else{
-      returnedWidget = new Card(color:!settings[0]?new Color.fromRGBO(250, 250, 250, 1.0):new Color.fromRGBO(32,33,36,1.0),child:new Hero(tag:widget.id,child:new Material(type:MaterialType.transparency,child:returnedWidget)));
+      returnedWidget = Card(color:!settings[0]?Color.fromRGBO(250, 250, 250, 1.0):Color.fromRGBO(32,33,36,1.0),child:Hero(tag:widget.id,child:Material(type:MaterialType.transparency,child:returnedWidget)));
       if(((!hasVoted||settings[1]=="Never")&&correctList.length>5)&&settings[1]!="Always"){
-        returnedWidget = new AbsorbPointer(child:returnedWidget);
+        returnedWidget = AbsorbPointer(child:returnedWidget);
       }
-      returnedWidget = new GestureDetector(onTap: (){
+      returnedWidget = GestureDetector(onTap: (){
         if(pids.length==0){
-          Navigator.push(context,new PageRouteBuilder(
+          Navigator.push(context,PageRouteBuilder(
             pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation){
-              return new PollView(widget.id,this);
+              return PollView(widget.id,this);
             },
-            transitionDuration: new Duration(milliseconds: 300),
+            transitionDuration: Duration(milliseconds: 300),
             transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-              return new FadeTransition(
+              return FadeTransition(
                   opacity: animation,
                   child: child
               );
@@ -1530,7 +1530,7 @@ class PollView extends StatefulWidget{
   final PollState state;
   PollView(this.id,[this.state]);
   @override
-  PollViewState createState() => new PollViewState();
+  PollViewState createState() => PollViewState();
 }
 
 class PollViewState extends State<PollView>{
@@ -1561,59 +1561,59 @@ class PollViewState extends State<PollView>{
   @override
   Widget build(BuildContext context){
     if(!hasLoaded){
-      new Future.delayed(Duration.zero,(){
+      Future.delayed(Duration.zero,(){
         Navigator.of(context).pop();
       });
     }
     if(isDeleted&&!pressedDelete&&openedPoll==widget.id){
-      new Future.delayed(Duration.zero,(){
+      Future.delayed(Duration.zero,(){
         openedPoll = null;
         Navigator.of(context).pop();
       });
     }
-    return new WillPopScope(onWillPop:(){
+    return WillPopScope(onWillPop:(){
       if(!canLeaveView){
-        return new Future(()=>false);
+        return Future(()=>false);
       }
       if(isDeleted){
-        return new Future(()=>true);
+        return Future(()=>true);
       }
       if(widget.state!=null){
         widget.state.lastChoice = null;
-        widget.state.choice = widget.state.multiSelect?(data[widget.id]["i"]!=null&&data[widget.id]["i"][userId]!=null?new Set.from(data[widget.id]["i"][userId]):new Set.from([])):(data[widget.id]["i"]!=null&&(data[widget.id]["i"][userId]!=null)?data[widget.id]["i"][userId]!=-1?data[widget.id]["c"][data[widget.id]["i"][userId]]:null:null);
+        widget.state.choice = widget.state.multiSelect?(data[widget.id]["i"]!=null&&data[widget.id]["i"][userId]!=null?Set.from(data[widget.id]["i"][userId]):Set.from([])):(data[widget.id]["i"]!=null&&(data[widget.id]["i"][userId]!=null)?data[widget.id]["i"][userId]!=-1?data[widget.id]["c"][data[widget.id]["i"][userId]]:null:null);
       }
-      return new Future((){
+      return Future((){
         openedPoll=null;
         return true;
       });
-    },child:new Scaffold(
-        body: new Container(
-            color: !settings[0]?new Color.fromRGBO(250, 250, 250, 1.0):new Color.fromRGBO(32,33,36,1.0),
-            child: new Stack(
+    },child:Scaffold(
+        body: Container(
+            color: !settings[0]?Color.fromRGBO(250, 250, 250, 1.0):Color.fromRGBO(32,33,36,1.0),
+            child: Stack(
                 children: [
-                  new CustomScrollView(
+                  CustomScrollView(
                       slivers: [
-                        new SliverAppBar(
+                        SliverAppBar(
                             actions: [
-                              canDelete?new IconButton(
-                                  icon:new Icon(Icons.delete),
+                              canDelete?IconButton(
+                                  icon:Icon(Icons.delete),
                                   onPressed:(){
                                     showDialog(
                                         context: context,
                                         barrierDismissible: true,
                                         builder: (context){
-                                          return new AlertDialog(
-                                              title:new Text("Are you sure?",style:new TextStyle(fontWeight:FontWeight.bold)),
-                                              content:new Text("Your poll will be permanently deleted."),
+                                          return AlertDialog(
+                                              title:Text("Are you sure?",style:TextStyle(fontWeight:FontWeight.bold)),
+                                              content:Text("Your poll will be permanently deleted."),
                                               actions: [
-                                                new FlatButton(
-                                                    child: new Text("No"),
+                                                FlatButton(
+                                                    child: Text("No"),
                                                     onPressed: (){
                                                       Navigator.of(context).pop();
                                                     }
                                                 ),
-                                                new FlatButton(
-                                                    child: new Text("Yes"),
+                                                FlatButton(
+                                                    child: Text("Yes"),
                                                     onPressed: () async{
                                                       pressedDelete = true;
                                                       openedPoll = null;
@@ -1636,9 +1636,9 @@ class PollViewState extends State<PollView>{
                                         }
                                     );
                                   }
-                              ):new Container(),
-                              new IconButton(
-                                  icon: new Icon(Icons.share),
+                              ):Container(),
+                              IconButton(
+                                  icon: Icon(Icons.share),
                                   onPressed: () async{
                                     if(!isDeleted){
                                       Share.share("Vote on \""+data[widget.id]["q"]+"\" (Code: ${widget.id}) using PPoll. Use this link: https://ppoll.me/"+widget.id);
@@ -1651,17 +1651,17 @@ class PollViewState extends State<PollView>{
                             floating: true,
                             centerTitle: false,
                             expandedHeight: 30.0,
-                            title: new Text(!isDeleted?widget.id:"Poll removed"),
-                            bottom: isDeleted?new PreferredSize(preferredSize: new Size(double.infinity,3.0),child: new Container(height:3.0,child:new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor)))):new PreferredSize(preferredSize:new Size(0.0,0.0),child: new Container())
+                            title: Text(!isDeleted?widget.id:"Poll removed"),
+                            bottom: isDeleted?PreferredSize(preferredSize: Size(double.infinity,3.0),child: Container(height:3.0,child:LinearProgressIndicator(valueColor: AlwaysStoppedAnimation(indicatorColor)))):PreferredSize(preferredSize:Size(0.0,0.0),child: Container())
                         ),
-                        new SliverList(
-                            delegate: new SliverChildBuilderDelegate((context,i)=>new Hero(tag:widget.id,child:!isDeleted?new Material(child:widget.state!=null?new Poll(widget.id,true,widget.state.image,widget.state.height,widget.state.width):new Poll(widget.id,true)):new Container()),childCount:1)
+                        SliverList(
+                            delegate: SliverChildBuilderDelegate((context,i)=>Hero(tag:widget.id,child:!isDeleted?Material(child:widget.state!=null?Poll(widget.id,true,widget.state.image,widget.state.height,widget.state.width):Poll(widget.id,true)):Container()),childCount:1)
                         )
                       ]
                   ),
-                  new Positioned(
+                  Positioned(
                       left:0.0,top:0.0,
-                      child:new Container(height:MediaQuery.of(context).padding.top,width:MediaQuery.of(context).size.width,color:color)
+                      child:Container(height:MediaQuery.of(context).padding.top,width:MediaQuery.of(context).size.width,color:color)
                   )
                 ]
             )
@@ -1675,7 +1675,7 @@ class ImageView extends StatefulWidget{
   final String name;
   ImageView({@required this.child,@required this.name});
   @override
-  ImageViewState createState() => new ImageViewState();
+  ImageViewState createState() => ImageViewState();
 }
 
 class ImageViewState extends State<ImageView> with SingleTickerProviderStateMixin{
@@ -1692,11 +1692,11 @@ class ImageViewState extends State<ImageView> with SingleTickerProviderStateMixi
   @override
   void initState(){
     super.initState();
-    controller = new AnimationController(
-        duration: new Duration(milliseconds: 175),
+    controller = AnimationController(
+        duration: Duration(milliseconds: 175),
         vsync: this
     );
-    animation = new Tween(
+    animation = Tween(
         begin:0.0,
         end:1.0
     ).animate(controller);
@@ -1709,10 +1709,10 @@ class ImageViewState extends State<ImageView> with SingleTickerProviderStateMixi
       if(t!=null&&t.isActive){
         t.cancel();
       }
-      t = new Timer(new Duration(seconds:2),(){
+      t = Timer(Duration(seconds:2),(){
         if(!isAnimating&&!hasLeft){
           setState((){isAnimating = true;});
-          t2 = new Timer(new Duration(milliseconds: 200),(){
+          t2 = Timer(Duration(milliseconds: 200),(){
             if(!hasLeft){
               isAnimating = false;
               setState((){
@@ -1723,14 +1723,14 @@ class ImageViewState extends State<ImageView> with SingleTickerProviderStateMixi
         }
       });
     }
-    return new FadeTransition(opacity: animation,child:new GestureDetector(onTap:(){
+    return FadeTransition(opacity: animation,child:GestureDetector(onTap:(){
       if(!isAnimating){
         if(hasTapped){
           if(t2!=null&&t2.isActive){
             t2.cancel();
           }
           setState((){isAnimating = true;});
-          t2 = new Timer(new Duration(milliseconds: 200),(){
+          t2 = Timer(Duration(milliseconds: 200),(){
             if(!hasLeft){
               isAnimating=false;
               setState((){hasTapped=false;});
@@ -1740,22 +1740,22 @@ class ImageViewState extends State<ImageView> with SingleTickerProviderStateMixi
           setState((){hasTapped=true;});
         }
       }
-    },child:new Scaffold(
-        body: new Stack(
+    },child:Scaffold(
+        body: Stack(
             children: hasTapped?[
               widget.child,
-              new IgnorePointer(child:new AnimatedOpacity(opacity:isAnimating?0.0:1.0,duration:new Duration(milliseconds: 200),child:new Container(color:Colors.black38))),
-              new Positioned(
+              IgnorePointer(child:AnimatedOpacity(opacity:isAnimating?0.0:1.0,duration:Duration(milliseconds: 200),child:Container(color:Colors.black38))),
+              Positioned(
                   right:10.0,
                   top:MediaQuery.of(context).padding.top,
-                  child: new AnimatedOpacity(opacity:isAnimating?0.0:1.0,duration:new Duration(milliseconds:200),child:new IconButton(iconSize:30.0*min(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height)/375.0,color:Colors.white,icon:new Icon(Icons.close),onPressed:(){hasLeft = true;controller.animateTo(0.0).then((v){Navigator.of(context).pop();});}))
+                  child: AnimatedOpacity(opacity:isAnimating?0.0:1.0,duration:Duration(milliseconds:200),child:IconButton(iconSize:30.0*min(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height)/375.0,color:Colors.white,icon:Icon(Icons.close),onPressed:(){hasLeft = true;controller.animateTo(0.0).then((v){Navigator.of(context).pop();});}))
               ),
-              new Positioned(
+              Positioned(
                   left:15.0,
                   top:MediaQuery.of(context).padding.top+12,
-                  child: new IgnorePointer(child:new AnimatedOpacity(opacity:isAnimating?0.0:1.0,duration:new Duration(milliseconds:200),child:new Text(widget.name,style:new TextStyle(fontSize:(48.0/1.75)*min(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height)/375.0,color:Colors.white))))
+                  child: IgnorePointer(child:AnimatedOpacity(opacity:isAnimating?0.0:1.0,duration:Duration(milliseconds:200),child:Text(widget.name,style:TextStyle(fontSize:(48.0/1.75)*min(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height)/375.0,color:Colors.white))))
               )
-              //new AnimatedOpacity(opacity:isAnimating?0.0:1.0,duration:new Duration(milliseconds:200),child:new Container(color:Colors.white70,height:MediaQuery.of(context).padding.top+kToolbarHeight,child:new AppBar(actions:[new IconButton(icon:new Icon(Icons.close),onPressed:(){hasLeft = true;Navigator.of(context).pop();})],automaticallyImplyLeading:false,centerTitle:false,title:new Text(widget.name,style:new TextStyle(color:Colors.white)),backgroundColor: Colors.transparent,elevation: 0.0)))
+              //AnimatedOpacity(opacity:isAnimating?0.0:1.0,duration:Duration(milliseconds:200),child:Container(color:Colors.white70,height:MediaQuery.of(context).padding.top+kToolbarHeight,child:AppBar(actions:[IconButton(icon:Icon(Icons.close),onPressed:(){hasLeft = true;Navigator.of(context).pop();})],automaticallyImplyLeading:false,centerTitle:false,title:Text(widget.name,style:TextStyle(color:Colors.white)),backgroundColor: Colors.transparent,elevation: 0.0)))
             ]:[
               widget.child
             ]
@@ -1764,11 +1764,11 @@ class ImageViewState extends State<ImageView> with SingleTickerProviderStateMixi
   }
 }
 
-ScrollController createController = new ScrollController();
+ScrollController createController = ScrollController();
 
 class CreatePollPage extends StatefulWidget{
   @override
-  CreatePollPageState createState() => new CreatePollPageState();
+  CreatePollPageState createState() => CreatePollPageState();
 }
 
 bool loadingData = false;
@@ -1787,7 +1787,7 @@ class CreatePollPageState extends State<CreatePollPage>{
 
   double height,width;
 
-  Completer<ui.Image> completer = new Completer<ui.Image>();
+  Completer<ui.Image> completer = Completer<ui.Image>();
 
   bool imageLoading = false;
 
@@ -1795,25 +1795,25 @@ class CreatePollPageState extends State<CreatePollPage>{
 
   int removedIndex = -1;
 
-  List<TextEditingController> controllers = new List<TextEditingController>()..addAll([new TextEditingController(),new TextEditingController()]);
+  List<TextEditingController> controllers = List<TextEditingController>()..addAll([TextEditingController(),TextEditingController()]);
 
-  TextEditingController questionController = new TextEditingController();
+  TextEditingController questionController = TextEditingController();
 
   @override
   Widget build(BuildContext context){
-    return new Scaffold(resizeToAvoidBottomPadding:false,appBar:new AppBar(backgroundColor:color,title:new Text("Create a Poll"),actions:[new IconButton(icon:new Icon(removing?Icons.check:Icons.delete),onPressed: (){setState((){removing=!removing;});})]),body:new Container(
-        color: !settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),
-        child: new Center(
-            child: new ListView(
+    return Scaffold(resizeToAvoidBottomPadding:false,appBar:AppBar(backgroundColor:color,title:Text("Create a Poll"),actions:[IconButton(icon:Icon(removing?Icons.check:Icons.delete),onPressed: (){setState((){removing=!removing;});})]),body:Container(
+        color: !settings[0]?Color.fromRGBO(230, 230, 230, 1.0):Color.fromRGBO(51,51,51,1.0),
+        child: Center(
+            child: ListView(
                 controller: createController,
                 children:[
-                  new Padding(padding:EdgeInsets.only(top:5.0,left:5.0,right:5.0),child:new Card(
-                      color: !settings[0]?new Color.fromRGBO(250, 250, 250, 1.0):new Color.fromRGBO(32,33,36,1.0),
-                      child:new Column(
+                  Padding(padding:EdgeInsets.only(top:5.0,left:5.0,right:5.0),child:Card(
+                      color: !settings[0]?Color.fromRGBO(250, 250, 250, 1.0):Color.fromRGBO(32,33,36,1.0),
+                      child:Column(
                           children:[
-                            new Padding(padding:EdgeInsets.only(top:10.0,left:11.0,right:11.0),child:new TextField(
+                            Padding(padding:EdgeInsets.only(top:10.0,left:11.0,right:11.0),child:TextField(
                               textCapitalization: TextCapitalization.sentences,
-                              style: new TextStyle(
+                              style: TextStyle(
                                   color:textColor,fontSize: 15.0,letterSpacing:.2,fontFamily: "Futura"
                               ),
                               onChanged: (s){
@@ -1822,24 +1822,24 @@ class CreatePollPageState extends State<CreatePollPage>{
                               onSubmitted: (s){
                                 question = s;
                               },
-                              decoration: new InputDecoration(
+                              decoration: InputDecoration(
                                   hintText: "Question",
-                                  hintStyle: new TextStyle(color:textColor.withOpacity(0.8)),
-                                  border: new OutlineInputBorder(),
+                                  hintStyle: TextStyle(color:textColor.withOpacity(0.8)),
+                                  border: OutlineInputBorder(),
                                   filled: true,
                                   contentPadding: EdgeInsets.only(top:12.0,bottom:12.0,left:8.0,right:8.0)
                               ),
                               controller: questionController,
-                              inputFormatters: [new MaxInputFormatter(200)],
+                              inputFormatters: [MaxInputFormatter(200)],
                             )),
-                            image!=null?new Padding(padding:EdgeInsets.only(top:10.0,bottom:5.0),child:new FutureBuilder<ui.Image>(
+                            image!=null?Padding(padding:EdgeInsets.only(top:10.0,bottom:5.0),child:FutureBuilder<ui.Image>(
                               future: completer.future,
                               builder:(BuildContext context, AsyncSnapshot<ui.Image> snapshot){
                                 if(snapshot.hasData){
                                   height = snapshot.data.height*1.0;
                                   width = snapshot.data.width*1.0;
                                   if(removing){
-                                    return new GestureDetector(
+                                    return GestureDetector(
                                         onTap: (){
                                           setState((){
                                             image = null;
@@ -1848,11 +1848,11 @@ class CreatePollPageState extends State<CreatePollPage>{
                                           });
                                           createController.jumpTo(max(0.0,createController.position.pixels-(10+MediaQuery.of(context).size.height/3.0)));
                                         },
-                                        child:new Container(color:Colors.grey[400],child:new SizedBox(
+                                        child:Container(color:Colors.grey[400],child:SizedBox(
                                             width: double.infinity,
                                             height: max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0),
-                                            child: new Center(
-                                                child:new IconButton(
+                                            child: Center(
+                                                child:IconButton(
                                                     onPressed:(){
                                                       setState((){
                                                         image = null;
@@ -1860,7 +1860,7 @@ class CreatePollPageState extends State<CreatePollPage>{
                                                         width = null;
                                                       });
                                                     },
-                                                    icon:new Icon(Icons.delete),
+                                                    icon:Icon(Icons.delete),
                                                     iconSize:MediaQuery.of(context).size.height/736.0*50,
                                                     color:Colors.black
                                                 )
@@ -1868,23 +1868,23 @@ class CreatePollPageState extends State<CreatePollPage>{
                                         ))
                                     );
                                   }
-                                  return new GestureDetector(onTap:(){Navigator.push(context,new PageRouteBuilder(opaque:false,pageBuilder: (context,a1,a2)=>new ImageView(child:new Center(child:new PhotoView(imageProvider:new Image.file(image).image,minScale: min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height),maxScale:4.0*min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height))),name:"Image")));},child:new SizedBox(
+                                  return GestureDetector(onTap:(){Navigator.push(context,PageRouteBuilder(opaque:false,pageBuilder: (context,a1,a2)=>ImageView(child:Center(child:PhotoView(imageProvider:Image.file(image).image,minScale: min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height),maxScale:4.0*min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height))),name:"Image")));},child:SizedBox(
                                       width: double.infinity,
                                       height: max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0),
-                                      child: new Image(image:new Image.file(image).image,fit:BoxFit.cover)
+                                      child: Image(image:Image.file(image).image,fit:BoxFit.cover)
                                   ));
                                 }else{
-                                  return new Container(width:double.infinity,height:max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0),color:Colors.black12,child: new Center(child: new Container(height:MediaQuery.of(context).size.height/20.0,width:MediaQuery.of(context).size.height/20.0,child:new CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor)))));
+                                  return Container(width:double.infinity,height:max(MediaQuery.of(context).size.height,MediaQuery.of(context).size.width)/(3.0),color:Colors.black12,child: Center(child: Container(height:MediaQuery.of(context).size.height/20.0,width:MediaQuery.of(context).size.height/20.0,child:CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(indicatorColor)))));
                                 }
                               },
-                            )):new Container(),
-                            new Column(
-                                children:choices.asMap().keys.map((i)=>new AnimatedOpacity(opacity:removedIndex==i?0.0:1.0,duration:new Duration(milliseconds:250),child:new Container(key:new ValueKey<int>(i),height:50.0,child:new Row(
+                            )):Container(),
+                            Column(
+                                children:choices.asMap().keys.map((i)=>AnimatedOpacity(opacity:removedIndex==i?0.0:1.0,duration:Duration(milliseconds:250),child:Container(key:ValueKey<int>(i),height:50.0,child:Row(
                                     children: [
-                                      !removing?!multiSelect?new Radio(groupValue: null,value:i,onChanged:(i){}):new Checkbox(onChanged:(b){},value:false):new IconButton(icon:new Icon(Icons.delete),onPressed:(){
+                                      !removing?!multiSelect?Radio(groupValue: null,value:i,onChanged:(i){}):Checkbox(onChanged:(b){},value:false):IconButton(icon:Icon(Icons.delete),onPressed:(){
                                         if(choices.length>2&&removedIndex==-1){
                                           setState((){removedIndex=i;});
-                                          new Timer(new Duration(milliseconds:250),(){
+                                          Timer(Duration(milliseconds:250),(){
                                             choices.removeAt(i);controllers.removeAt(i);
                                             for(int j = 0; j<choices.length;j++){
                                               controllers[j].text = choices[j];
@@ -1894,34 +1894,34 @@ class CreatePollPageState extends State<CreatePollPage>{
                                           });
                                         }
                                       }),
-                                      new Expanded(
-                                        child: new Padding(padding:EdgeInsets.only(right:11.0),child:new TextField(
+                                      Expanded(
+                                        child: Padding(padding:EdgeInsets.only(right:11.0),child:TextField(
                                             textCapitalization: TextCapitalization.sentences,
-                                            style: new TextStyle(color:textColor,fontSize:14.0),
+                                            style: TextStyle(color:textColor,fontSize:14.0),
                                             onChanged: (s){
                                               choices[i]=s;
                                             },
                                             onSubmitted: (s){
                                               choices[i]=s;
                                             },
-                                            decoration: new InputDecoration(
+                                            decoration: InputDecoration(
                                               hintText: "Option ${i+1}",
-                                              hintStyle: new TextStyle(color:textColor.withOpacity(0.7)),
+                                              hintStyle: TextStyle(color:textColor.withOpacity(0.7)),
                                             ),
                                             controller: controllers[i],
-                                            inputFormatters: [new MaxInputFormatter(100)]
+                                            inputFormatters: [MaxInputFormatter(100)]
                                         )),
                                       ),
-                                      new Container(width:5.0)
+                                      Container(width:5.0)
                                     ]
                                 )))).toList()
                             ),
-                            new MaterialButton(
+                            MaterialButton(
                                 padding:EdgeInsets.zero,
-                                child: new Container(height:50.0,child:new Row(
+                                child: Container(height:50.0,child:Row(
                                     children:[
-                                      new Container(width:2*kRadialReactionRadius+8.0,height:2*kRadialReactionRadius+8.0,child:new Icon(Icons.add)),
-                                      new Expanded(child:new Text("Add",style:new TextStyle(color:textColor,fontSize:15.0)))
+                                      Container(width:2*kRadialReactionRadius+8.0,height:2*kRadialReactionRadius+8.0,child:Icon(Icons.add)),
+                                      Expanded(child:Text("Add",style:TextStyle(color:textColor,fontSize:15.0)))
                                     ]
                                 )),
                                 onPressed:(){
@@ -1929,23 +1929,23 @@ class CreatePollPageState extends State<CreatePollPage>{
                                     if(createController.position.pixels>0){
                                       createController.jumpTo(createController.position.pixels+50.0);
                                     }
-                                    controllers.add(new TextEditingController());
+                                    controllers.add(TextEditingController());
                                     setState((){choices.add(null);});
                                   }
                                 }
                             ),
-                            new Container(height:7.0)
+                            Container(height:7.0)
                           ]
                       )
                   )),
-                  new Container(height:5.0),
-                  new MaterialButton(color:settings[0]?new Color.fromRGBO(32,33,36,1.0):new Color.fromRGBO(253,253,253,1.0),onPressed:(){setState((){multiSelect=!multiSelect;public=false;});},padding:EdgeInsets.zero,child:new ListTile(leading:new Text("Multiple selections",style:new TextStyle(color:textColor)),trailing:new Switch(value:multiSelect,activeColor:indicatorColor,onChanged:(b){setState((){multiSelect=b;public=false;});}))),
-                  new MaterialButton(color:settings[0]?new Color.fromRGBO(32,33,36,1.0):new Color.fromRGBO(253,253,253,1.0),onPressed:(){setState((){public=!public;multiSelect=false;});},padding:EdgeInsets.zero,child:new ListTile(leading:new Text("Publicly searchable",style:new TextStyle(color:textColor)),trailing:new Switch(value:public,activeColor:indicatorColor,onChanged:(b){setState((){public=b;multiSelect=false;});}))),
-                  new MaterialButton(color:settings[0]?new Color.fromRGBO(32,33,36,1.0):new Color.fromRGBO(253,253,253,1.0),onPressed:() async{
+                  Container(height:5.0),
+                  MaterialButton(color:settings[0]?Color.fromRGBO(32,33,36,1.0):Color.fromRGBO(253,253,253,1.0),onPressed:(){setState((){multiSelect=!multiSelect;public=false;});},padding:EdgeInsets.zero,child:ListTile(leading:Text("Multiple selections",style:TextStyle(color:textColor)),trailing:Switch(value:multiSelect,activeColor:indicatorColor,onChanged:(b){setState((){multiSelect=b;public=false;});}))),
+                  MaterialButton(color:settings[0]?Color.fromRGBO(32,33,36,1.0):Color.fromRGBO(253,253,253,1.0),onPressed:(){setState((){public=!public;multiSelect=false;});},padding:EdgeInsets.zero,child:ListTile(leading:Text("Publicly searchable",style:TextStyle(color:textColor)),trailing:Switch(value:public,activeColor:indicatorColor,onChanged:(b){setState((){public=b;multiSelect=false;});}))),
+                  MaterialButton(color:settings[0]?Color.fromRGBO(32,33,36,1.0):Color.fromRGBO(253,253,253,1.0),onPressed:() async{
                     if(image!=null&&width!=null){
-                      Navigator.push(context,new PageRouteBuilder(opaque:false,pageBuilder: (context,a1,a2)=>new ImageView(child:new Center(child:new PhotoView(imageProvider:new Image.file(image).image,minScale: min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height),maxScale:4.0*min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height))),name:"Image")));
+                      Navigator.push(context,PageRouteBuilder(opaque:false,pageBuilder: (context,a1,a2)=>ImageView(child:Center(child:PhotoView(imageProvider:Image.file(image).image,minScale: min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height),maxScale:4.0*min(MediaQuery.of(context).size.width/width,MediaQuery.of(context).size.height/height))),name:"Image")));
                     }else if(!imageLoading){
-                      completer = new Completer<ui.Image>();
+                      completer = Completer<ui.Image>();
                       File tempImage = await ImagePicker.pickImage(source: ImageSource.gallery);
                       if(tempImage!=null){
                         if(tempImage!=null&&(basename(tempImage.path)==null||lookupMimeType(basename(tempImage.path))==null||!["image/png","image/jpeg"].contains(lookupMimeType(basename(tempImage.path))))){
@@ -1954,12 +1954,12 @@ class CreatePollPageState extends State<CreatePollPage>{
                               context: context,
                               barrierDismissible: true,
                               builder: (context){
-                                return new AlertDialog(
-                                    title:new Text("Error",style:new TextStyle(fontWeight:FontWeight.bold)),
-                                    content:new Text(basename(tempImage.path)==null?"Invalid file path":"Invalid file type"),
+                                return AlertDialog(
+                                    title:Text("Error",style:TextStyle(fontWeight:FontWeight.bold)),
+                                    content:Text(basename(tempImage.path)==null?"Invalid file path":"Invalid file type"),
                                     actions: [
-                                      new FlatButton(
-                                          child: new Text("OK"),
+                                      FlatButton(
+                                          child: Text("OK"),
                                           onPressed: (){
                                             Navigator.of(context).pop();
                                           }
@@ -1972,7 +1972,7 @@ class CreatePollPageState extends State<CreatePollPage>{
                         }
                         setState((){imageLoading = true;image = tempImage;});
                         createController.jumpTo(createController.position.pixels+10+MediaQuery.of(context).size.height/3.0);
-                        new Image.file(tempImage).image.resolve(new ImageConfiguration()).addListener((ImageInfo info, bool b){
+                        Image.file(tempImage).image.resolve(ImageConfiguration()).addListener((ImageInfo info, bool b){
                           completer.complete(info.image);
                           height = info.image.height*1.0;
                           width = info.image.width*1.0;
@@ -1985,31 +1985,31 @@ class CreatePollPageState extends State<CreatePollPage>{
                         image=null;
                       }
                     }
-                  },padding:EdgeInsets.zero,child:new ListTile(leading:new Text(image!=null?"Image selected":"Add an image",style:new TextStyle(color:textColor)),trailing:new Padding(padding:EdgeInsets.only(right:10.0),child:new SizedBox(height:40.0,width:40.0,child:image!=null?!imageLoading?!removing?new Image.file(image,fit:BoxFit.cover):new IconButton(color:settings[0]?Colors.white:Colors.black,icon: new Icon(Icons.delete),onPressed:(){
+                  },padding:EdgeInsets.zero,child:ListTile(leading:Text(image!=null?"Image selected":"Add an image",style:TextStyle(color:textColor)),trailing:Padding(padding:EdgeInsets.only(right:10.0),child:SizedBox(height:40.0,width:40.0,child:image!=null?!imageLoading?!removing?Image.file(image,fit:BoxFit.cover):IconButton(color:settings[0]?Colors.white:Colors.black,icon: Icon(Icons.delete),onPressed:(){
                     createController.jumpTo(max(0.0,createController.position.pixels-(10+MediaQuery.of(context).size.height/3.0)));
                     setState((){
                       image = null;
                       height = null;
                       width = null;
                     });
-                  }):new Padding(padding:EdgeInsets.all(7.0),child:new CircularProgressIndicator()):new Icon(Icons.add,color:settings[0]?Colors.white:Colors.black))))),
-                  new Container(height:20.0),
-                  new Padding(padding:EdgeInsets.only(left:MediaQuery.of(context).size.width/20.0,right:MediaQuery.of(context).size.width/20.0),child:new MaterialButton(
+                  }):Padding(padding:EdgeInsets.all(7.0),child:CircularProgressIndicator()):Icon(Icons.add,color:settings[0]?Colors.white:Colors.black))))),
+                  Container(height:20.0),
+                  Padding(padding:EdgeInsets.only(left:MediaQuery.of(context).size.width/20.0,right:MediaQuery.of(context).size.width/20.0),child:MaterialButton(
                       color:color,
                       height:40.0,
-                      child:new Text("SUBMIT",style:new TextStyle(fontSize:14.0,color:Colors.white,letterSpacing:.5)),
+                      child:Text("SUBMIT",style:TextStyle(fontSize:14.0,color:Colors.white,letterSpacing:.5)),
                       onPressed:() async{
                         if(!hasLoaded){
                           showDialog(
                               context: context,
                               barrierDismissible: false,
                               builder: (context){
-                                return new AlertDialog(
-                                    title: new Text("Error",style:new TextStyle(fontWeight:FontWeight.bold)),
-                                    content: new Text("You must wait for the browse page to load before you create polls."),
+                                return AlertDialog(
+                                    title: Text("Error",style:TextStyle(fontWeight:FontWeight.bold)),
+                                    content: Text("You must wait for the browse page to load before you create polls."),
                                     actions: [
-                                      new FlatButton(
-                                          child: new Text("OK"),
+                                      FlatButton(
+                                          child: Text("OK"),
                                           onPressed: (){
                                             Navigator.of(context).pop();
                                           }
@@ -2027,12 +2027,12 @@ class CreatePollPageState extends State<CreatePollPage>{
                               context: context,
                               barrierDismissible: false,
                               builder: (context){
-                                return new AlertDialog(
-                                    title: new Text("Error",style:new TextStyle(fontWeight:FontWeight.bold)),
-                                    content: new Text("Please check your internet connection"),
+                                return AlertDialog(
+                                    title: Text("Error",style:TextStyle(fontWeight:FontWeight.bold)),
+                                    content: Text("Please check your internet connection"),
                                     actions: [
-                                      new FlatButton(
-                                          child: new Text("OK"),
+                                      FlatButton(
+                                          child: Text("OK"),
                                           onPressed: (){
                                             Navigator.of(context).pop();
                                           }
@@ -2056,14 +2056,14 @@ class CreatePollPageState extends State<CreatePollPage>{
                               context: context,
                               barrierDismissible: false,
                               builder: (context){
-                                return new AlertDialog(
-                                    title: new Text("Loading"),
-                                    content: new LinearProgressIndicator(valueColor: new AlwaysStoppedAnimation(indicatorColor))
+                                return AlertDialog(
+                                    title: Text("Loading"),
+                                    content: LinearProgressIndicator(valueColor: AlwaysStoppedAnimation(indicatorColor))
                                 );
                               }
                           );
                           String code;
-                          await http.get(Uri.encodeFull(functionsLink+"/create?text={\"key\":"+json.encode(secretKey)+",\"a\":"+json.encode(new List<int>(choices.length).map((i)=>0).toList())+",\"c\":"+json.encode(choices)+",\"q\":"+json.encode(question)+",\"u\":"+json.encode(userId)+",\"b\":"+json.encode([multiSelect?1:0,0,public?1:0,image!=null?1:0])+"}").replaceAll("#","%23").replaceAll("&","%26")).then((r){
+                          await http.get(Uri.encodeFull(functionsLink+"/create?text={\"key\":"+json.encode(secretKey)+",\"a\":"+json.encode(List<int>(choices.length).map((i)=>0).toList())+",\"c\":"+json.encode(choices)+",\"q\":"+json.encode(question)+",\"u\":"+json.encode(userId)+",\"b\":"+json.encode([multiSelect?1:0,0,public?1:0,image!=null?1:0])+"}").replaceAll("#","%23").replaceAll("&","%26")).then((r){
                             List l = json.decode(r.body);
                             code = l[0];
                             data[code] = l[1];
@@ -2073,12 +2073,12 @@ class CreatePollPageState extends State<CreatePollPage>{
                                 context: context,
                                 barrierDismissible: false,
                                 builder: (context){
-                                  return new AlertDialog(
-                                      title: new Text("Error",style:new TextStyle(fontWeight:FontWeight.bold)),
-                                      content: new Text("Something went wrong"),
+                                  return AlertDialog(
+                                      title: Text("Error",style:TextStyle(fontWeight:FontWeight.bold)),
+                                      content: Text("Something went wrong"),
                                       actions: [
-                                        new FlatButton(
-                                            child: new Text("OK"),
+                                        FlatButton(
+                                            child: Text("OK"),
                                             onPressed: (){
                                               Navigator.of(context).pop();
                                             }
@@ -2104,14 +2104,14 @@ class CreatePollPageState extends State<CreatePollPage>{
                           image = null;
                           height = null;
                           width = null;
-                          completer = new Completer<ui.Image>();
+                          completer = Completer<ui.Image>();
                           imageLoading = false;
                           removing = false;
                           removedIndex = -1;
-                          questionController = new TextEditingController();
-                          controllers = new List<TextEditingController>()..addAll([new TextEditingController(),new TextEditingController()]);
+                          questionController = TextEditingController();
+                          controllers = List<TextEditingController>()..addAll([TextEditingController(),TextEditingController()]);
                           setState((){});
-                          Navigator.push(context,new MaterialPageRoute(builder: (context)=>new PollView(code)));
+                          Navigator.push(context,MaterialPageRoute(builder: (context)=>PollView(code)));
                         }else{
                           String errorMessage = "";
                           if((question==null||choices.contains(null)||question==""||choices.contains(""))&&choices.toSet().length!=choices.length){
@@ -2135,12 +2135,12 @@ class CreatePollPageState extends State<CreatePollPage>{
                               context: context,
                               barrierDismissible: true,
                               builder: (context){
-                                return new AlertDialog(
-                                    title:new Text("Error",style:new TextStyle(fontWeight:FontWeight.bold)),
-                                    content:new Text(errorMessage),
+                                return AlertDialog(
+                                    title:Text("Error",style:TextStyle(fontWeight:FontWeight.bold)),
+                                    content:Text(errorMessage),
                                     actions: [
-                                      new FlatButton(
-                                          child: new Text("OK"),
+                                      FlatButton(
+                                          child: Text("OK"),
                                           onPressed: (){
                                             Navigator.of(context).pop();
                                           }
@@ -2152,7 +2152,7 @@ class CreatePollPageState extends State<CreatePollPage>{
                         }
                       }
                   )),
-                  new Container(height:20.0)
+                  Container(height:20.0)
                 ]
             )
         )
@@ -2162,7 +2162,7 @@ class CreatePollPageState extends State<CreatePollPage>{
 
 class OpenPollPage extends StatefulWidget{
   @override
-  OpenPollPageState createState() => new OpenPollPageState();
+  OpenPollPageState createState() => OpenPollPageState();
 }
 
 class OpenPollPageState extends State<OpenPollPage>{
@@ -2175,8 +2175,8 @@ class OpenPollPageState extends State<OpenPollPage>{
     });
   }
 
-  TextEditingController openController = new TextEditingController();
-  FocusNode f = new FocusNode();
+  TextEditingController openController = TextEditingController();
+  FocusNode f = FocusNode();
   String input;
   @override
   Widget build(BuildContext context){
@@ -2184,23 +2184,23 @@ class OpenPollPageState extends State<OpenPollPage>{
     double width = MediaQuery.of(context).size.width;
     double usedParam = min(width,height);
     double space = f.hasFocus?0.0:(height - kBottomNavigationBarHeight);
-    return new Scaffold(
+    return Scaffold(
         resizeToAvoidBottomPadding: false,
-        body: new Stack(
+        body: Stack(
             children:[
-              new Container(
-                  color:!settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0)
+              Container(
+                  color:!settings[0]?Color.fromRGBO(230, 230, 230, 1.0):Color.fromRGBO(51,51,51,1.0)
               ),
-              new SingleChildScrollView(child:new Center(child:new Container(height:!f.hasFocus?max(space,260.0):max(300*height/568.0,260.0),color:!settings[0]?new Color.fromRGBO(230, 230, 230, 1.0):new Color.fromRGBO(51,51,51,1.0),child:new Center(
-                  child:new Column(
+              SingleChildScrollView(child:Center(child:Container(height:!f.hasFocus?max(space,260.0):max(300*height/568.0,260.0),color:!settings[0]?Color.fromRGBO(230, 230, 230, 1.0):Color.fromRGBO(51,51,51,1.0),child:Center(
+                  child:Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children:[
-                        new Container(width:usedParam*3/4,child:new FittedBox(fit:BoxFit.fitWidth,child:new Text("PPoll"))),
-                        new Container(height:7.5),
-                        new Container(constraints:BoxConstraints.loose(new Size(usedParam*3/4,48.0)),child:new TextField(
+                        Container(width:usedParam*3/4,child:FittedBox(fit:BoxFit.fitWidth,child:Text("PPoll"))),
+                        Container(height:7.5),
+                        Container(constraints:BoxConstraints.loose(Size(usedParam*3/4,48.0)),child:TextField(
                           controller:openController,
                           focusNode: f,
-                          inputFormatters: [new UpperCaseTextFormatter()],
+                          inputFormatters: [UpperCaseTextFormatter()],
                           onChanged:(s){
                             input = s;
                           },
@@ -2208,33 +2208,33 @@ class OpenPollPageState extends State<OpenPollPage>{
                             input=s;
                           },
                           textAlign:TextAlign.center,
-                          style:new TextStyle(
+                          style:TextStyle(
                               color:textColor,
                               fontSize:20.0
                           ),
-                          decoration: new InputDecoration(
+                          decoration: InputDecoration(
                               hintText: "Poll Code",
                               border: InputBorder.none,
                               fillColor: !settings[0]?Colors.grey[400]:Colors.grey[600],
                               filled:true
                           ),
                         )),
-                        new Container(height:7.5),
-                        new Container(width:usedParam*3/4,height:48.0,child:new RaisedButton(
+                        Container(height:7.5),
+                        Container(width:usedParam*3/4,height:48.0,child:RaisedButton(
                             color:color,
-                            child:new Text("Open Poll",style:new TextStyle(fontSize:20.0,color:Colors.white)),
+                            child:Text("Open Poll",style:TextStyle(fontSize:20.0,color:Colors.white)),
                             onPressed:() async{
                               if(!hasLoaded){
                                 showDialog(
                                     context: context,
                                     barrierDismissible: false,
                                     builder: (context){
-                                      return new AlertDialog(
-                                          title: new Text("Error",style:new TextStyle(fontWeight:FontWeight.bold)),
-                                          content: new Text("You must wait for the browse page to load before you view polls."),
+                                      return AlertDialog(
+                                          title: Text("Error",style:TextStyle(fontWeight:FontWeight.bold)),
+                                          content: Text("You must wait for the browse page to load before you view polls."),
                                           actions: [
-                                            new FlatButton(
-                                                child: new Text("OK"),
+                                            FlatButton(
+                                                child: Text("OK"),
                                                 onPressed: (){
                                                   Navigator.of(context).pop();
                                                 }
@@ -2252,12 +2252,12 @@ class OpenPollPageState extends State<OpenPollPage>{
                                     context: context,
                                     barrierDismissible: false,
                                     builder: (context){
-                                      return new AlertDialog(
-                                          title: new Text("Error",style:new TextStyle(fontWeight:FontWeight.bold)),
-                                          content: new Text("Please check your internet connection"),
+                                      return AlertDialog(
+                                          title: Text("Error",style:TextStyle(fontWeight:FontWeight.bold)),
+                                          content: Text("Please check your internet connection"),
                                           actions: [
-                                            new FlatButton(
-                                                child: new Text("OK"),
+                                            FlatButton(
+                                                child: Text("OK"),
                                                 onPressed: (){
                                                   Navigator.of(context).pop();
                                                 }
@@ -2270,25 +2270,25 @@ class OpenPollPageState extends State<OpenPollPage>{
                               }
                               if(input==null||input.length<4){
                                 Scaffold.of(context).removeCurrentSnackBar();
-                                Scaffold.of(context).showSnackBar(new SnackBar(duration:new Duration(milliseconds:450),content:new Text("Invalid code")));
+                                Scaffold.of(context).showSnackBar(SnackBar(duration:Duration(milliseconds:450),content:Text("Invalid code")));
                               }else if(data[input]==null){
                                 Scaffold.of(context).removeCurrentSnackBar();
-                                Scaffold.of(context).showSnackBar(new SnackBar(duration:new Duration(milliseconds:450),content:new Text("Poll not found")));
+                                Scaffold.of(context).showSnackBar(SnackBar(duration:Duration(milliseconds:450),content:Text("Poll not found")));
                               }else if(data[input]["p"]==1&&settings[2]&&(data[input]["u"]==null||data[input]["u"]!=userId)){
                                 Scaffold.of(context).removeCurrentSnackBar();
-                                Scaffold.of(context).showSnackBar(new SnackBar(duration:new Duration(milliseconds:450),content:new Text("Unsafe Poll")));
+                                Scaffold.of(context).showSnackBar(SnackBar(duration:Duration(milliseconds:450),content:Text("Unsafe Poll")));
                               }else{
                                 String temp = input;
-                                openController = new TextEditingController();
+                                openController = TextEditingController();
                                 f.unfocus();
                                 setState((){input = null;});
-                                Navigator.push(context,new PageRouteBuilder(
+                                Navigator.push(context,PageRouteBuilder(
                                   pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation){
-                                    return new PollView(temp);
+                                    return PollView(temp);
                                   },
-                                  transitionDuration: new Duration(milliseconds: 300),
+                                  transitionDuration: Duration(milliseconds: 300),
                                   transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child){
-                                    return new FadeTransition(
+                                    return FadeTransition(
                                         opacity: animation,
                                         child: child
                                     );
@@ -2300,9 +2300,9 @@ class OpenPollPageState extends State<OpenPollPage>{
                       ]
                   )
               )))),
-              new Positioned(
+              Positioned(
                   left:0.0,top:0.0,
-                  child:new Container(height:MediaQuery.of(context).padding.top,width:MediaQuery.of(context).size.width,color:color)
+                  child:Container(height:MediaQuery.of(context).padding.top,width:MediaQuery.of(context).size.width,color:color)
               )
             ]
         )
@@ -2313,7 +2313,7 @@ class OpenPollPageState extends State<OpenPollPage>{
 class UpperCaseTextFormatter extends TextInputFormatter{
   @override
   TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue){
-    return newValue.text.length>4?oldValue.copyWith(text:oldValue.text.toUpperCase().replaceAll(new RegExp("[^A-Z0-9]"), "")):newValue.copyWith(text:newValue.text.toUpperCase().replaceAll(new RegExp("[^A-Z0-9]"), ""));
+    return newValue.text.length>4?oldValue.copyWith(text:oldValue.text.toUpperCase().replaceAll(RegExp("[^A-Z0-9]"), "")):newValue.copyWith(text:newValue.text.toUpperCase().replaceAll(RegExp("[^A-Z0-9]"), ""));
   }
 }
 
@@ -2340,7 +2340,7 @@ class PersistentData{
 
   Future<File> get _localFile async{
     final path = await _localPath;
-    return new File("$path/${external?".":""}${external?"config":name}.${external?"plist":"txt"}");
+    return File("$path/${external?".":""}${external?"config":name}.${external?"plist":"txt"}");
   }
 
   Future<dynamic> readData() async{
