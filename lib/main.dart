@@ -524,11 +524,11 @@ class AppState extends State<App>{
     if(!agreesToPolicy){
       iconCompleter = Completer<ui.Image>();
       icon = Image.asset("icon/platypus2.png");
-      icon.image.resolve(ImageConfiguration()).addListener((ImageInfo info, bool b){
+      icon.image.resolve(ImageConfiguration()).addListener(ImageStreamListener((ImageInfo info, bool b){
         if(!iconCompleter.isCompleted){
           iconCompleter.complete(info.image);
         }
-      });
+      }));
     }
   }
 
@@ -1239,11 +1239,11 @@ class PollState extends State<Poll>{
     if(hasImage){
       completer = Completer<ui.Image>();
       image = widget.image==null?Image.network(imageLink+widget.id):widget.image;
-      image.image.resolve(ImageConfiguration()).addListener((ImageInfo info, bool b){
+      image.image.resolve(ImageConfiguration()).addListener(ImageStreamListener((ImageInfo info, bool b){
         if(!completer.isCompleted){
           completer.complete(info.image);
         }
-      });
+      }));
     }
   }
 
@@ -1972,12 +1972,12 @@ class CreatePollPageState extends State<CreatePollPage>{
                         }
                         setState((){imageLoading = true;image = tempImage;});
                         createController.jumpTo(createController.position.pixels+10+MediaQuery.of(context).size.height/3.0);
-                        Image.file(tempImage).image.resolve(ImageConfiguration()).addListener((ImageInfo info, bool b){
+                        Image.file(tempImage).image.resolve(ImageConfiguration()).addListener(ImageStreamListener((ImageInfo info, bool b){
                           completer.complete(info.image);
                           height = info.image.height*1.0;
                           width = info.image.width*1.0;
                           setState((){imageLoading = false;});
-                        });
+                        }));
                       }else{
                         height=null;
                         width=null;

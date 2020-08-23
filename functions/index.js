@@ -53,21 +53,18 @@ exports.create = functions.https.onRequest((req,res)=>{
                 }
             }while(list.includes(code));
             let profane = false;
-            let l = map["q"].split(" ");
-            for(let j = 0; j<l.length;j++){
-                profane = profanityList.includes(l[j].toLowerCase());
+            outer: for(let j = 0; j<profanityList.length;j++){
+                let str = map["q"];
+                let search = "\\b"+profanityList[j]+"\\b";
+                profane = str.match(new RegExp(search,"i"))!=null;
                 if(profane){
                     break;
                 }
-            }
-            if(!profane){
-                outer: for(let j = 0; j<map["c"].length;j++){
-                    let list = map["c"][j].split(" ");
-                    for(let k = 0; k<list.length;k++){
-                        profane = profanityList.includes(list[k].toLowerCase());
-                        if(profane){
-                            break outer;
-                        }
+                for(let k = 0; k<map["c"].length;k++){
+                    str = map["c"][k];
+                    profane = str.match(new RegExp(search,"i"))!=null;
+                    if(profane){
+                        break outer;
                     }
                 }
             }
